@@ -8,35 +8,32 @@ export default function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      setScrolled(window.scrollY > 50);
     };
-
     window.addEventListener("scroll", handleScroll);
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+
   // Bloquear scroll cuando el menú esté abierto (opcional pero recomendado)
   useEffect(() => {
     document.body.classList.toggle("overflow-hidden", menuOpen);
     return () => document.body.classList.remove("overflow-hidden");
   }, [menuOpen]);
 
+
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-[60] transition-colors duration-300 ${
-        scrolled ? "bg-deep-space-transp backdrop-blur-md" : "bg-transparent"
-      } text-white`}
+      className={`fixed top-0 left-0 w-full z-[80] transition-colors duration-300 ${
+    scrolled ? "bg-black/60 backdrop-blur-md" : "bg-transparent"
+  } text-white`}
     >
       {/* Barra móvil */}
       <div className="lg:hidden container mx-auto flex items-center justify-between h-16 px-4 relative">
         <button
           aria-label="Abrir menú"
           onClick={() => setMenuOpen(!menuOpen)}
-          className="z-[70]"
+          className="z-[90]"
         >
           {menuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
@@ -86,18 +83,16 @@ export default function Header() {
       </div>
 
       {/* OVERLAY del menú móvil (cubre la pantalla) */}
-      <div
-        className={`lg:hidden fixed inset-0 z-[50] bg-black/60 backdrop-blur-md transition-opacity duration-300
-                    ${
-                      menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
-                    }`}
-        aria-hidden={!menuOpen}
-        // Cierra el menú tocando fuera (opcional)
-        onClick={() => setMenuOpen(false)}
-      >
+ <div
+  className={`lg:hidden fixed inset-0 z-[90] bg-black/60 backdrop-blur-md transition-opacity duration-300 ${
+    menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+  }`}
+  aria-hidden={!menuOpen}
+  onClick={() => setMenuOpen(false)}
+>
         {/* Contenido del menú: empieza debajo de la barra (h-16) */}
         <nav
-          className="container mx-auto pt-16 px-6 space-y-6"
+          className="container mx-auto pt-16 px-6 space-y-6 relative z-[100]"
           // Evita que el click en los links cierre por el contenedor
           onClick={(e) => e.stopPropagation()}
         >
