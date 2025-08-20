@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/* Fondos principales */
+.bg-space { background-color: #0b0f17; }  
+.bg-deep-space{background-color: #0B0D17} 
+.bg-deep-space-transp{background-color: #0b0d17b8}         /* Fondo principal oscuro */
+.bg-space-60 { background-color: rgba(11, 15, 25, 0.6); } /* Fondo con opacidad */
+.bg-deepSpace { background-color: #0f172a; }      /* Secciones más oscuras */
+.bg-nebula { background-color: #1e293b; }    /* Tonos intermedios */
+                                                    
+.bg-galaxy { background-color: #9333ea; }
+.bg-galaxy:hover { background-color: #5d2097; }
+
+.hover-after-galaxy::after {
+  background-color: #9333ea;
+  transition: all 0.3s;
+}
+.hover-after-galaxy:hover::after {
+  background-color: #5d2097;
+}
+
+/* Textos */
+.text-star { color: #facc15; }     /* Amarillo estrella */
+.text-comet { color: #38bdf8; }    /* Azul brillante */
+.text-galaxy { color: #9333ea; } 
+.hover-text-galaxy:hover { color: #ba6bfe; }    /* Morado galaxia */
+.text-meteor { color: #f43f5e; }   /* Rojo meteoro */
+
+/* Bordes y sombras */
+.border-star { border-color: #facc15; }
+.border-comet { border-color: #38bdf8; }
+.border-galaxy { border-color: #9333ea; }
+.shadow-space { box-shadow: 0 4px 12px rgba(11, 15, 25, 0.8); }
+
+/* Botones */
+.btn-space { background-color: #0b0f19; color: #facc15; }
+.btn-space:hover { background-color: #0f172a; }
+.btn-comet { background-color: #38bdf8; color: #0b0f19; }
+.btn-comet:hover { background-color: #0f172a; color: #38bdf8; }
+.btn-galaxy { background-color: #9333ea; color: #ffffff; }
+.btn-galaxy:hover { background-color: #5d2097; }
+
+/* Extras */
+.bg-gradient-nebula {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+.bg-gradient-galaxy {
+  background: linear-gradient(135deg, #9333ea 0%, #38bdf8 100%);
+}
