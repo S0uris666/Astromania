@@ -37,10 +37,10 @@ export const Activities = [
   },
   {
     id: 5,
-    title: "Capacitación docente",
+    title: "Charlas y Talleres",
     cta: "Solicita información",
-    image: "/public/Images/colegios.jpg",
-    description: "Formamos a docentes para llevar la astronomía al aula."
+    image: "/public/Images/charlasytalleres.webp",
+    description: "Llevamos charlas y talleres a tu institucion."
   }
    
 ];
