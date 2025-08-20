@@ -3,14 +3,14 @@ export const Activities = [
     id: 1,
     title: "Visitas a colegios",
     cta: "Revisa disponibilidad",
-    image: "/public/Images/colegios.jpg",
+    image: "/public/Images/planetario.webp",
     description: "Llevamos la astronomía a tu colegio con actividades interactivas."
   },
    {
     id: 2,
     title: "Juegos de mesa",
     cta: "Descubre nuestros juegos",
-    image: "/public/Images/colegios.jpg",
+    image: "/public/Images/juegosdemesa.webp",
     description: "Juegos originales de la fundación para aprender jugando."
   },
   
@@ -18,21 +18,21 @@ export const Activities = [
     id: 3,
     title: "Exposición Misión Luna-Marte",
     cta: "Explora la exposición",
-    image: "/public/Images/colegios.jpg",
+    image: "/public/Images/misionlunamarte.webp",
     description: "Conoce la historia y los secretos de la Luna y Marte."
   },
   {
     id: 4,
     title: "Concursos",
     cta: "Participa aquí",
-    image: "/public/Images/colegios.jpg",
+    image: "/public/Images/concursos.webp",
     description: "Participa en nuestros concursos astronómicos y gana premios."
   },
   {
     id: 4,
     title: "Cuentos Astronómicos",
     cta: "Descubre Cosmocuentos",
-    image: "/public/Images/colegios.jpg",
+    image: "/public/Images/cuentos.webp",
     description: "Aprende astronomía de manera divertida con cuentos"
   },
   {
