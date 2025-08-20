@@ -2,6 +2,9 @@ import { Activities } from "../../data/Activities";
 import { AboutData } from "../../data/AboutData";
 import { Link } from "react-router-dom";
 import { Partners } from "../../data/Partners";
+import { recursos } from "../../data/Recursos";
+import { Book, Music, Film, Smartphone, Youtube } from "lucide-react"
+import { comunidad } from "../../data/Comunidad";
 const { missionVision, team, faqs } = AboutData;
 export function Home() {
   return (
@@ -74,7 +77,7 @@ export function Home() {
           </div>
 
           {/* Contenido de la tarjeta */}
-          <div className="relative p-6 flex flex-col justify-end h-64">
+          <div className="relative p-6 flex flex-col justify-end h-80">
             <h3 className="text-2xl font-bold mb-2 text-white">{activity.title}</h3>
             <p className="text-gray-300 mb-4">{activity.description}</p>
             <Link
@@ -175,25 +178,64 @@ export function Home() {
       </div>
     </section>
 
-      {/* SECCIÓN CALENDARIO ASTRONÓMICO */}
-      <section className="py-16 bg-deep-space">
-        {/* Mini calendario con eventos destacados */}
-        {/* CTA Ver calendario completo */}
-      </section>
 
-      {/* SECCIÓN RECURSOS / REPOSITORIO */}
-      <section className="py-16 bg-deepSpace">
-        {/* Grid de tarjetas de recursos */}
-      </section>
+
+      {/* recursos */}
+   <section className="py-12 px-6 text-center bg-gradient-to-b bg-deep-space ">
+      <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 tracking-wide">
+        Recursos
+      </h2>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
+        {recursos.map((item, index) => (
+          <div
+            key={index}
+            className="p-6 rounded-2xl shadow-lg bg-gradient-galaxy
+            hover:scale-105 transition-transform duration-300 text-white flex flex-col justify-between h-full"
+          >
+            <h3 className="text-xl font-semibold mb-4">{item.titulo}</h3>
+            
+            {/* Botón con Link */}
+            <Link
+              to={item.link}
+              className="inline-block px-5 py-2 mt-2 bg-white text-gray-900 font-semibold rounded-xl 
+              shadow-md hover:bg-gray-200 transition-colors duration-300"
+            >
+              {item.texto}
+            </Link>
+          </div>
+        ))}
+      </div>
+    </section>
 
       {/* SECCIÓN COMUNIDAD */}
-      <section className="py-16 bg-white">
-        {/* Pregúntale a Astromanía */}
-        {/* Podcast */}
-        {/* Redes sociales embebidas */}
-        {/* Galería */}
-        {/* CTA Unirse */}
-      </section>
+ <section className="py-12 px-6 text-center bg-gradient-to-b bg-deepSpace ">
+      <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 tracking-wide">
+       Comunidad
+      </h2>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        {comunidad.map((item, index) => (
+          <div
+            key={index}
+            className="p-6 rounded-2xl shadow-lg bg-gradient-galaxy
+            hover:scale-105 transition-transform duration-300 text-white"
+          >
+            {item.icon}
+            <h3 className="text-xl font-semibold mb-4">{item.titulo}</h3>
+            
+            {/* Botón con Link */}
+            <Link
+              to={item.link}
+              className="inline-block px-5 py-2 mt-2 bg-white text-gray-900 font-semibold rounded-xl 
+              shadow-md hover:bg-gray-200 transition-colors duration-300"
+            >
+              {item.texto}
+            </Link>
+          </div>
+        ))}
+      </div>
+    </section>
     </main>
   );
 }
