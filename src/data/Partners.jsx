@@ -10,6 +10,4 @@ export const Partners = [
   { id: 9, name: "Store", logo: "public/Images/partners/Store.png" },
   { id: 10, name: "UA", logo: "public/Images/partners/UA.png" },
   { id: 11, name: "UC", logo: "public/Images/partners/UC.png" },
-   
-
 ];

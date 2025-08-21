@@ -3,8 +3,8 @@ import { AboutData } from "../../data/AboutData";
 import { Link } from "react-router-dom";
 import { Partners } from "../../data/Partners";
 import { recursos } from "../../data/Recursos";
-import { Book, Music, Film, Smartphone, Youtube } from "lucide-react"
 import { comunidad } from "../../data/Comunidad";
+import { Redes } from "../../data/Redes";
 const { missionVision, team, faqs } = AboutData;
 export function Home() {
   return (
@@ -34,208 +34,233 @@ export function Home() {
 
           {/* Botones */}
           <div className="flex flex-col sm:flex-row gap-4 justify-start animate-fade-in delay-400">
-            <a
-              href="/reserva"
+            <Link
+              to="/reserva"
               className="w-full sm:w-auto text-center px-6 py-3 btn-galaxy hover:btn-galaxy text-white rounded-lg shadow-lg transition transform hover:scale-105"
             >
               Reserva una visita
-            </a>
-            <a
-              href="/actividades-servicios"
+            </Link>
+            <Link
+              to="/actividades-servicios"
               className="px-6 py-3 bg-transparent border border-white hover:bg-white hover:text-black rounded-lg shadow-lg transition transform hover:scale-105"
             >
               Descubre nuestras actividades
-            </a>
+            </Link>
           </div>
         </div>
       </section>
 
-
       {/*ACTIVIDADES DESTACADAS */}
-      
 
-<section className="py-20 bg-deepSpace text-white">
-  <div className="container mx-auto px-4">
-    <h2 className="text-3xl font-bold text-center mb-12 text-white">
-      Actividades destacadas
-    </h2>
+      <section className="py-20 bg-deepSpace text-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12 text-white">
+            Actividades destacadas
+          </h2>
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {Activities.map((activity) => (
-        <div
-          key={activity.id}
-          className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transform transition duration-500 hover:scale-105 bg-gradient-to-br from-space via-nebula to-deepSpace"
-        >
-          {/* Imagen de fondo con overlay y blur */}
-          <div className="absolute inset-0">
-            <img
-              src={activity.image}
-              alt={activity.title}
-              className="w-full h-full object-cover brightness-50"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent " />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Activities.map((activity) => (
+              <div
+                key={activity.id}
+                className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transform transition duration-500 hover:scale-105 bg-gradient-to-br from-space via-nebula to-deepSpace"
+              >
+                {/* Imagen de fondo con overlay y blur */}
+                <div className="absolute inset-0">
+                  <img
+                    src={activity.image}
+                    alt={activity.title}
+                    className="w-full h-full object-cover brightness-50"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent " />
+                </div>
+
+                {/* Contenido de la tarjeta */}
+                <div className="relative p-6 flex flex-col justify-end h-80">
+                  <h3 className="text-2xl font-bold mb-2 text-white">
+                    {activity.title}
+                  </h3>
+                  <p className="text-gray-300 mb-4">{activity.description}</p>
+                  <Link
+                    to={`/actividades-servicios/${activity.id}`}
+                    className="inline-block px-5 py-3 bg-galaxy hover:bg-nebula text-white font-semibold rounded-xl shadow-lg transition transform hover:scale-105 text-center"
+                  >
+                    {activity.cta}
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
-
-          {/* Contenido de la tarjeta */}
-          <div className="relative p-6 flex flex-col justify-end h-80">
-            <h3 className="text-2xl font-bold mb-2 text-white">{activity.title}</h3>
-            <p className="text-gray-300 mb-4">{activity.description}</p>
-            <Link
-              to={`/actividades-servicios/${activity.id}`}
-              className="inline-block px-5 py-3 bg-galaxy hover:bg-nebula text-white font-semibold rounded-xl shadow-lg transition transform hover:scale-105 text-center"
-            >
-              {activity.cta}
-            </Link>
-          </div>
-
-
         </div>
-      ))}
-    </div>
-  </div>
-</section>
-      
+      </section>
 
       {/* SECCIÓN NOSOTROS / CREDIBILIDAD */}
-    <section className="py-20 bg-deep-space text-white">
-      {/* Misión y Visión */}
-      <div className="max-w-5xl mx-auto px-4 text-center mb-16">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">{missionVision.title}</h2>
-        <p className="text-lg md:text-xl text-gray-300">{missionVision.description}</p>
-      </div>
-
-      {/* Equipo */}
-      <div className="max-w-6xl mx-auto px-4 mb-16">
-        <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">Nuestro Equipo</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {team.map((member) => (
-            <div
-              key={member.name}
-              className="bg-gray-800 rounded-lg p-6 flex flex-col items-center text-center hover:scale-105 transform transition"
-            >
-              <img
-                src={member.avatar}
-                alt={member.name}
-                className="w-24 h-24 rounded-full mb-4 object-cover"
-              />
-              <h4 className="text-xl font-semibold">{member.name}</h4>
-              <p className="text-gray-400">{member.role}</p>
-            </div>
-          ))}
+      <section className="py-20 bg-deep-space text-white">
+        {/* Misión y Visión */}
+        <div className="max-w-5xl mx-auto px-4 text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            {missionVision.title}
+          </h2>
+          <p className="text-lg md:text-xl text-gray-300">
+            {missionVision.description}
+          </p>
         </div>
-      </div>
 
-      {/* FAQs */}
-      <div className="max-w-5xl mx-auto px-4 mb-16">
-        <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">Preguntas Frecuentes</h3>
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <details
-              key={index}
-              className="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition"
-            >
-              <summary className="font-semibold">{faq.question}</summary>
-              <p className="mt-2 text-gray-300">{faq.answer}</p>
-            </details>
-          ))}
+        {/* Equipo */}
+        <div className="max-w-6xl mx-auto px-4 mb-16">
+          <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
+            Nuestro Equipo
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            {team.map((member) => (
+              <div
+                key={member.name}
+                className="bg-gray-800 rounded-lg p-6 flex flex-col items-center text-center hover:scale-105 transform transition"
+              >
+                <img
+                  src={member.avatar}
+                  alt={member.name}
+                  className="w-24 h-24 rounded-full mb-4 object-cover"
+                />
+                <h4 className="text-xl font-semibold">{member.name}</h4>
+                <p className="text-gray-400">{member.role}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* CTA */}
-      <div className="text-center">
-        <Link
-          to="/contacto"
-          className="inline-block px-6 py-3 bg-galaxy text-white rounded-lg shadow-lg
+        {/* FAQs */}
+        <div className="max-w-5xl mx-auto px-4 mb-16">
+          <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
+            Preguntas Frecuentes
+          </h3>
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <details
+                key={index}
+                className="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition"
+              >
+                <summary className="font-semibold">{faq.question}</summary>
+                <p className="mt-2 text-gray-300">{faq.answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="text-center">
+          <Link
+            to="/contacto"
+            className="inline-block px-6 py-3 bg-galaxy text-white rounded-lg shadow-lg
                transition-transform duration-300 transform hover:scale-105
                hover:bg-galaxy/80"
-        >
-          Contáctanos
-        </Link>
-      </div>
-    </section>
+          >
+            Contáctanos
+          </Link>
+        </div>
+      </section>
 
       {/* SECCIÓN COLABORADORES */}
-    <section className="bg-deepSpace py-12">
-      <div className="container mx-auto px-6 text-center">
-        <h2 className="text-3xl font-bold text-white mb-8">
-          Nuestros Colaboradores
+      <section className="bg-deepSpace py-12">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold text-white mb-8">
+            Nuestros Colaboradores
+          </h2>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 items-center">
+            {Partners.map((partner) => (
+              <div
+                key={partner.id}
+                className="flex justify-center items-center bg-white/5 p-4 rounded-lg hover:scale-105 transition-transform"
+              >
+                <img
+                  src={partner.logo}
+                  alt={partner.name}
+                  className="max-h-16 object-contain"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* recursos */}
+      <section className="py-12 px-6 text-center bg-gradient-to-b bg-deep-space ">
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 tracking-wide">
+          Recursos
         </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 items-center">
-          {Partners.map((partner) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
+          {recursos.map((item, index) => (
             <div
-              key={partner.id}
-              className="flex justify-center items-center bg-white/5 p-4 rounded-lg hover:scale-105 transition-transform"
+              key={index}
+              className="p-6 rounded-2xl shadow-lg bg-gradient-to-br from-indigo-600 via-purple-700 to-pink-600
+            hover:scale-105 transition-transform duration-300 text-white flex flex-col justify-between h-full"
             >
-              <img
-                src={partner.logo}
-                alt={partner.name}
-                className="max-h-16 object-contain"
-              />
+              <h3 className="text-xl font-semibold mb-4">{item.titulo}</h3>
+
+              {/* Botón con Link */}
+              <Link
+                to={item.link}
+                className="inline-block px-5 py-2 mt-2 bg-white text-gray-900 font-semibold rounded-xl 
+              shadow-md hover:bg-gray-200 transition-colors duration-300"
+              >
+                {item.texto}
+              </Link>
             </div>
           ))}
         </div>
-      </div>
-    </section>
-
-
-
-      {/* recursos */}
-   <section className="py-12 px-6 text-center bg-gradient-to-b bg-deep-space ">
-      <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 tracking-wide">
-        Recursos
-      </h2>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
-        {recursos.map((item, index) => (
-          <div
-            key={index}
-            className="p-6 rounded-2xl shadow-lg bg-gradient-galaxy
-            hover:scale-105 transition-transform duration-300 text-white flex flex-col justify-between h-full"
-          >
-            <h3 className="text-xl font-semibold mb-4">{item.titulo}</h3>
-            
-            {/* Botón con Link */}
-            <Link
-              to={item.link}
-              className="inline-block px-5 py-2 mt-2 bg-white text-gray-900 font-semibold rounded-xl 
-              shadow-md hover:bg-gray-200 transition-colors duration-300"
-            >
-              {item.texto}
-            </Link>
-          </div>
-        ))}
-      </div>
-    </section>
+      </section>
 
       {/* SECCIÓN COMUNIDAD */}
- <section className="py-12 px-6 text-center bg-gradient-to-b bg-deepSpace ">
-      <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 tracking-wide">
-       Comunidad
-      </h2>
+      <section className="py-12 px-6 text-center bg-gradient-to-b bg-deepSpace ">
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 tracking-wide">
+          Comunidad
+        </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-        {comunidad.map((item, index) => (
-          <div
-            key={index}
-            className="p-6 rounded-2xl shadow-lg bg-gradient-galaxy
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {comunidad.map((item, index) => (
+            <div
+              key={index}
+              className="p-6 rounded-2xl shadow-lg bg-gradient-galaxy
             hover:scale-105 transition-transform duration-300 text-white"
-          >
-            {item.icon}
-            <h3 className="text-xl font-semibold mb-4">{item.titulo}</h3>
-            
-            {/* Botón con Link */}
-            <Link
-              to={item.link}
-              className="inline-block px-5 py-2 mt-2 bg-white text-gray-900 font-semibold rounded-xl 
+            >
+              {item.icon}
+              <h3 className="text-xl font-semibold mb-4">{item.titulo}</h3>
+
+              {/* Botón con Link */}
+              <Link
+                to={item.link}
+                className="inline-block px-5 py-2 mt-2 bg-white text-gray-900 font-semibold rounded-xl 
               shadow-md hover:bg-gray-200 transition-colors duration-300"
+              >
+                {item.texto}
+              </Link>
+            </div>
+          ))}
+          {/* Redes sociales */}
+          {Redes.map((item,index) => (
+
+            <div
+              key={index}
+              className="p-6 rounded-2xl shadow-lg bg-gradient-galaxy
+            hover:scale-105 transition-transform duration-300 text-white"
+            >
+              {item.icon}
+              <h3 className="text-xl font-semibold mb-4">{item.titulo}</h3>
+            
+            <a
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-5 py-2 mt-2 bg-white text-gray-900 font-semibold rounded-xl 
+  shadow-md hover:bg-gray-200 transition-colors duration-300"
             >
               {item.texto}
-            </Link>
+            </a>
           </div>
-        ))}
-      </div>
-    </section>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
