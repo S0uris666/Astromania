@@ -15,6 +15,7 @@
   background-color: #9333ea;
   transition: all 0.3s;
 }
+
 .hover-after-galaxy:hover::after {
   background-color: #5d2097;
 }

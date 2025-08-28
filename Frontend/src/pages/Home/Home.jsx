@@ -101,7 +101,7 @@ export function Home() {
             {missionVision.title}
           </h2>
           <p className="text-lg md:text-xl text-gray-300">
-            {missionVision.description}
+            {missionVision.short_description}
           </p>
         </div>
 

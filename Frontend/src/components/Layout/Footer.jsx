@@ -26,11 +26,11 @@ export function Footer() {
         <div>
           <h3 className="text-xl font-semibold mb-4">Enlaces</h3>
           <ul className="space-y-2">
-            <li><Link to="/" className="hover:text-blue-400 transition">Inicio</Link></li>
-            <li><Link to="/nosotros" className="hover:text-blue-400 transition">Nosotros</Link></li>
-            <li><Link to="/recursos" className="hover:text-blue-400 transition">Recursos</Link></li>
-            <li><Link to="/comunidad" className="hover:text-blue-400 transition">Comunidad</Link></li>
-            <li><Link to="/contacto" className="hover:text-blue-400 transition">Contacto</Link></li>
+            <li><Link to="/" className="hover-text-galaxy transition">Inicio</Link></li>
+            <li><Link to="/nosotros" className="hover-text-galaxy transition">Nosotros</Link></li>
+            <li><Link to="/recursos" className="hover-text-galaxy transition">Recursos</Link></li>
+            <li><Link to="/comunidad" className="hover-text-galaxy transition">Comunidad</Link></li>
+            <li><Link to="/contacto" className="hover-text-galaxy transition">Contacto</Link></li>
           </ul>
         </div>
 
@@ -44,7 +44,7 @@ export function Footer() {
             <a href="https://instagram.com/fundacionastromania" target="_blank" rel="noopener noreferrer" className="hover:text-pink-500 transition">
               <FaInstagram />
             </a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-red-600 transition">
+            <a href="https://youtube.com/fundacionastromania" target="_blank" rel="noopener noreferrer" className="hover:text-red-600 transition">
               <FaYoutube />
             </a>
             
@@ -54,7 +54,7 @@ export function Footer() {
 
       {/* Pie de página */}
       <div className="mt-12 text-center text-gray-500 text-sm">
-        &copy; {new Date().getFullYear()} Astromanía. Todos los derechos reservados.
+        &copy; {new Date().getFullYear()} Astromanía. Todos los derechos reservados. Desarrollado por <a href="https://www.linkedin.com/in/camila-rivas-12bb66226/" target="_blank" rel="noopener noreferrer" className="text-galaxy hover:underline">Camila Rivas</a>.
       </div>
     </footer>
   );

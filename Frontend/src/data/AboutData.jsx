@@ -1,10 +1,14 @@
 export const AboutData = {
   missionVision: {
     title: "Nuestra Misión y Visión",
-    description:
+    short_description:
       "Impulsar la educación astronómica en Chile, acercando el universo a todas las edades mediante experiencias educativas, exposiciones y actividades interactivas.",
-  },
-  team: [
+    long_description:
+      "Astromanía es una iniciativa educativa dedicada al desarrollo de actividades que promuevan la enseñanza de la ciencia y astronomía en Chile y para el mundo. A lo largo del año organizamos junto a otras instituciones distintas actividades que unen la ciencia, el arte y la cultura popular, como lo son la convocatoria de pintura astronómica, el concurso de cuento breve Cosmocuentos o la feria astronómica AstroCon!. También llevamos a cabo actividades de divulgación en colegios, universidades y espacios culturales, llevando nuestro planetario móvil, originales «astrojuegos» de mesa, cuentacuentos, observación astronómica con telescopios y charlas sobre ciencia y astronomía, entre otras.",},
+      mision:{},
+  vision:{},
+  
+      team: [
     { name: "JuanPablo Méndez", email:"juanpablo@astromania.cl" ,role: "Director Ejecutivo", avatar: "/public/Images/JP.jpg",description: "Máster en Comunicación Científica de la Universidad de Valencia, España y Comunicador Audiovisual de la Universidad UNIACC, especializado en Astronomía en la Asociación Chilena de Astronáutica y Astronomía (ACHAYA), y en el Taller de Astronomía para Docentes en Latinoamérica, impartido por la Pontificia Universidad Católica de Chile y y la Universidad de Heidelberg, Alemania. Durante los últimos 15 años se ha desempeñado como docente en Chile, España y Alemania, para estudiantes jóvenes y adultos, lo que le ha permitido participar en distintas actividades nacionales e internacionales de educación y divulgación de la astronomía."},
     { name: "Camila Rivas", email:"camila@astromania.cl" ,role: "Asesora de contenidos.", avatar: "/public/Images/Cami.jpg" ,description:"Licenciada en Física con mención en Astronomía por la Universidad de Valparaíso, cuenta con experiencia en investigación en ALMA y una profunda vocación por la divulgación científica. Ha sido líder pedagógica en Enseña Chile, trabajando en comunidades vulnerables del país, donde ha impulsado el acceso a la ciencia como una herramienta de transformación social. Desarrolladora web por la Universidad del Desarrollo, combina sus conocimientos científicos con habilidades artísticas y tecnológicas para crear experiencias astronómicas inclusivas, creativas y cercanas para niñxs y adolescentes en Chile."},
     { name: "Rodrigo Moraga", email:"rodrigo@astromania.cl" , role: "Asesor científico.", avatar: "/public/Images/Rodrigo.jpg" ,description:"Licenciado en Astronomía de la Pontificia Universidad Católica de Chile, y Magister en Astrofísica de la Eberhard Karls Tübingen Universität, con experiencia en educación como ayudante de cursos de laboratorio. Con experiencia en investigación como asistente y divulgación, siendo participe como ayudante en el «European Workshop of White Dwarfs». Actualmente completando una certificación en educación superior."},

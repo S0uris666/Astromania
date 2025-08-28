@@ -14,19 +14,17 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-
-  // Bloquear scroll cuando el menú esté abierto (opcional pero recomendado)
+  // Bloquear scroll cuando el menú esté abierto
   useEffect(() => {
     document.body.classList.toggle("overflow-hidden", menuOpen);
     return () => document.body.classList.remove("overflow-hidden");
   }, [menuOpen]);
 
-
   return (
     <header
       className={`fixed top-0 left-0 w-full z-[80] transition-colors duration-300 ${
-    scrolled ? "bg-black/60 backdrop-blur-md" : "bg-transparent"
-  } text-white`}
+        scrolled ? "bg-black/60 backdrop-blur-md" : "bg-transparent"
+      } text-white`}
     >
       {/* Barra móvil */}
       <div className="lg:hidden container mx-auto flex items-center justify-between h-16 px-4 relative">
@@ -47,7 +45,6 @@ export default function Header() {
         {/* Espaciador para balancear */}
         <div className="w-[28px]" />
       </div>
-
       {/* Barra escritorio */}
       <div className="hidden lg:flex container mx-auto items-center justify-between h-20 px-4">
         <div className="flex items-center space-x-3">
@@ -81,66 +78,79 @@ export default function Header() {
           Reserva una visita
         </Link>
       </div>
+      {/* OVERLAY del menú móvil - SOLUCIÓN COMPLETA */}
+      
+      <div
+        className={`lg:hidden fixed inset-0 z-[100] transition-all duration-300 ${
+          menuOpen
+            ? "opacity-100 visible bg-black/90 backdrop-blur-lg"
+            : "opacity-0 invisible bg-transparent"
+        }`}
+        aria-hidden={!menuOpen}
+        onClick={() => setMenuOpen(false)}
+      >
+        {/* Botón de cerrar (X) en la parte superior derecha */}
+        <button
+          aria-label="Cerrar menú"
+          onClick={(e) => {
+            e.stopPropagation();
+            setMenuOpen(false);
+          }}
+          className="absolute top-4 right-4 z-[110] p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors duration-200"
+        >
+          <X size={28} className="text-white" />
+        </button>
 
-      {/* OVERLAY del menú móvil (cubre la pantalla) */}
- <div
-  className={`lg:hidden fixed inset-0 z-[90] bg-black/60 backdrop-blur-md transition-opacity duration-300 ${
-    menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
-  }`}
-  aria-hidden={!menuOpen}
-  onClick={() => setMenuOpen(false)}
->
-        {/* Contenido del menú: empieza debajo de la barra (h-16) */}
+        {/* Contenido del menú */}
         <nav
-          className="container mx-auto pt-16 px-6 space-y-6 relative z-[100]"
-          // Evita que el click en los links cierre por el contenedor
+          className="absolute top-16 left-0 w-full px-6 py-8 space-y-6 bg-black/80 backdrop-blur-sm"
           onClick={(e) => e.stopPropagation()}
         >
           <Link
             to="/"
-            className="block text-lg hover:text-blue-400 transition"
+            className="block text-xl font-medium hover-text-galaxy transition-colors duration-200 py-2"
             onClick={() => setMenuOpen(false)}
           >
             Inicio
           </Link>
           <Link
             to="/nosotros"
-            className="block text-lg hover:text-blue-400 transition"
+            className="block text-xl font-medium hover-text-galaxy transition-colors duration-200 py-2"
             onClick={() => setMenuOpen(false)}
           >
             Nosotros
           </Link>
           <Link
             to="/actividades-servicios"
-            className="block text-lg hover:text-blue-400 transition"
+            className="block text-xl font-medium hover-text-galaxy transition-colors duration-200 py-2"
             onClick={() => setMenuOpen(false)}
           >
             Actividades y Servicios
           </Link>
           <Link
             to="/recursos"
-            className="block text-lg hover:text-blue-400 transition"
+            className="block text-xl font-medium hover-text-galaxy transition-colors duration-200 py-2"
             onClick={() => setMenuOpen(false)}
           >
             Recursos
           </Link>
           <Link
             to="/comunidad"
-            className="block text-lg hover:text-blue-400 transition"
+            className="block text-xl font-medium hover-text-galaxy transition-colors duration-200 py-2"
             onClick={() => setMenuOpen(false)}
           >
             Comunidad
           </Link>
           <Link
             to="/contacto"
-            className="block text-lg hover:text-blue-400 transition"
+            className="block text-xl font-medium hover-text-galaxy transition-colors duration-200 py-2"
             onClick={() => setMenuOpen(false)}
           >
             Contacto
           </Link>
           <Link
             to="/reserva"
-            className="block text-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md transition"
+            className="block text-center bg-galaxy  text-white px-6 py-3 rounded-xl shadow-lg transition-all duration-300 mt-6 font-semibold"
             onClick={() => setMenuOpen(false)}
           >
             Reserva una visita

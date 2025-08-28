@@ -18,6 +18,4 @@ export const Redes = [  {
     texto: "Mira ahora",
     icon: <FaYoutube size={32} className="mx-auto mb-4 text-white" />,
   },
-  
-
 ];
