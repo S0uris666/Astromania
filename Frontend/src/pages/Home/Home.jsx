@@ -5,6 +5,7 @@ import { Partners } from "../../data/Partners";
 import { recursos } from "../../data/Recursos";
 import { comunidad } from "../../data/Comunidad";
 import { Redes } from "../../data/Redes";
+/* import { motion } from "motion/react" */
 const { missionVision, team, faqs } = AboutData;
 export function Home() {
   return (
@@ -112,18 +113,32 @@ export function Home() {
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {team.map((member) => (
-              <div
-                key={member.name}
-                className="bg-gray-800 rounded-lg p-6 flex flex-col items-center text-center hover:scale-105 transform transition"
-              >
-                <img
-                  src={member.avatar}
-                  alt={member.name}
-                  className="w-24 h-24 rounded-full mb-4 object-cover"
-                />
-                <h4 className="text-xl font-semibold">{member.name}</h4>
-                <p className="text-gray-400">{member.role}</p>
-              </div>
+              <Link key={member.name} to="nosotros" className="card">
+                <div key={member.name} className="card">
+                  <div className="card-inner">
+                    {/* Front */}
+                    <div className="card-front">
+                      <img
+                        src={member.avatar}
+                        alt={member.name}
+                        className="w-24 h-24 rounded-full mb-4 object-cover"
+                      />
+                      <h4 className="text-xl font-semibold">{member.name}</h4>
+                      <p className="text-gray-400">{member.role}</p>
+                    </div>
+                    {/* Back */}
+                    <div className="card-back">
+                      <img
+                        src={member.avatar}
+                        alt={member.name}
+                        className="w-24 h-24 rounded-full mb-4 object-cover"
+                      />
+                      <h4 className="text-xl font-semibold ">{member.name}</h4>
+                      <p className="text-gray-400 ">{member.email}</p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -184,25 +199,26 @@ export function Home() {
       </section>
 
       {/* recursos */}
-      <section className="py-12 px-6 text-center bg-gradient-to-b bg-deep-space ">
+      <section className="py-12 px-6 text-center bg-deep-space">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 tracking-wide">
           Recursos
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {recursos.map((item, index) => (
             <div
               key={index}
-              className="p-6 rounded-2xl shadow-lg bg-gradient-to-br from-indigo-600 via-purple-700 to-pink-600
-            hover:scale-105 transition-transform duration-300 text-white flex flex-col justify-between h-full"
+              className="p-6 rounded-2xl shadow-lg shadow-purple-500/50
+          hover:shadow-blue-400/70 hover:scale-105 transition-all duration-300
+           bg-[#1a1a2e] text-white flex flex-col items-center justify-center"
             >
               <h3 className="text-xl font-semibold mb-4">{item.titulo}</h3>
 
               {/* Botón con Link */}
               <Link
                 to={item.link}
-                className="inline-block px-5 py-2 mt-2 bg-white text-gray-900 font-semibold rounded-xl 
-              shadow-md hover:bg-gray-200 transition-colors duration-300"
+                className="inline-block px-5 py-2 mt-4 bg-gray-100 text-gray-900 font-semibold rounded-xl
+            shadow-md hover:bg-gray-200 transition-colors duration-300"
               >
                 {item.texto}
               </Link>
@@ -212,52 +228,53 @@ export function Home() {
       </section>
 
       {/* SECCIÓN COMUNIDAD */}
-      <section className="py-12 px-6 text-center bg-gradient-to-b bg-deepSpace ">
+      <section className="py-12 px-6 text-center bg-deepSpace">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 tracking-wide">
           Comunidad
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {comunidad.map((item, index) => (
             <div
               key={index}
-              className="p-6 rounded-2xl shadow-lg bg-gradient-galaxy
-            hover:scale-105 transition-transform duration-300 text-white"
+              className="p-6 rounded-2xl shadow-lg shadow-blue-500/50
+          hover:shadow-purple-400/70 hover:scale-105 transition-all duration-300
+           bg-[#1a1a2e] text-white flex flex-col items-center justify-center"
             >
               {item.icon}
-              <h3 className="text-xl font-semibold mb-4">{item.titulo}</h3>
+              <h3 className="text-xl font-semibold mb-4 mt-2">{item.titulo}</h3>
 
               {/* Botón con Link */}
               <Link
                 to={item.link}
-                className="inline-block px-5 py-2 mt-2 bg-white text-gray-900 font-semibold rounded-xl 
-              shadow-md hover:bg-gray-200 transition-colors duration-300"
+                className="inline-block px-5 py-2 mt-2 bg-gray-100 text-gray-900 font-semibold rounded-xl 
+            shadow-md hover:bg-gray-200 transition-colors duration-300"
               >
                 {item.texto}
               </Link>
             </div>
           ))}
           {/* Redes sociales */}
-          {Redes.map((item,index) => (
-
+          {Redes.map((item, index) => (
             <div
               key={index}
-              className="p-6 rounded-2xl shadow-lg bg-gradient-galaxy
-            hover:scale-105 transition-transform duration-300 text-white"
+              className="p-6 rounded-2xl shadow-lg shadow-blue-500/50
+          hover:shadow-purple-400/70 hover:scale-105 transition-all duration-300
+          bg-[#1a1a2e] text-white flex flex-col items-center justify-center"
             >
               {item.icon}
-              <h3 className="text-xl font-semibold mb-4">{item.titulo}</h3>
-            
-            <a
-              href={item.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block px-5 py-2 mt-2 bg-white text-gray-900 font-semibold rounded-xl 
-  shadow-md hover:bg-gray-200 transition-colors duration-300"
-            >
-              {item.texto}
-            </a>
-          </div>
+              <h3 className="text-xl font-semibold mb-4 mt-2">{item.titulo}</h3>
+
+              <a
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-5 py-2 mt-2 bg-gray-100 text-gray-900 font-semibold rounded-xl 
+            shadow-md hover:bg-gray-200 transition-colors duration-300"
+              >
+                {item.texto}
+              </a>
+            </div>
           ))}
         </div>
       </section>
