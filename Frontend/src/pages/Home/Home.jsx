@@ -5,8 +5,8 @@ import { Partners } from "../../data/Partners";
 import { recursos } from "../../data/Recursos";
 import { comunidad } from "../../data/Comunidad";
 import { Redes } from "../../data/Redes";
-/* import { motion } from "motion/react" */
-const { missionVision, team, faqs } = AboutData;
+
+const { team, faqs } = AboutData;
 export function Home() {
   return (
     <main>
@@ -27,7 +27,7 @@ export function Home() {
         <div className="relative z-10 max-w-2xl px-4 md:px-16 lg:px-24 flex flex-col justify-center h-full text-left items-start">
           <h1 className="text-4xl md:text-6xl font-bold mb-8 animate-fade-in ">
             Explora el Universo con{" "}
-            <span className="text-galaxy">Astromanía</span>
+            <span className="text-primary">Astromanía</span>
           </h1>
           <p className="text-lg md:text-2xl mb-8 animate-fade-in delay-200">
             Educación astronómica para todas las edades en Chile
@@ -37,13 +37,13 @@ export function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-start animate-fade-in delay-400">
             <Link
               to="/reserva"
-              className="w-full sm:w-auto text-center px-6 py-3 btn-galaxy hover:btn-galaxy text-white rounded-lg shadow-lg transition transform hover:scale-105"
+              className="btn btn-galaxy btn-lg w-full sm:w-auto text-center px-6 py-3  text-white rounded-lg shadow-lg transition transform hover:scale-105"
             >
               Reserva una visita
             </Link>
             <Link
               to="/actividades-servicios"
-              className="px-6 py-3 bg-transparent border border-white hover:bg-white hover:text-black rounded-lg shadow-lg transition transform hover:scale-105"
+              className="btn btn-neutral btn-lg px-6 py-3 bg-transparent border border-white hover:bg-white hover:text-black rounded-lg shadow-lg transition transform hover:scale-105"
             >
               Descubre nuestras actividades
             </Link>
@@ -53,9 +53,9 @@ export function Home() {
 
       {/*ACTIVIDADES DESTACADAS */}
 
-      <section className="py-20 bg-deepSpace text-white">
+      <section className="py-20 text-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12 text-white">
+          <h2 className="text-3xl font-bold text-center mb-12 text-secondary">
             Actividades destacadas
           </h2>
 
@@ -83,7 +83,7 @@ export function Home() {
                   <p className="text-gray-300 mb-4">{activity.description}</p>
                   <Link
                     to={`/actividades-servicios/${activity.id}`}
-                    className="inline-block px-5 py-3 bg-galaxy hover:bg-nebula text-white font-semibold rounded-xl shadow-lg transition transform hover:scale-105 text-center"
+                    className="btn btn-galaxy btn-lg inline-block px-5 py-3 text-white font-semibold rounded-xl shadow-lg transition transform hover:scale-105 text-center"
                   >
                     {activity.cta}
                   </Link>
@@ -97,18 +97,11 @@ export function Home() {
       {/* SECCIÓN NOSOTROS / CREDIBILIDAD */}
       <section className="py-20 bg-deep-space text-white">
         {/* Misión y Visión */}
-        <div className="max-w-5xl mx-auto px-4 text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            {missionVision.title}
-          </h2>
-          <p className="text-lg md:text-xl text-gray-300">
-            {missionVision.short_description}
-          </p>
-        </div>
+
 
         {/* Equipo */}
         <div className="max-w-6xl mx-auto px-4 mb-16">
-          <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
+          <h3 className="text-secondary text-2xl md:text-3xl font-bold mb-8 text-center">
             Nuestro Equipo
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
@@ -145,7 +138,7 @@ export function Home() {
 
         {/* FAQs */}
         <div className="max-w-5xl mx-auto px-4 mb-16">
-          <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
+          <h3 className="text-secondary text-2xl md:text-3xl font-bold mb-8 text-center">
             Preguntas Frecuentes
           </h3>
           <div className="space-y-4">
@@ -177,7 +170,7 @@ export function Home() {
       {/* SECCIÓN COLABORADORES */}
       <section className="bg-deepSpace py-12">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-white mb-8">
+          <h2 className="text-3xl font-bold text-secondary mb-8">
             Nuestros Colaboradores
           </h2>
 
@@ -200,7 +193,7 @@ export function Home() {
 
       {/* recursos */}
       <section className="py-12 px-6 text-center bg-deep-space">
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 tracking-wide">
+        <h2 className="text-secondary text-3xl md:text-4xl font-bold mb-10 tracking-wide">
           Recursos
         </h2>
 
@@ -229,7 +222,7 @@ export function Home() {
 
       {/* SECCIÓN COMUNIDAD */}
       <section className="py-12 px-6 text-center bg-deepSpace">
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 tracking-wide">
+        <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-10 tracking-wide">
           Comunidad
         </h2>
 
