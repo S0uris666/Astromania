@@ -12,6 +12,8 @@ import {Recursos} from './pages/Recursos/Recursos.jsx';
 import {Comunidad} from './pages/Comunidad/Comunidad.jsx';
 import { Contacto } from './pages/Contacto/Contacto.jsx';
 import { Reserva } from './pages/Reserva/Reserva.jsx';
+import {ScrollToTop} from "./components/ScrollToTop.jsx"; 
+
 
 // Subpáginas "Nosotros"
 // Subpáginas "Actividades y Servicios"
@@ -23,6 +25,7 @@ import { Reserva } from './pages/Reserva/Reserva.jsx';
 export default function AppRouter() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Layout />} >
         <Route index element={<Home />} />
