@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -42,44 +42,130 @@ export default function Header() {
           className="h-12 w-auto z-[70]"
         />
 
-        {/* Espaciador para balancear */}
+        {/* Espaciador */}
         <div className="w-[28px]" />
       </div>
+
       {/* Barra escritorio */}
       <div className="hidden lg:flex container mx-auto items-center justify-between h-20 px-4">
+        {/* Logo */}
         <div className="flex items-center space-x-3">
           <img src="/vite.svg" alt="Astromanía Logo" className="h-12 w-auto" />
         </div>
 
-        <nav className="flex space-x-6">
-          {[
-            { to: "/", label: "Inicio" },
-            { to: "/nosotros", label: "Nosotros" },
-            { to: "/actividades-servicios", label: "Actividades y Servicios" },
-            { to: "/recursos", label: "Recursos" },
-            { to: "/contacto", label: "Contacto" },
-            { to: "/comunidad", label: "Comunidad" },
-          ].map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              className="relative hover-text-galaxy hover-after-galaxy transition-colors duration-300
+        {/* Menú */}
+        <nav className="flex space-x-6 items-center ">
+          <Link
+            to="/"
+            className="relative hover-text-galaxy hover-after-galaxy transition-colors duration-300
              after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:transition-all after:duration-300 hover:after:w-full"
-            >
-              {l.label}
-            </Link>
-          ))}
+          >
+            Inicio
+          </Link>
+          <Link
+            to="/nosotros"
+            className="relative hover-text-galaxy hover-after-galaxy transition-colors duration-300
+             after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:transition-all after:duration-300 hover:after:w-full"
+          >
+            Nosotros
+          </Link>
+
+          <div className="flex gap-4">
+            {/* Dropdown Recursos */}
+            <div className="dropdown dropdown-hover group">
+              <label
+                tabIndex={0}
+                className="relative hover-text-galaxy hover-after-galaxy transition-colors duration-300
+          after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:transition-all after:duration-300 hover:after:w-full cursor-pointer flex justify-between items-center"
+              >
+                Recursos
+                <ChevronDown className="w-4 h-4 ml-2 transition-transform duration-300 rotate-90 group-hover:rotate-0" />
+              </label>
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu p-2 shadow bg-black/80 backdrop-blur-md rounded-box w-52 text-white mt-2"
+              >
+                <li>
+                  <Link to="/recursos/literatura">Literatura Astronómica</Link>
+                </li>
+                <li>
+                  <Link to="/recursos/musica">Música Astronómica</Link>
+                </li>
+                <li>
+                  <Link to="/recursos/peliculas-series">
+                    Películas y series
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/recursos/sofware-y-apps">Software y apps</Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Dropdown Comunidad */}
+            <div className="dropdown dropdown-hover group">
+              <label
+                tabIndex={0}
+                className="relative hover-text-galaxy hover-after-galaxy transition-colors duration-300
+          after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:transition-all after:duration-300 hover:after:w-full cursor-pointer flex justify-between items-center"
+              >
+                Comunidad
+                <ChevronDown className="w-4 h-4 ml-2 transition-transform duration-300 rotate-90 group-hover:rotate-0" />
+              </label>
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu p-2 shadow bg-black/80 backdrop-blur-md rounded-box w-52 text-white mt-2"
+              >
+                <li>
+                  <Link to="/comunidad/astromania-responde">
+                    Astromania responde
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/comunidad/podcast">Podcast</Link>
+                </li>
+                <li>
+                  <Link to="/comunidad/galeria">Galería</Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <Link
+            to="/actividades-servicios"
+            className="relative hover-text-galaxy hover-after-galaxy transition-colors duration-300
+             after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:transition-all after:duration-300 hover:after:w-full"
+          >
+            Actividades y Servicios
+          </Link>
+          <Link
+            to="/contacto"
+            className="relative hover-text-galaxy hover-after-galaxy transition-colors duration-300
+             after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:transition-all after:duration-300 hover:after:w-full"
+          >
+            Contacto
+          </Link>
         </nav>
 
-        <Link
-          to="/reserva"
-          className="bg-galaxy hover:bg-galaxy text-white px-4 py-2 rounded-lg shadow-md transition"
-        >
-          Reserva una visita
-        </Link>
+        {/* Barra búsqueda + botón */}
+        <div className="flex items-center space-x-4">
+          <div className="form-control">
+            <input
+              type="text"
+              placeholder="Buscar..."
+              className="input input-bordered input-sm w-48 bg-white/10 text-white placeholder-gray-300"
+            />
+          </div>
+
+          <Link
+            to="/reserva"
+            className="btn btn-secondary btn-sm text-white px-4 py-2 rounded-lg shadow-md"
+          >
+            Reserva una visita
+          </Link>
+        </div>
       </div>
-      {/* OVERLAY del menú móvil - SOLUCIÓN COMPLETA */}
-      
+
+      {/* Overlay del menú móvil */}
       <div
         className={`lg:hidden fixed inset-0 z-[100] transition-all duration-300 ${
           menuOpen
@@ -89,68 +175,78 @@ export default function Header() {
         aria-hidden={!menuOpen}
         onClick={() => setMenuOpen(false)}
       >
-        {/* Botón de cerrar (X) en la parte superior derecha */}
+        {/* Botón cerrar */}
         <button
           aria-label="Cerrar menú"
           onClick={(e) => {
             e.stopPropagation();
             setMenuOpen(false);
           }}
-          className="absolute top-4 right-4 z-[110] p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors duration-200"
+          className="absolute top-4 right-4 z-[110] p-2 rounded-full bg-white/10 hover:bg-white/20 transition"
         >
           <X size={28} className="text-white" />
         </button>
 
-        {/* Contenido del menú */}
+        {/* Menú móvil */}
         <nav
           className="absolute top-16 left-0 w-full px-6 py-8 space-y-6 bg-black/80 backdrop-blur-sm"
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Barra búsqueda móvil */}
+          <div className="form-control mb-4">
+            <input
+              type="text"
+              placeholder="Buscar..."
+              className="input input-bordered w-full bg-white/10 text-white placeholder-gray-300"
+            />
+          </div>
+
           <Link
             to="/"
-            className="block text-xl font-medium hover-text-galaxy transition-colors duration-200 py-2"
+            className="block text-xl"
             onClick={() => setMenuOpen(false)}
           >
             Inicio
           </Link>
           <Link
             to="/nosotros"
-            className="block text-xl font-medium hover-text-galaxy transition-colors duration-200 py-2"
+            className="block text-xl"
             onClick={() => setMenuOpen(false)}
           >
             Nosotros
           </Link>
           <Link
             to="/actividades-servicios"
-            className="block text-xl font-medium hover-text-galaxy transition-colors duration-200 py-2"
+            className="block text-xl"
             onClick={() => setMenuOpen(false)}
           >
             Actividades y Servicios
           </Link>
           <Link
             to="/recursos"
-            className="block text-xl font-medium hover-text-galaxy transition-colors duration-200 py-2"
+            className="block text-xl"
             onClick={() => setMenuOpen(false)}
           >
             Recursos
           </Link>
           <Link
             to="/comunidad"
-            className="block text-xl font-medium hover-text-galaxy transition-colors duration-200 py-2"
+            className="block text-xl"
             onClick={() => setMenuOpen(false)}
           >
             Comunidad
           </Link>
           <Link
             to="/contacto"
-            className="block text-xl font-medium hover-text-galaxy transition-colors duration-200 py-2"
+            className="block text-xl"
             onClick={() => setMenuOpen(false)}
           >
             Contacto
           </Link>
+
           <Link
             to="/reserva"
-            className="block text-center bg-galaxy  text-white px-6 py-3 rounded-xl shadow-lg transition-all duration-300 mt-6 font-semibold"
+            className="block text-center btn btn-secondary text-white mt-6"
             onClick={() => setMenuOpen(false)}
           >
             Reserva una visita
