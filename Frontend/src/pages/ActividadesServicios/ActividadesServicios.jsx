@@ -1,7 +1,9 @@
-import React from 'react'
+import { ServiceProductList } from "../../components/servicesProducts/list"
 
 export const ActividadesServicios = () => {
   return (
-    <div>ActividadesServicios</div>
+    <section>
+      <ServiceProductList />
+    </section>
   )
 }

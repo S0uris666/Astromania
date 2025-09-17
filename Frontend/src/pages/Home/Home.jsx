@@ -2,9 +2,8 @@ import { Activities } from "../../data/Activities";
 import { AboutData } from "../../data/AboutData";
 import { Link } from "react-router-dom";
 import { Partners } from "../../data/Partners";
-import { recursos } from "../../data/Recursos";
-import { comunidad } from "../../data/Comunidad";
-import { Redes } from "../../data/Redes";
+
+
 
 const { team, faqs } = AboutData;
 export function Home() {
@@ -55,7 +54,7 @@ export function Home() {
 
       <section className="py-20 text-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12 text-secondary">
+          <h2 className="text-3xl font-bold text-center mb-12 ">
             Actividades destacadas
           </h2>
 
@@ -82,7 +81,7 @@ export function Home() {
                   </h3>
                   <p className="text-gray-300 mb-4">{activity.description}</p>
                   <Link
-                    to={`/actividades-servicios/${activity.id}`}
+                    to={`/${activity.id}`}
                     className="btn btn-galaxy btn-lg inline-block px-5 py-3 text-white font-semibold rounded-xl shadow-lg transition transform hover:scale-105 text-center"
                   >
                     {activity.cta}
@@ -98,10 +97,9 @@ export function Home() {
       <section className="py-20 bg-deep-space text-white">
         {/* Misión y Visión */}
 
-
         {/* Equipo */}
         <div className="max-w-6xl mx-auto px-4 mb-16">
-          <h3 className="text-secondary text-2xl md:text-3xl font-bold mb-8 text-center">
+          <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
             Nuestro Equipo
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
@@ -138,7 +136,7 @@ export function Home() {
 
         {/* FAQs */}
         <div className="max-w-5xl mx-auto px-4 mb-16">
-          <h3 className="text-secondary text-2xl md:text-3xl font-bold mb-8 text-center">
+          <h3 className=" text-2xl md:text-3xl font-bold mb-8 text-center">
             Preguntas Frecuentes
           </h3>
           <div className="space-y-4">
@@ -168,22 +166,20 @@ export function Home() {
       </section>
 
       {/* SECCIÓN COLABORADORES */}
-      <section className="bg-deepSpace py-12">
+      <section className="bg-base py-12">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-secondary mb-8">
-            Nuestros Colaboradores
-          </h2>
+          <h2 className="text-3xl font-bold  text-white mb-12">Nuestros Colaboradores</h2>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 items-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center">
             {Partners.map((partner) => (
               <div
                 key={partner.id}
-                className="flex justify-center items-center bg-white/5 p-4 rounded-lg hover:scale-105 transition-transform"
+                className="flex justify-center items-center"
               >
                 <img
                   src={partner.logo}
                   alt={partner.name}
-                  className="max-h-16 object-contain"
+                  className="max-h-12 object-contain opacity-70 hover:opacity-100 transition-opacity"
                 />
               </div>
             ))}
@@ -191,86 +187,14 @@ export function Home() {
         </div>
       </section>
 
-      {/* recursos */}
-      <section className="py-12 px-6 text-center bg-deep-space">
-        <h2 className="text-secondary text-3xl md:text-4xl font-bold mb-10 tracking-wide">
-          Recursos
-        </h2>
+      
+        
+      
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-          {recursos.map((item, index) => (
-            <div
-              key={index}
-              className="p-6 rounded-2xl shadow-lg shadow-purple-500/50
-          hover:shadow-blue-400/70 hover:scale-105 transition-all duration-300
-           bg-[#1a1a2e] text-white flex flex-col items-center justify-center"
-            >
-              <h3 className="text-xl font-semibold mb-4">{item.titulo}</h3>
+    
 
-              {/* Botón con Link */}
-              <Link
-                to={item.link}
-                className="inline-block px-5 py-2 mt-4 bg-gray-100 text-gray-900 font-semibold rounded-xl
-            shadow-md hover:bg-gray-200 transition-colors duration-300"
-              >
-                {item.texto}
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
 
-      {/* SECCIÓN COMUNIDAD */}
-      <section className="py-12 px-6 text-center bg-deepSpace">
-        <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-10 tracking-wide">
-          Comunidad
-        </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {comunidad.map((item, index) => (
-            <div
-              key={index}
-              className="p-6 rounded-2xl shadow-lg shadow-blue-500/50
-          hover:shadow-purple-400/70 hover:scale-105 transition-all duration-300
-           bg-[#1a1a2e] text-white flex flex-col items-center justify-center"
-            >
-              {item.icon}
-              <h3 className="text-xl font-semibold mb-4 mt-2">{item.titulo}</h3>
-
-              {/* Botón con Link */}
-              <Link
-                to={item.link}
-                className="inline-block px-5 py-2 mt-2 bg-gray-100 text-gray-900 font-semibold rounded-xl 
-            shadow-md hover:bg-gray-200 transition-colors duration-300"
-              >
-                {item.texto}
-              </Link>
-            </div>
-          ))}
-          {/* Redes sociales */}
-          {Redes.map((item, index) => (
-            <div
-              key={index}
-              className="p-6 rounded-2xl shadow-lg shadow-blue-500/50
-          hover:shadow-purple-400/70 hover:scale-105 transition-all duration-300
-          bg-[#1a1a2e] text-white flex flex-col items-center justify-center"
-            >
-              {item.icon}
-              <h3 className="text-xl font-semibold mb-4 mt-2">{item.titulo}</h3>
-
-              <a
-                href={item.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block px-5 py-2 mt-2 bg-gray-100 text-gray-900 font-semibold rounded-xl 
-            shadow-md hover:bg-gray-200 transition-colors duration-300"
-              >
-                {item.texto}
-              </a>
-            </div>
-          ))}
-        </div>
-      </section>
     </main>
   );
 }

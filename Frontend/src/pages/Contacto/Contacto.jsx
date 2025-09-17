@@ -43,7 +43,7 @@ export function Contacto() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200 px-4 py-12">
       <div className="w-full max-w-lg">
-        <h2 className="text-3xl font-bold mb-6 text-center text-primary">
+        <h2 className="text-3xl font-bold mb-6 text-center text-white">
           Contáctanos
         </h2>
 
