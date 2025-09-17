@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import ServiceProductState from './context/serviceProducts/ServiceProductState.jsx';
 
 
 //Layout Principal
@@ -24,6 +25,7 @@ import {ScrollToTop} from "./components/ScrollToTop.jsx";
 
 export default function AppRouter() {
   return (
+    <ServiceProductState> {/* //arbol de componenete DB */}
     <BrowserRouter>
       <ScrollToTop />
       <Routes>
@@ -38,5 +40,6 @@ export default function AppRouter() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </ServiceProductState>
   );
 }
