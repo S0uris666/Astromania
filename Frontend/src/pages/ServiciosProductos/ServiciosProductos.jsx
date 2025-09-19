@@ -1,6 +1,6 @@
 import { ServiceProductList } from "../../components/servicesProducts/list"
 
-export const ActividadesServicios = () => {
+export const ServiciosProductos = () => {
   return (
     <section>
       <ServiceProductList />

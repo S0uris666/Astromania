@@ -41,7 +41,7 @@ export function Home() {
               Reserva una visita
             </Link>
             <Link
-              to="/actividades-servicios"
+              to="/servicios-productos"
               className="btn btn-neutral btn-lg px-6 py-3 bg-transparent border border-white hover:bg-white hover:text-black rounded-lg shadow-lg transition transform hover:scale-105"
             >
               Descubre nuestras actividades

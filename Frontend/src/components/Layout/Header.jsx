@@ -131,11 +131,11 @@ export default function Header() {
             </div>
           </div>
           <Link
-            to="/actividades-servicios"
+            to="/servicios-productos"
             className="relative hover-text-galaxy hover-after-galaxy transition-colors duration-300
              after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:transition-all after:duration-300 hover:after:w-full"
           >
-            Actividades y Servicios
+            Servicios y Productos
           </Link>
           <Link
             to="/contacto"
@@ -157,10 +157,10 @@ export default function Header() {
           </div>
 
           <Link
-            to="/reserva"
+            to="/login"
             className="btn btn-secondary btn-sm text-white px-4 py-2 rounded-lg shadow-md"
           >
-            Reserva una visita
+            Ingresa
           </Link>
         </div>
       </div>
@@ -216,11 +216,11 @@ export default function Header() {
             Nosotros
           </Link>
           <Link
-            to="/actividades-servicios"
+            to="/servicios-productos"
             className="block text-xl"
             onClick={() => setMenuOpen(false)}
           >
-            Actividades y Servicios
+            Servicios y Productos
           </Link>
           <Link
             to="/recursos"
