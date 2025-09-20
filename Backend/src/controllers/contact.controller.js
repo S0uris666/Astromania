@@ -20,17 +20,23 @@ export const createContact = async (req, res) => {
     });
 
     // Configuración del correo
-    const mailOptions = {
-      from: `"Contacto desde Astromania" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_JP, // tu correo (donde recibes los mensajes)
-      subject: subject,
-      text: `
-        Nombre: ${name}
-        Email: ${email}
-        Asunto: ${subject}
-        Mensaje: ${message}
-      `,
-    };
+const mailOptions = {
+  from: `"${subject}" <${process.env.EMAIL_USER}>`,
+  to: process.env.EMAIL_JP,
+  subject: subject,
+  html: `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <h2>Nuevo mensaje desde Astromania WEB</h2>
+      <p><strong>Nombre:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      
+      <p><strong>Mensaje:</strong></p>
+      <p style="padding: 10px; background-color: #f4f4f4; border-radius: 5px;">${message}</p>
+      <hr>
+      <p style="font-size: 0.9em; color: #555;">Este mensaje fue enviado desde el formulario de contacto de Astromania WEB.</p>
+    </div>
+  `,
+};
 
     // Enviar correo
     await transporter.sendMail(mailOptions);
