@@ -1,5 +1,5 @@
 import { useState } from "react";
-import emailjs from "@emailjs/browser";
+import { sendMessage } from "../../api/contactService";
 
 export function Contacto() {
   const [formData, setFormData] = useState({
@@ -10,34 +10,29 @@ export function Contacto() {
   });
 
   const [status, setStatus] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus("Enviando...");
-    const SERVICE_ID = "service_gfpmasb";
-    const TEMPLATE_ID = "template_snfggxe";
-    const PUBLIC_KEY = "ctEUdwn4a4dbyHxKB";
+    setLoading(true); // Iniciamos carga
+    setStatus(""); // Limpiamos mensaje
 
-    emailjs.send(SERVICE_ID, TEMPLATE_ID, formData, PUBLIC_KEY).then(
-      (response) => {
-        console.log("Correo enviado:", response);
-        setStatus("¡Correo enviado correctamente!");
-        setFormData({ name: "", email: "", subject: "", message: "" });
-      },
-      (error) => {
-        console.error("Error al enviar correo:", error);
-        setStatus("Error al enviar el correo. Intenta nuevamente.");
-      }
-    );
+    try {
+      const response = await sendMessage(formData);
+      console.log("Respuesta del servidor:", response);
 
-    setTimeout(() => {
       setStatus("¡Correo enviado correctamente!");
       setFormData({ name: "", email: "", subject: "", message: "" });
-    }, 1000);
+    } catch (error) {
+      console.error("Error enviando el correo:", error);
+      setStatus("Hubo un error al enviar el correo.");
+    } finally {
+      setLoading(false); // Terminamos carga
+    }
   };
 
   return (
@@ -111,8 +106,12 @@ export function Contacto() {
             />
           </div>
 
-          <button type="submit" className="btn btn-secondary w-full">
-            Enviar
+          <button
+            type="submit"
+            className="btn btn-secondary w-full"
+            disabled={loading}
+          >
+            {loading ? "Enviando..." : "Enviar"}
           </button>
 
           {status && <p className="text-center text-success mt-2">{status}</p>}
