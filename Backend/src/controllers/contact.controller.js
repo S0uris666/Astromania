@@ -21,7 +21,7 @@ export const createContact = async (req, res) => {
 
     // Configuración del correo
     const mailOptions = {
-      from: `"${name}" <${email}>`,
+      from: `"Contacto desde Astromania" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_JP, // tu correo (donde recibes los mensajes)
       subject: subject,
       text: `
