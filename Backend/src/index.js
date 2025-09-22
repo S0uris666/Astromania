@@ -1,8 +1,9 @@
 import express from "express";
 import cors from "cors";
-
 import dotenv from "dotenv";
+
 import contactRouter from './routes/contact.route.js';
+import paymentRouter from "./routes/payment.route.js";
 
 dotenv.config();
 
@@ -14,11 +15,13 @@ app.use(express.json());
 
 
 app.get("/", (req, res) => {
-  res.send("🚀 Backend funcionando!");
+  res.send("Backend funcionando!");
 });
 
 // Rutas
 app.use('/', contactRouter);
+app.use("/api/payments", paymentRouter);
+
 
 
 
