@@ -15,7 +15,7 @@ import { Contacto } from './pages/Contacto/Contacto.jsx';
 import { Reserva } from './pages/Reserva/Reserva.jsx';
 import {ScrollToTop} from "./components/ScrollToTop.jsx"; 
 import { Login } from './pages/Login/Login.jsx';
-
+import { Registro } from './pages/Registro/Registro.jsx';
 
 // Subpáginas "Nosotros"
 // Subpáginas "Actividades y Servicios"
@@ -39,6 +39,7 @@ export default function AppRouter() {
        <Route path="/contacto" element={<Contacto />} />
        <Route path="/reserva" element={<Reserva />} />
        <Route path="/login" element={<Login />} />
+       <Route path="/registro" element={<Registro />} />
         </Route>
       </Routes>
     </BrowserRouter>
