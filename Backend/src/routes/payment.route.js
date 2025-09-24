@@ -1,29 +1,22 @@
 import express from "express";
 import { createPreference } from "../controllers/payment.controller.js";
-import { createPaymentPreference } from "../services/payment.service.js";
+import { testPreference } from "../controllers/payment.controller.js";
 
 const paymentRouter = express.Router();
 
-paymentRouter.post("/create_preference", createPreference);
+paymentRouter.post("/create_preference", createPreference);//http://localhost:3000/api/payments/create_preference
  
-paymentRouter.get("/test_preference", async (req, res) => {
+paymentRouter.get("/test_preference", testPreference);//http://localhost:3000/api/payments/test_preference
 
 
-  const items = [
-    { title: "Producto test", quantity: 1, unit_price: 2000 }
-  ];
-  try {
-    const preference = await createPaymentPreference(items);
-    
-    console.log("ID de preferencia (test GET):", preference.id);
-    console.log("URL de checkout:", preference.init_point);
-    console.log("Token usado:", process.env.TEST_ACCESS_TOKEN);
-
-    
-    res.json(preference);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+paymentRouter.get("/success", (req, res) => { //http://localhost:3000/api/payments/success
+  res.send("Ruta de pagos funcionando!");
 });
+
+
+paymentRouter.post("/notification", (req, res) => {
+  console.log("Notificación recibida:", req.body);
+  res.status(200).send("Notificación recibida");
+}) //http://localhost:3000/api/payments/notification
 
 export default paymentRouter
