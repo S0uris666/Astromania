@@ -1,29 +1,12 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
 
-import contactRouter from './routes/contact.route.js';
-import paymentRouter from "./routes/payment.route.js";
+import dotenv from "dotenv";
+import app from "./app.js";
+import { connectDB } from "./config/db.js";
+
+/* Conexion DB */
+connectDB();
 
 dotenv.config();
-
-const app = express();
-
-// Middlewares
-app.use(cors());
-app.use(express.json());
-
-
-app.get("/", (req, res) => {
-  res.send("Backend funcionando!");
-});
-
-// Rutas
-app.use('/', contactRouter);
-app.use("/api/payments", paymentRouter);
-
-
-
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;
