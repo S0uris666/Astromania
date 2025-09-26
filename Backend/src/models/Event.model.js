@@ -16,7 +16,12 @@ const eventSchema = new mongoose.Schema(
       minlength: 10,
       maxlength: 1000,
     },
-    organizer: {
+    organizer:{
+        type:String,
+        required:true,
+        trim:true,
+    },
+    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
