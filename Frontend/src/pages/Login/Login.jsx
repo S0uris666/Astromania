@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useUser } from "../../context/user/UserContext.js";
 
 export function Login() {
+  const {login} = useUser();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -20,20 +22,24 @@ export function Login() {
     setStatus("");
 
     try {
-      // Aquí iría la llamada ala  API de login
-      // Ejemplo:
-      // const response = await loginUser(formData);
-
-      setTimeout(() => {
+      await login(formData);
+      
         setStatus("¡Estas dentro!");
         setFormData({ email: "", password: "" });
         setLoading(false);
-      }, 1000);
+      
     } catch (error) {
-      console.error(error);
-      setStatus("Error al iniciar sesión");
-      setLoading(false);
-    }
+  console.error(error);
+
+  // si es un error del backend REVISAR
+  if (error.response && error.response.data && error.response.data.message) {
+    setStatus(error.response.data.message);
+  } else {
+    setStatus("Error al iniciar sesión, contraseña o usuario incorrecto");
+  }
+} finally {
+  setLoading(false);
+}
   };
 
   return (
