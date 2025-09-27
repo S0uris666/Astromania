@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useUser } from "../../context/user/UserContext.js";
+
 
 export function Registro() {
+  const {signUp} = useUser();
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -28,19 +31,25 @@ export function Registro() {
     }
 
     try {
-      // Aquí iría tu llamada a la API para crear el usuario
-      // const response = await registerUser(formData);
-
-      setTimeout(() => {
+      await signUp(formData);
+      
+      
         setStatus("¡Registro exitoso!");
-        setFormData({ name: "", email: "", password: "", confirmPassword: "" });
+        setFormData({ username: "", email: "", password: "", confirmPassword: "" });
         setLoading(false);
-      }, 1000);
+      
     } catch (error) {
-      console.error(error);
-      setStatus("Error al registrarse");
-      setLoading(false);
-    }
+  console.error(error);
+
+  // si es un error del backend REVISAR!!
+  if (error.response && error.response.data && error.response.data.message) {
+    setStatus(error.response.data.message);
+  } else {
+    setStatus("Error al registrarse, intenta de nuevo");
+  }
+} finally {
+  setLoading(false);
+}
   };
 
   return (
@@ -57,9 +66,9 @@ export function Registro() {
             </label>
             <input
               type="text"
-              name="name"
-              placeholder="Tu nombre"
-              value={formData.name}
+              name="username"
+              placeholder="Tu nombre de usuario"
+              value={formData.username}
               onChange={handleChange}
               className="input input-bordered input-neutral w-full"
               required
