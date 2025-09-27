@@ -20,7 +20,7 @@ const ServiceProductState = (props) => {
     try {
       const res = await getServiceProducts();
       console.log("colección de productos y servicios", res);
-      dispatch({ type: "GET_PRODUCTS", payload: res.data });
+      dispatch({ type: "GET_PRODUCTS", payload: res.data });// esta data debe ser igual al nombre que est en el back
     } catch (error) {
       console.error("Error obteniendo productos y servicios", error);
     }
