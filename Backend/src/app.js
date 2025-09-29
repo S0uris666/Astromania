@@ -10,6 +10,7 @@ import eventRouter from "./routes/event.route.js";
 import userRouter from "./routes/user.routes.js";
 import contactRouter from './routes/contact.route.js';
 import paymentRouter from "./routes/payment.route.js";
+import serviceProductRouter from "./routes/service.product.route.js";
 
 
 // Middlewares
@@ -27,6 +28,7 @@ app.use('/api', contactRouter);
 app.use("/api/payments", paymentRouter);
 app.use("/api", userRouter);
 app.use("/api", eventRouter);
+app.use("/api", serviceProductRouter)
 
 
 export default app;
