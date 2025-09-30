@@ -111,10 +111,11 @@ export const updateEvent = async (req, res) => {
 // Obtener todos los eventos (público, sin auth)
 export const getAllPublicEvents = async (req, res) => {
   try {
-    // Si quieres que se muestren solo eventos publicados
+   
     const events = await Event.find({ status: "published" }).sort({ startDateTime: 1 });
     
     res.status(200).json(events);
+    console.log(events)
   } catch (error) {
     res.status(500).json({ error: "Error al obtener los eventos públicos" });
   }
