@@ -144,6 +144,13 @@ export default function Header() {
           >
             Contacto
           </Link>
+                    <Link
+            to="/eventos"
+            className="relative hover-text-galaxy hover-after-galaxy transition-colors duration-300
+             after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:transition-all after:duration-300 hover:after:w-full"
+          >
+            Eventos
+          </Link>
         </nav>
 
         {/* Barra búsqueda + botón */}
