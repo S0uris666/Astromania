@@ -44,6 +44,9 @@ const eventSchema = new mongoose.Schema(
       enum: ["draft", "published", "cancelled"],
       default: "draft",
     },
+    url:{
+      type:String
+    }
   },
   { timestamps: true }
 );
