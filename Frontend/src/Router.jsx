@@ -18,6 +18,8 @@ import {ScrollToTop} from "./components/ScrollToTop.jsx";
 import { Login } from './pages/Login/Login.jsx';
 import { Registro } from './pages/Registro/Registro.jsx';
 import { UserProvider } from './context/user/UserProvider.jsx';
+import { EventsCalendarPage } from './pages/Events/Events.jsx';
+import EventState from './context/events/eventsState.jsx';
 
 // Subpáginas "Nosotros"
 // Subpáginas "Actividades y Servicios"
@@ -28,7 +30,9 @@ import { UserProvider } from './context/user/UserProvider.jsx';
 
 export default function AppRouter() {
   return (
+    
     <UserProvider>
+      <EventState>
     <ServiceProductState> {/* //arbol de componenete DB */}
     <BrowserRouter>
       <ScrollToTop />
@@ -44,10 +48,13 @@ export default function AppRouter() {
        <Route path="/reserva" element={<Reserva />} />
        <Route path="/login" element={<Login />} />
        <Route path="/registro" element={<Registro />} />
+       <Route path="/eventos" element={<EventsCalendarPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
     </ServiceProductState>
+    </EventState>
     </UserProvider>
+    
   );
 }
