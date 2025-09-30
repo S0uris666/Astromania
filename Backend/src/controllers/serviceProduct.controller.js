@@ -16,7 +16,7 @@ export const createServiceProduct = async (req, res) => {
   try {
     const payload = { ...req.body };
 
-    // slug automático si no viene
+    
     if (!payload.slug && payload.title) {
       payload.slug = slugify(payload.title);
     }
@@ -24,7 +24,7 @@ export const createServiceProduct = async (req, res) => {
     const created = await ServiceProductItem.create(payload);
     return res.status(201).json(created);
   } catch (err) {
-    // manejo de clave duplicada (slug o sku si lo agregas)
+    
     if (err?.code === 11000) {
       return res.status(409).json({
         message: "Ya existe un registro con ese valor único",
