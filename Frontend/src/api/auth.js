@@ -12,3 +12,8 @@ export const loginRequest = (user) => axios.post(`${API}/login`,user)
 //Productos y servicios
 
 export const getServiceProducts= (products) => axios.get(`${API}/service-products/readall`,products)
+
+
+//eventos
+
+export const getEvents = (events) => axios.get(`${API}/events/readall`, events);
