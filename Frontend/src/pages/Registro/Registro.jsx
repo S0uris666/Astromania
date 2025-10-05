@@ -4,7 +4,7 @@ import { useUser } from "../../context/user/UserContext.js";
 
 
 export function Registro() {
-  const {signUp} = useUser();
+  const {registerUser} = useUser();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -31,9 +31,8 @@ export function Registro() {
     }
 
     try {
-      await signUp(formData);
-      
-      
+      await registerUser(formData);
+     
         setStatus("¡Registro exitoso!");
         setFormData({ username: "", email: "", password: "", confirmPassword: "" });
         setLoading(false);
