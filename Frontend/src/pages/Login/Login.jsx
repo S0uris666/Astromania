@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useUser } from "../../context/user/UserContext.js";
 
 export function Login() {
-  const {login} = useUser();
+  const {loginUser} = useUser();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -22,7 +22,7 @@ export function Login() {
     setStatus("");
 
     try {
-      await login(formData);
+      await loginUser(formData);
       
         setStatus("¡Estas dentro!");
         setFormData({ email: "", password: "" });
