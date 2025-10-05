@@ -1,6 +1,9 @@
+const API = import.meta.env.VITE_BACKEND_URL_CONTACT;
+
+
 export const sendMessage = async ({ name, email, subject, message }) => {
   try {
-    const res = await fetch("http://localhost:3000/contact", {
+    const res = await fetch(`${API}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, subject, message }),
