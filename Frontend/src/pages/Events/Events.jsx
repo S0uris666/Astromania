@@ -1,4 +1,3 @@
-
 import { useContext, useEffect, useMemo, useState } from "react";
 import EventContext from "../../context/events/eventsContext";
 
@@ -26,11 +25,43 @@ const statusBadge = (status) => (status === "published" ? "badge-success" : stat
 
 
 function renderEventContent(arg) {
+  // Extraer solo la hora del timeText (formato HH:MM)
+  const timeOnly = arg.timeText.split(' - ')[0] || arg.timeText;
+  const event = arg.event.extendedProps.ev;
+  
+  // Determinar las clases de color según el tipo de evento
+  let colorClasses = '';
+  if (event?.isOnline) {
+    colorClasses = 'bg-gradient-to-r from-cyan-500 to-cyan-600';
+  } else if (event?.requiresRegistration) {
+    colorClasses = 'bg-gradient-to-r from-amber-500 to-amber-600';
+  } else {
+    colorClasses = 'bg-gradient-to-r from-purple-500 to-purple-600';
+  }
   
   return (
-    <>
-      <b>{arg.timeText}</b>&nbsp;<i>{arg.event.title}</i>
-    </>
+    <div className={`
+      ${colorClasses}
+      text-white 
+      px-2.5 py-1 
+      rounded-xl 
+      text-xs 
+      font-semibold 
+      text-center 
+      shadow-md 
+      min-w-[45px] 
+      max-w-[70px] 
+      overflow-hidden 
+      whitespace-nowrap 
+      transition-all 
+      duration-200 
+      cursor-pointer 
+      hover:-translate-y-0.5 
+      hover:scale-[1.02] 
+      hover:shadow-lg
+    `}>
+      <span className="block leading-tight tracking-wide">{timeOnly}</span>
+    </div>
   );
 }
 
@@ -43,42 +74,103 @@ export function EventsCalendarPage() {
 
   useEffect(() => { getAllEvents(); }, [getAllEvents]);
 
-  const isISO = (v) => DateTime.fromISO(String(v || ""), { setZone: true }).isValid;
+  // Datos de prueba para debugging (comentar cuando funcione la API)
+  const testEvents = [
+    {
+      _id: "test1",
+      title: "Eclipse Solar de Prueba",
+      description: "Evento de prueba para verificar horarios",
+      organizer: "Astromanía",
+      location: "Santiago",
+      startDateTime: "2025-01-15T14:30:00-03:00", // ISO con zona horaria
+      endDateTime: "2025-01-15T16:30:00-03:00",
+      status: "published",
+      isOnline: false,
+      requiresRegistration: true,
+      price: 5000,
+      capacity: 50,
+      tags: ["eclipse", "sol"]
+    },
+    {
+      _id: "test2",
+      title: "Observación Lunar",
+      description: "Observación de la luna llena",
+      organizer: "Astromanía",
+      location: "Online",
+      startDateTime: "2025-01-20T20:00:00-03:00",
+      endDateTime: "2025-01-20T22:00:00-03:00",
+      status: "published",
+      isOnline: true,
+      requiresRegistration: false,
+      price: 0,
+      url: "https://example.com/luna",
+      tags: ["luna", "observación"]
+    }
+  ];
 
-  // (forzamos ISO para evitar sorpresas)
+  // Para debugging: usar datos de prueba si no hay eventos reales
+  const eventsToUse = Event && Event.length > 0 ? Event : testEvents;
+  console.log("[EV] Using events:", eventsToUse);
+
+  const isISO = (v) => {
+    if (!v) return false;
+    const dt = DateTime.fromISO(String(v), { zone: TZ });
+    return dt.isValid;
+  };
+
+  // Procesamiento de eventos con debugging mejorado
 const calendarEvents = useMemo(() => {
-  const mapped = (Event || [])
-    .filter(ev => isISO(ev.startDateTime)) // exige start válido
+  console.log("[EV] Raw Event data:", eventsToUse);
+  
+  const mapped = (eventsToUse || [])
+    .filter(ev => {
+      const isValid = isISO(ev.startDateTime);
+      if (!isValid) {
+        console.warn("[EV] Fecha inválida detectada:", {
+          _id: ev._id,
+          title: ev.title,
+          startDateTime: ev.startDateTime,
+          type: typeof ev.startDateTime
+        });
+      }
+      return isValid;
+    })
     .map(ev => {
-      const startISO = ev.startDateTime;
-      const endISO = ev.endDateTime || null;
+      // Convertir fechas a zona horaria correcta
+      const startDT = DateTime.fromISO(ev.startDateTime, { zone: TZ });
+      const endDT = ev.endDateTime ? DateTime.fromISO(ev.endDateTime, { zone: TZ }) : null;
+      
+      console.log("[EV] Processing event:", {
+        title: ev.title,
+        originalStart: ev.startDateTime,
+        processedStart: startDT.toISO(),
+        startValid: startDT.isValid,
+        timezone: startDT.zoneName,
+        offset: startDT.offset,
+        localTime: startDT.toFormat("dd/MM/yyyy HH:mm")
+      });
+
       return {
         id: ev._id,
         title: ev.title,
-        start: startISO,
-        end: endISO,
-        
+        start: startDT.toISO(), // Usar ISO procesado con zona horaria
+        end: endDT ? endDT.toISO() : null,
         extendedProps: { ev },
       };
     });
-      const invalid = (Event || []).filter(ev => !isISO(ev.startDateTime));
-  if (invalid.length) {
-    console.warn("[EV] eventos con fecha inválida:", invalid.map(e => ({
-      _id: e._id, title: e.title, startDateTime: e.startDateTime
-    })));
-  }
-  console.log("[EV] calendarEvents ->", mapped); 
+
+  console.log("[EV] Final calendarEvents ->", mapped);
   return mapped;
-}, [Event]);
+}, [eventsToUse]);
 
   // Eventos del día seleccionado (para el panel)
   const dayEvents = useMemo(() => {
     if (!selectedDateISO) return [];
     const d = DateTime.fromISO(selectedDateISO, { zone: TZ });
-    return (Event || [])
+    return (eventsToUse || [])
       .filter((ev) => DateTime.fromISO(ev.startDateTime, { zone: TZ }).hasSame(d, "day"))
       .sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
-  }, [Event, selectedDateISO]);
+  }, [eventsToUse, selectedDateISO]);
 
   // === Handlers estilo demo oficial ===
   const handleDateSelect = (selectInfo) => {
@@ -96,7 +188,23 @@ const calendarEvents = useMemo(() => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 mt-20">
+    <>
+      <style>{`
+        .fc-event {
+          border: none !important;
+          background: none !important;
+          padding: 2px !important;
+        }
+        
+        .fc-daygrid-event {
+          margin: 1px 0 !important;
+        }
+        
+        .fc-event-title {
+          display: none !important;
+        }
+      `}</style>
+      <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 mt-20">
       {/* Calendario */}
       <section className="lg:col-span-2">
         <div className="card bg-base-200 shadow-xl">
@@ -129,12 +237,21 @@ const calendarEvents = useMemo(() => {
               timeZone="America/Santiago"
               locale="es"
               selectMirror={true}
-              events={calendarEvents}          //Datos de db
+              events={calendarEvents}
               select={handleDateSelect}        
               eventClick={handleEventClick}    
               eventsSet={handleEventsSet}      
               eventContent={renderEventContent}
               firstDay={1} // lunes
+              // Configuraciones adicionales para zona horaria
+              forceEventDuration={true}
+              eventDisplay="block"
+              displayEventTime={true}
+              eventTimeFormat={{
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+              }}
             />
           </div>
         </div>
@@ -207,5 +324,6 @@ const calendarEvents = useMemo(() => {
         </div>
       </aside>
     </div>
+    </>
   );
 }
