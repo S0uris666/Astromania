@@ -26,11 +26,17 @@ const getAllEvents = useCallback(async () => {
 
     console.log("[EV] raw axios data =", res.data);
     console.log("[EV] payload array? =", Array.isArray(payload), "length =", payload.length);
-    if (payload[0]) console.log("[EV] sample event =", payload[0]);
+    
+    if (payload[0]) {
+      console.log("[EV] sample event =", payload[0]);
+      console.log("[EV] sample startDateTime =", payload[0].startDateTime, "type:", typeof payload[0].startDateTime);
+      console.log("[EV] sample endDateTime =", payload[0].endDateTime, "type:", typeof payload[0].endDateTime);
+    }
 
     dispatch({ type: "GET_EVENTS", payload });
   } catch (error) {
     console.error("[EV] getAllEvents error:", error?.response?.data || error.message);
+    console.error("[EV] Error details:", error?.response || error);
     dispatch({ type: "GET_EVENTS", payload: [] });
   }
 }, []);
