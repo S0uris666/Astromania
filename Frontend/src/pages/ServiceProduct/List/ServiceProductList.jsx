@@ -1,14 +1,58 @@
 import { useContext, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import ServiceProductContext from "../../../context/serviceProducts/ServiceProductContext";
+import { UserContext } from "../../../context/user/UserContext";
 
 const currencyCLP = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" });
-
 const fmtPrice = (n) => (typeof n === "number" ? currencyCLP.format(n) : "A cotizar");
-
 const truncate = (s = "", n = 120) => (s.length > n ? s.slice(0, n) + "…" : s);
 
+// Placeholders
+const PLACEHOLDER_PRODUCT = "https://placehold.co/900x600?text=Producto";
+const PLACEHOLDER_SERVICE = "https://placehold.co/900x600?text=Servicio";
+
+// Si la imagen viene de Cloudinary, genera una miniatura optimizada 3:2
+const cloudinaryThumb = (urlOrId) => {
+  if (!urlOrId) return null;
+  // Si es una URL completa con "/upload/"
+  if (typeof urlOrId === "string" && urlOrId.includes("/upload/")) {
+    return urlOrId.replace("/upload/", "/upload/f_auto,q_auto,w_900,h_600,c_fill/");
+  }
+  // Si solo te llegara un public_id (no es tu caso habitual, pero lo soportamos)
+  const cloudName = import.meta.env.VITE_CLD_CLOUD_NAME;
+  if (cloudName) {
+    return `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_900,h_600,c_fill/${urlOrId}`;
+  }
+  return null;
+};
+
+// Obtiene src/alt considerando el nuevo esquema y compatibilidad retro
+const getCoverData = (sp) => {
+  // Nuevo esquema: [{ url, public_id, alt }]
+  const first = sp?.images?.[0];
+  if (first && (first.url || first.public_id)) {
+    const srcOptim = cloudinaryThumb(first.url || first.public_id);
+    const src = srcOptim || first.url || null;
+    const alt = first.alt || sp.title || "Imagen";
+    if (src) return { src, alt };
+  }
+
+  // Viejo esquema: images: [string]
+  if (Array.isArray(sp?.images) && typeof sp.images[0] === "string") {
+    const srcOptim = cloudinaryThumb(sp.images[0]);
+    const src = srcOptim || sp.images[0];
+    return { src, alt: sp.title || "Imagen" };
+  }
+
+  // Fallback por tipo
+  return {
+    src: sp?.type === "product" ? PLACEHOLDER_PRODUCT : PLACEHOLDER_SERVICE,
+    alt: sp?.title || "Sin imagen",
+  };
+};
+
 export const ServiceProductList = () => {
+  const { addToCart } = useContext(UserContext);
   const { serviceProduct = [], getSP } = useContext(ServiceProductContext);
 
   useEffect(() => { getSP(); }, [getSP]);
@@ -41,16 +85,12 @@ export const ServiceProductList = () => {
           {items.map((sp) => {
             const isProduct = sp.type === "product";
             const href = `/servicios-productos/${sp.slug || sp._id}`;
-            const cover =
-              sp.images?.[0] ||
-              (isProduct
-                ? "https://placehold.co/600x400?text=Producto"
-                : "https://placehold.co/600x400?text=Servicio");
+            const { src: coverSrc, alt: coverAlt } = getCoverData(sp);
 
             return (
               <div key={sp._id} className="card bg-neutral shadow-xl hover:shadow-2xl transition-shadow">
                 <figure className="aspect-[3/2] overflow-hidden">
-                  <img src={cover} alt={sp.title} className="w-full h-full object-cover" />
+                  <img src={coverSrc} alt={coverAlt} className="w-full h-full object-cover" />
                 </figure>
 
                 <div className="card-body">
@@ -58,10 +98,10 @@ export const ServiceProductList = () => {
                     <span className={`badge ${isProduct ? "badge-primary" : "badge-secondary"}`}>
                       {isProduct ? "Producto" : "Servicio"}
                     </span>
-
                   </div>
 
                   <h2 className="card-title mt-1">{sp.title}</h2>
+
                   {sp.shortDescription || sp.description ? (
                     <p className="text-sm text-base-content/80">
                       {truncate(sp.shortDescription || sp.description, 140)}
@@ -93,8 +133,12 @@ export const ServiceProductList = () => {
                       Ver más
                     </Link>
                     {isProduct && sp.stock > 0 && (
-                      <button type="button" className="btn btn-outline btn-sm">
-                        Agregar
+                      <button
+                        type="button"
+                        onClick={() => addToCart(sp)}
+                        className="btn btn-outline btn-sm"
+                      >
+                        Añadir al carrito
                       </button>
                     )}
                   </div>
