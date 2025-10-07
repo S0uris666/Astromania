@@ -1,18 +1,44 @@
-import { Preference } from "mercadopago";
+// services/payment.service.js
+import { Preference, Payment } from "mercadopago";
 import client from "../config/mercadoPago.js";
 
-const preference = new Preference(client);
-
 export const createPaymentPreference = async (preferenceData) => {
-  console.log("Token en service:", process.env.TEST_ACCESS_TOKEN);
+  const preference = new Preference(client);
   try {
-    console.log("Response from MercadoPago:", preferenceData);
-    const response = await preference.create({
-      body: preferenceData,
-    });
+    // Normaliza items (asegura números y CLP)
+    const items = (preferenceData.items || []).map(it => ({
+      title: String(it.title),
+      description: it.description ?? String(it.title),
+      quantity: Number.isInteger(it.quantity) ? it.quantity : Number(it.quantity || 1),
+      unit_price: Number(it.unit_price ?? it.price),
+      currency_id: it.currency_id || "CLP",
+    }));
 
-    return response;
+    const body = {
+      ...preferenceData,
+      items,
+        back_urls: {
+    success: process.env.MP_SUCCESS_URL,  // 👈 HTTPS público
+    failure: process.env.MP_FAILURE_URL,
+    pending: process.env.MP_PENDING_URL,
+  },
+      notification_url: process.env.MP_WEBHOOK_URL ,
+      auto_return: preferenceData.auto_return || "approved",
+    };
+
+    // token para verificar que existe
+
+
+    const response = await preference.create({ body });
+    return { id: response.id, init_point: response.init_point };
   } catch (error) {
-    throw new Error(error.message);
+    console.error("MP createPreference ERROR.message:", error?.message);
+    console.error("MP createPreference ERROR.cause:", error?.cause); 
+    throw error; 
   }
+};
+
+export const getPaymentById = async (paymentId) => {
+  const payment = new Payment(client);
+  return await payment.get({ id: paymentId });
 };
