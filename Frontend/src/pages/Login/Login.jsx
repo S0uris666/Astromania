@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useUser } from "../../context/user/UserContext.js";
 
 export function Login() {
-  const {loginUser} = useUser();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const next = new URLSearchParams(location.search).get("next");
+
+  const { loginUser } = useUser();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -22,24 +26,32 @@ export function Login() {
     setStatus("");
 
     try {
-      await loginUser(formData);
-      
-        setStatus("¡Estas dentro!");
-        setFormData({ email: "", password: "" });
-        setLoading(false);
-      
-    } catch (error) {
-  console.error(error);
+      const user = await loginUser(formData);
+      const role = user.role;
 
-  // si es un error del backend REVISAR
-  if (error.response && error.response.data && error.response.data.message) {
-    setStatus(error.response.data.message);
-  } else {
-    setStatus("Error al iniciar sesión, contraseña o usuario incorrecto");
-  }
-} finally {
-  setLoading(false);
-}
+      if (next && role !== "admin") navigate(next, { replace: true });
+      else if (role === "admin") navigate("/admin", { replace: true });
+      else navigate("/perfil", { replace: true });
+
+      setStatus("¡Estas dentro!");
+      setFormData({ email: "", password: "" });
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+
+      // si es un error del backend REVISAR
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setStatus(error.response.data.message);
+      } else {
+        setStatus("Error al iniciar sesión, contraseña o usuario incorrecto");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -96,9 +108,9 @@ export function Login() {
           {/* Texto para registrarse */}
           <p className="text-center mt-4 text-sm text-white">
             ¿No tienes una cuenta?{" "}
-              <Link to="/registro" className="text-secondary font-semibold">
-                Regístrate
-              </Link>
+            <Link to="/registro" className="text-secondary font-semibold">
+              Regístrate
+            </Link>
           </p>
         </form>
       </div>
