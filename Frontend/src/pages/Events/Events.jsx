@@ -6,41 +6,51 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
-
-
 import { DateTime } from "luxon";
 
 const TZ = "America/Santiago";
-const CLP = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" });
+const CLP = new Intl.NumberFormat("es-CL", {
+  style: "currency",
+  currency: "CLP",
+});
 
 const formatRange = (startISO, endISO) => {
   const s = DateTime.fromISO(startISO, { zone: TZ });
   const e = DateTime.fromISO(endISO, { zone: TZ });
   return s.hasSame(e, "day")
-    ? `${s.toFormat("dd LLL yyyy, HH:mm")} – ${e.toFormat("HH:mm")} (${s.offsetNameShort})`
-    : `${s.toFormat("dd LLL yyyy, HH:mm")} → ${e.toFormat("dd LLL yyyy, HH:mm")} (${s.offsetNameShort})`;
+    ? `${s.toFormat("dd LLL yyyy, HH:mm")} – ${e.toFormat("HH:mm")} (${
+        s.offsetNameShort
+      })`
+    : `${s.toFormat("dd LLL yyyy, HH:mm")} → ${e.toFormat(
+        "dd LLL yyyy, HH:mm"
+      )} (${s.offsetNameShort})`;
 };
 
-const statusBadge = (status) => (status === "published" ? "badge-success" : status === "cancelled" ? "badge-error" : "badge-ghost");
-
+const statusBadge = (status) =>
+  status === "published"
+    ? "badge-success"
+    : status === "cancelled"
+    ? "badge-error"
+    : "badge-ghost";
 
 function renderEventContent(arg) {
   // Extraer solo la hora del timeText (formato HH:MM)
-  const timeOnly = arg.timeText.split(' - ')[0] || arg.timeText;
+  const timeOnly = arg.timeText.split(" - ")[0] || arg.timeText;
   const event = arg.event.extendedProps.ev;
-  
+
   // Determinar las clases de color según el tipo de evento
-  let colorClasses = '';
+  let colorClasses = "";
   if (event?.isOnline) {
-    colorClasses = 'bg-gradient-to-r from-cyan-500 to-cyan-600';
+    colorClasses = "bg-gradient-to-r from-cyan-500 to-cyan-600";
   } else if (event?.requiresRegistration) {
-    colorClasses = 'bg-gradient-to-r from-amber-500 to-amber-600';
+    colorClasses = "bg-gradient-to-r from-amber-500 to-amber-600";
   } else {
-    colorClasses = 'bg-gradient-to-r from-purple-500 to-purple-600';
+    colorClasses = "bg-gradient-to-r from-purple-500 to-purple-600";
   }
-  
+
   return (
-    <div className={`
+    <div
+      className={`
       ${colorClasses}
       text-white 
       px-2.5 py-1 
@@ -59,7 +69,8 @@ function renderEventContent(arg) {
       hover:-translate-y-0.5 
       hover:scale-[1.02] 
       hover:shadow-lg
-    `}>
+    `}
+    >
       <span className="block leading-tight tracking-wide">{timeOnly}</span>
     </div>
   );
@@ -72,7 +83,9 @@ export function EventsCalendarPage() {
   const [selectedDateISO, setSelectedDateISO] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  useEffect(() => { getAllEvents(); }, [getAllEvents]);
+  useEffect(() => {
+    getAllEvents();
+  }, [getAllEvents]);
 
   // Datos de prueba para debugging (comentar cuando funcione la API)
   const testEvents = [
@@ -89,7 +102,7 @@ export function EventsCalendarPage() {
       requiresRegistration: true,
       price: 5000,
       capacity: 50,
-      tags: ["eclipse", "sol"]
+      tags: ["eclipse", "sol"],
     },
     {
       _id: "test2",
@@ -104,8 +117,8 @@ export function EventsCalendarPage() {
       requiresRegistration: false,
       price: 0,
       url: "https://example.com/luna",
-      tags: ["luna", "observación"]
-    }
+      tags: ["luna", "observación"],
+    },
   ];
 
   // Para debugging: usar datos de prueba si no hay eventos reales
@@ -119,56 +132,60 @@ export function EventsCalendarPage() {
   };
 
   // Procesamiento de eventos con debugging mejorado
-const calendarEvents = useMemo(() => {
-  console.log("[EV] Raw Event data:", eventsToUse);
-  
-  const mapped = (eventsToUse || [])
-    .filter(ev => {
-      const isValid = isISO(ev.startDateTime);
-      if (!isValid) {
-        console.warn("[EV] Fecha inválida detectada:", {
-          _id: ev._id,
+  const calendarEvents = useMemo(() => {
+    console.log("[EV] Raw Event data:", eventsToUse);
+
+    const mapped = (eventsToUse || [])
+      .filter((ev) => {
+        const isValid = isISO(ev.startDateTime);
+        if (!isValid) {
+          console.warn("[EV] Fecha inválida detectada:", {
+            _id: ev._id,
+            title: ev.title,
+            startDateTime: ev.startDateTime,
+            type: typeof ev.startDateTime,
+          });
+        }
+        return isValid;
+      })
+      .map((ev) => {
+        // Convertir fechas a zona horaria correcta
+        const startDT = DateTime.fromISO(ev.startDateTime, { zone: TZ });
+        const endDT = ev.endDateTime
+          ? DateTime.fromISO(ev.endDateTime, { zone: TZ })
+          : null;
+
+        console.log("[EV] Processing event:", {
           title: ev.title,
-          startDateTime: ev.startDateTime,
-          type: typeof ev.startDateTime
+          originalStart: ev.startDateTime,
+          processedStart: startDT.toISO(),
+          startValid: startDT.isValid,
+          timezone: startDT.zoneName,
+          offset: startDT.offset,
+          localTime: startDT.toFormat("dd/MM/yyyy HH:mm"),
         });
-      }
-      return isValid;
-    })
-    .map(ev => {
-      // Convertir fechas a zona horaria correcta
-      const startDT = DateTime.fromISO(ev.startDateTime, { zone: TZ });
-      const endDT = ev.endDateTime ? DateTime.fromISO(ev.endDateTime, { zone: TZ }) : null;
-      
-      console.log("[EV] Processing event:", {
-        title: ev.title,
-        originalStart: ev.startDateTime,
-        processedStart: startDT.toISO(),
-        startValid: startDT.isValid,
-        timezone: startDT.zoneName,
-        offset: startDT.offset,
-        localTime: startDT.toFormat("dd/MM/yyyy HH:mm")
+
+        return {
+          id: ev._id,
+          title: ev.title,
+          start: startDT.toISO(), // Usar ISO procesado con zona horaria
+          end: endDT ? endDT.toISO() : null,
+          extendedProps: { ev },
+        };
       });
 
-      return {
-        id: ev._id,
-        title: ev.title,
-        start: startDT.toISO(), // Usar ISO procesado con zona horaria
-        end: endDT ? endDT.toISO() : null,
-        extendedProps: { ev },
-      };
-    });
-
-  console.log("[EV] Final calendarEvents ->", mapped);
-  return mapped;
-}, [eventsToUse]);
+    console.log("[EV] Final calendarEvents ->", mapped);
+    return mapped;
+  }, [eventsToUse]);
 
   // Eventos del día seleccionado (para el panel)
   const dayEvents = useMemo(() => {
     if (!selectedDateISO) return [];
     const d = DateTime.fromISO(selectedDateISO, { zone: TZ });
     return (eventsToUse || [])
-      .filter((ev) => DateTime.fromISO(ev.startDateTime, { zone: TZ }).hasSame(d, "day"))
+      .filter((ev) =>
+        DateTime.fromISO(ev.startDateTime, { zone: TZ }).hasSame(d, "day")
+      )
       .sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
   }, [eventsToUse, selectedDateISO]);
 
@@ -184,8 +201,7 @@ const calendarEvents = useMemo(() => {
     setSelectedEvent(full);
   };
 
-  const handleEventsSet = () => {
-  };
+  const handleEventsSet = () => {};
 
   return (
     <>
@@ -205,125 +221,206 @@ const calendarEvents = useMemo(() => {
         }
       `}</style>
       <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 mt-20">
-      {/* Calendario */}
-      <section className="lg:col-span-2">
-        <div className="card bg-base-200 shadow-xl">
-          <div className="card-body">
-            <div className="flex items-center justify-between mb-2">
-              <h1 className="card-title text-2xl">Calendario de eventos Astronómicos</h1>
-              <label className="label cursor-pointer gap-2">
-                <span className="label-text">Mostrar fin de semana</span>
-                <input
-                  type="checkbox"
-                  className="toggle toggle-primary"
-                  checked={weekendsVisible}
-                  onChange={() => setWeekendsVisible((v) => !v)}
-                />
-              </label>
-            </div>
-
-            <FullCalendar
-              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              headerToolbar={{
-                left: "prev,next today",
-                center: "title",
-                right: "dayGridMonth,timeGridWeek,timeGridDay"
-              }}
-              initialView="dayGridMonth"
-              height="auto"
-              dayMaxEvents={true}
-              weekends={weekendsVisible}
-              selectable={true}
-              timeZone="America/Santiago"
-              locale="es"
-              selectMirror={true}
-              events={calendarEvents}
-              select={handleDateSelect}        
-              eventClick={handleEventClick}    
-              eventsSet={handleEventsSet}      
-              eventContent={renderEventContent}
-              firstDay={1} // lunes
-              // Configuraciones adicionales para zona horaria
-              forceEventDuration={true}
-              eventDisplay="block"
-              displayEventTime={true}
-              eventTimeFormat={{
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-              }}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Panel derecho */}
-      <aside className="lg:col-span-1">
-        <div className="card bg-base-200 shadow-xl sticky top-4">
-          <div className="card-body">
-            <div className="flex items-center justify-between">
-              <h2 className="card-title">Detalle del día</h2>
-              {selectedDateISO
-                ? <div className="badge badge-ghost">{DateTime.fromISO(selectedDateISO, { zone: TZ }).toFormat("dd LLL yyyy")}</div>
-                : <div className="badge badge-ghost">Selecciona un día</div>}
-            </div>
-
-            {!selectedDateISO ? (
-              <p className="text-base-content/70">Haz clic en una fecha para ver sus eventos.</p>
-            ) : dayEvents.length === 0 ? (
-              <div className="alert"><span>No hay eventos para este día.</span></div>
-            ) : (
-              <ul className="menu bg-base-100 rounded-box">
-                {dayEvents.map((ev) => {
-                  const active = selectedEvent?._id === ev._id;
-                  return (
-                    <li key={ev._id}>
-                      <button className={active ? "active" : ""} onClick={() => setSelectedEvent(ev)} title={ev.title}>
-                        <span className="font-medium">{ev.title}</span>
-                        <span className="ml-auto text-xs opacity-70">
-                          {DateTime.fromISO(ev.startDateTime, { zone: TZ }).toFormat("HH:mm")}
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-
-            {selectedEvent && (
-              <div className="mt-4 p-4 rounded-xl bg-base-100 border border-base-300">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className={`badge ${statusBadge(selectedEvent.status)}`}>{selectedEvent.status}</span>
-                  {selectedEvent.isOnline ? <span className="badge badge-info">Online</span> : <span className="badge badge-ghost">Presencial</span>}
-                  {selectedEvent.requiresRegistration && <span className="badge badge-warning">Inscripción</span>}
-                </div>
-
-                <h3 className="text-xl font-bold">{selectedEvent.title}</h3>
-                <p className="text-sm text-base-content/80 mt-1">{selectedEvent.description}</p>
-
-                <div className="mt-3 space-y-1 text-sm">
-                  <div><span className="font-semibold">Organiza:</span> {selectedEvent.organizer}</div>
-                  <div><span className="font-semibold">Lugar:</span> {selectedEvent.isOnline ? "Online" : selectedEvent.location}</div>
-                  <div><span className="font-semibold">Horario:</span> {formatRange(selectedEvent.startDateTime, selectedEvent.endDateTime)}</div>
-                  <div><span className="font-semibold">Precio:</span> {selectedEvent.price ? CLP.format(selectedEvent.price) : "Gratuito"}</div>
-                  {selectedEvent.capacity != null && <div><span className="font-semibold">Cupos:</span> {selectedEvent.capacity}</div>}
-                  {!!selectedEvent.tags?.length && (
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {selectedEvent.tags.map((t) => <span key={t} className="badge badge-ghost">{t}</span>)}
-                    </div>
-                  )}
-                  {selectedEvent.isOnline && selectedEvent.url && (
-                    <div className="pt-2">
-                      <a href={selectedEvent.url} target="_blank" rel="noreferrer" className="link link-primary">Ir al enlace del evento</a>
-                    </div>
-                  )}
-                </div>
+        {/* Calendario */}
+        <section className="lg:col-span-2">
+          <div className="card bg-base-200 shadow-xl">
+            <div className="card-body">
+              <div className="flex items-center justify-between mb-2">
+                <h1 className="card-title text-2xl">
+                  Calendario de eventos Astronómicos
+                </h1>
+                <label className="label cursor-pointer gap-2">
+                  <span className="label-text">Mostrar fin de semana</span>
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-primary"
+                    checked={weekendsVisible}
+                    onChange={() => setWeekendsVisible((v) => !v)}
+                  />
+                </label>
               </div>
-            )}
+
+              <FullCalendar
+                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                headerToolbar={{
+                  left: "prev,next today",
+                  center: "title",
+                  right: "dayGridMonth,timeGridWeek,timeGridDay",
+                }}
+                initialView="dayGridMonth"
+                height="auto"
+                dayMaxEvents={true}
+                weekends={weekendsVisible}
+                selectable={true}
+                timeZone="America/Santiago"
+                locale="es"
+                selectMirror={true}
+                events={calendarEvents}
+                select={handleDateSelect}
+                eventClick={handleEventClick}
+                eventsSet={handleEventsSet}
+                eventContent={renderEventContent}
+                firstDay={1} // lunes
+                // Configuraciones adicionales para zona horaria
+                forceEventDuration={true}
+                eventDisplay="block"
+                displayEventTime={true}
+                eventTimeFormat={{
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                }}
+              />
+            </div>
           </div>
-        </div>
-      </aside>
-    </div>
+        </section>
+
+        {/* Panel derecho */}
+        <aside className="lg:col-span-1">
+          <div className="card bg-base-200 shadow-xl sticky top-4">
+            <div className="card-body">
+              <div className="flex items-center justify-between">
+                <h2 className="card-title">Detalle del día</h2>
+                {selectedDateISO ? (
+                  <div className="badge badge-ghost">
+                    {DateTime.fromISO(selectedDateISO, { zone: TZ }).toFormat(
+                      "dd LLL yyyy"
+                    )}
+                  </div>
+                ) : (
+                  <div className="badge badge-ghost">Selecciona un día</div>
+                )}
+              </div>
+
+              {!selectedDateISO ? (
+                <p className="text-base-content/70">
+                  Haz clic en una fecha para ver sus eventos.
+                </p>
+              ) : dayEvents.length === 0 ? (
+                <div className="alert">
+                  <span>No hay eventos para este día.</span>
+                </div>
+              ) : (
+                <ul className="menu bg-base-100 rounded-box">
+                  {dayEvents.map((ev) => {
+                    const active = selectedEvent?._id === ev._id;
+                    return (
+                      <li key={ev._id}>
+                        <button
+                          className={active ? "active" : ""}
+                          onClick={() => setSelectedEvent(ev)}
+                          title={ev.title}
+                        >
+                          <span className="font-medium">{ev.title}</span>
+                          <span className="ml-auto text-xs opacity-70">
+                            {DateTime.fromISO(ev.startDateTime, {
+                              zone: TZ,
+                            }).toFormat("HH:mm")}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              {selectedEvent && (
+                <div className="mt-4 p-4 rounded-xl bg-base-100 border border-base-300">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className={`badge ${statusBadge(selectedEvent.status)}`}
+                    >
+                      {selectedEvent.status}
+                    </span>
+                    {selectedEvent.isOnline ? (
+                      <span className="badge badge-info">Online</span>
+                    ) : (
+                      <span className="badge badge-ghost">Presencial</span>
+                    )}
+                    {selectedEvent.requiresRegistration && (
+                      <span className="badge badge-warning">Inscripción</span>
+                    )}
+                  </div>
+
+                  <h3 className="text-xl font-bold">{selectedEvent.title}</h3>
+                  <p className="text-sm text-base-content/80 mt-1">
+                    {selectedEvent.description}
+                  </p>
+
+                  <div className="mt-3 space-y-1 text-sm">
+                    <div>
+                      <span className="font-semibold">Organiza:</span>{" "}
+                      {selectedEvent.organizer}
+                    </div>
+                    <div>
+                      <span className="font-semibold">Lugar:</span>{" "}
+                      {selectedEvent.isOnline
+                        ? "Online"
+                        : selectedEvent.location}
+                    </div>
+                    <div>
+                      <span className="font-semibold">Horario:</span>{" "}
+                      {formatRange(
+                        selectedEvent.startDateTime,
+                        selectedEvent.endDateTime
+                      )}
+                    </div>
+                    <div>
+                      <span className="font-semibold">Precio:</span>{" "}
+                      {selectedEvent.price
+                        ? CLP.format(selectedEvent.price)
+                        : "Gratuito"}
+                    </div>
+<div>
+  <span className="font-semibold">URL:</span>{" "}
+  {selectedEvent?.url ? (
+    <a
+      href={selectedEvent.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="link link-primary break-all"
+      title={selectedEvent.url}
+    >
+      Más información
+    </a>
+  ) : (
+    "No disponible"
+  )}
+</div>
+                    {selectedEvent.capacity != null && (
+                      <div>
+                        <span className="font-semibold">Cupos:</span>{" "}
+                        {selectedEvent.capacity}
+                      </div>
+                    )}
+                    {!!selectedEvent.tags?.length && (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {selectedEvent.tags.map((t) => (
+                          <span key={t} className="badge badge-ghost">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {selectedEvent.isOnline && selectedEvent.url && (
+                      <div className="pt-2">
+                        <a
+                          href={selectedEvent.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="link link-primary"
+                        >
+                          Ir al enlace del evento
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </aside>
+      </div>
     </>
   );
 }
