@@ -1,5 +1,15 @@
 import mongoose from "mongoose";
 
+const ImageSchema = new mongoose.Schema(
+  {
+    url: { type: String, required: true, trim: true },
+    public_id: { type: String, required: true, trim: true },
+    alt: { type: String, trim: true, default: "" },
+  },
+  { _id: false }
+);
+
+
 const ServiceProductItemSchema = new mongoose.Schema(
   {
     // Identificación básica
@@ -26,7 +36,7 @@ const ServiceProductItemSchema = new mongoose.Schema(
 
     // Entrega / formato (libre: "physical" | "onsite" | "digital"…)
     delivery: { type: String, trim: true },
-    images:   [{ type: String }],
+    images:   [ImageSchema],
 
     // Extras de servicios (si aplica)
     durationMinutes: { type: Number },
