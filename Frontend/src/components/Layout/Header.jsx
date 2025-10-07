@@ -10,7 +10,22 @@ export default function Header() {
   const cartRef = useRef(null);
   const navigate = useNavigate();
 
-  const { cart = [], clearCart, removeFromCart, authState } = useContext(UserContext);
+  const {
+    cart = [],
+    clearCart,
+    removeFromCart,
+    authState,
+    currentUser,
+  } = useContext(UserContext);
+
+  //destino segun rol
+
+  const accountPath = useMemo(() => {
+    if (!authState) return "/login";
+    const u = currentUser?.user || currentUser;
+    const role = (u?.role || "user").toLowerCase();
+    return role === "admin" ? "/admin" : "/perfil";
+  }, [authState, currentUser]);
 
   const qty = useMemo(
     () => cart.reduce((acc, it) => acc + Number(it.quantity || 0), 0),
@@ -18,12 +33,19 @@ export default function Header() {
   );
 
   const subtotal = useMemo(
-    () => cart.reduce((acc, it) => acc + Number(it.price || 0) * Number(it.quantity || 0), 0),
+    () =>
+      cart.reduce(
+        (acc, it) => acc + Number(it.price || 0) * Number(it.quantity || 0),
+        0
+      ),
     [cart]
   );
 
   const clp = (n) =>
-    new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(Number(n || 0));
+    new Intl.NumberFormat("es-CL", {
+      style: "currency",
+      currency: "CLP",
+    }).format(Number(n || 0));
 
   // scroll
   useEffect(() => {
@@ -61,16 +83,22 @@ export default function Header() {
     >
       {/* Barra móvil */}
       <div className="lg:hidden container mx-auto flex items-center justify-between h-16 px-4 relative">
-  <button
-    aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
-    onClick={() => setMenuOpen(!menuOpen)}
-    className={`z-[90] transition-opacity ${menuOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-  >
-    {/* ya no alternamos a <X />, dejamos siempre el ícono de menú */}
-    <Menu size={28} />
-  </button>
+        <button
+          aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+          onClick={() => setMenuOpen(!menuOpen)}
+          className={`z-[90] transition-opacity ${
+            menuOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+        >
+          {/* ya no alternamos a <X />, dejamos siempre el ícono de menú */}
+          <Menu size={28} />
+        </button>
 
-        <img src="/vite.svg" alt="Astromanía Logo" className="h-12 w-auto z-[70]" />
+        <img
+          src="/vite.svg"
+          alt="Astromanía Logo"
+          className="h-12 w-auto z-[70]"
+        />
 
         {/* Botón carrito móvil */}
         <div className="relative z-[80]" ref={cartRef}>
@@ -82,7 +110,9 @@ export default function Header() {
             <div className="indicator">
               <ShoppingCart className="w-6 h-6" />
               {qty > 0 && (
-                <span className="badge badge-primary badge-sm indicator-item">{qty}</span>
+                <span className="badge badge-primary badge-sm indicator-item">
+                  {qty}
+                </span>
               )}
             </div>
           </button>
@@ -118,20 +148,38 @@ export default function Header() {
 
           <div className="flex gap-4">
             <Drop label="Recursos">
-              <li><Link to="/recursos/literatura">Literatura Astronómica</Link></li>
-              <li><Link to="/recursos/musica">Música Astronómica</Link></li>
-              <li><Link to="/recursos/peliculas-series">Películas y series</Link></li>
-              <li><Link to="/recursos/sofware-y-apps">Software y apps</Link></li>
+              <li>
+                <Link to="/recursos/literatura">Literatura Astronómica</Link>
+              </li>
+              <li>
+                <Link to="/recursos/musica">Música Astronómica</Link>
+              </li>
+              <li>
+                <Link to="/recursos/peliculas-series">Películas y series</Link>
+              </li>
+              <li>
+                <Link to="/recursos/sofware-y-apps">Software y apps</Link>
+              </li>
             </Drop>
 
             <Drop label="Comunidad">
-              <li><Link to="/comunidad/astromania-responde">Astromanía responde</Link></li>
-              <li><Link to="/comunidad/podcast">Podcast</Link></li>
-              <li><Link to="/comunidad/galeria">Galería</Link></li>
+              <li>
+                <Link to="/comunidad/astromania-responde">
+                  Astromanía responde
+                </Link>
+              </li>
+              <li>
+                <Link to="/comunidad/podcast">Podcast</Link>
+              </li>
+              <li>
+                <Link to="/comunidad/galeria">Galería</Link>
+              </li>
             </Drop>
           </div>
 
-          <NavLink to="/servicios-productos-list">Servicios y Productos</NavLink>
+          <NavLink to="/servicios-productos-list">
+            Servicios y Productos
+          </NavLink>
           <NavLink to="/contacto">Contacto</NavLink>
           <NavLink to="/eventos">Eventos</NavLink>
         </nav>
@@ -146,7 +194,10 @@ export default function Header() {
             />
           </div>
 
-          <Link to={authState ? "/perfil" : "/login"} className="btn btn-secondary btn-sm text-white">
+          <Link
+            to={accountPath}
+            className="btn btn-secondary btn-sm text-white"
+          >
             {authState ? "Mi cuenta" : "Ingresa"}
           </Link>
 
@@ -160,7 +211,9 @@ export default function Header() {
               <div className="indicator">
                 <ShoppingCart className="w-6 h-6" />
                 {qty > 0 && (
-                  <span className="badge badge-primary badge-sm indicator-item">{qty}</span>
+                  <span className="badge badge-primary badge-sm indicator-item">
+                    {qty}
+                  </span>
                 )}
               </div>
             </button>
@@ -185,14 +238,19 @@ export default function Header() {
       {/* Overlay / menú móvil */}
       <div
         className={`lg:hidden fixed inset-0 z-[70] transition-all duration-300 ${
-          menuOpen ? "opacity-100 visible bg-black/90 backdrop-blur-lg" : "opacity-0 invisible"
+          menuOpen
+            ? "opacity-100 visible bg-black/90 backdrop-blur-lg"
+            : "opacity-0 invisible"
         }`}
         aria-hidden={!menuOpen}
         onClick={() => setMenuOpen(false)}
       >
         <button
           aria-label="Cerrar menú"
-          onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setMenuOpen(false);
+          }}
           className="absolute top-4 left-4 z-[120] p-2 rounded-full bg-white/10 hover:bg-white/20 transition"
         >
           <X size={28} className="text-white" />
@@ -210,14 +268,54 @@ export default function Header() {
             />
           </div>
 
-          <Link to="/" className="block text-xl" onClick={() => setMenuOpen(false)}>Inicio</Link>
-          <Link to="/nosotros" className="block text-xl" onClick={() => setMenuOpen(false)}>Nosotros</Link>
-          <Link to="/servicios-productos-list" className="block text-xl" onClick={() => setMenuOpen(false)}>Servicios y Productos</Link>
-          <Link to="/recursos" className="block text-xl" onClick={() => setMenuOpen(false)}>Recursos</Link>
-          <Link to="/comunidad" className="block text-xl" onClick={() => setMenuOpen(false)}>Comunidad</Link>
-          <Link to="/contacto" className="block text-xl" onClick={() => setMenuOpen(false)}>Contacto</Link>
+          <Link
+            to="/"
+            className="block text-xl"
+            onClick={() => setMenuOpen(false)}
+          >
+            Inicio
+          </Link>
+          <Link
+            to="/nosotros"
+            className="block text-xl"
+            onClick={() => setMenuOpen(false)}
+          >
+            Nosotros
+          </Link>
+          <Link
+            to="/servicios-productos-list"
+            className="block text-xl"
+            onClick={() => setMenuOpen(false)}
+          >
+            Servicios y Productos
+          </Link>
+          <Link
+            to="/recursos"
+            className="block text-xl"
+            onClick={() => setMenuOpen(false)}
+          >
+            Recursos
+          </Link>
+          <Link
+            to="/comunidad"
+            className="block text-xl"
+            onClick={() => setMenuOpen(false)}
+          >
+            Comunidad
+          </Link>
+          <Link
+            to="/contacto"
+            className="block text-xl"
+            onClick={() => setMenuOpen(false)}
+          >
+            Contacto
+          </Link>
 
-          <Link to="/reserva" className="block text-center btn btn-secondary text-white mt-6" onClick={() => setMenuOpen(false)}>
+          <Link
+            to="/reserva"
+            className="block text-center btn btn-secondary text-white mt-6"
+            onClick={() => setMenuOpen(false)}
+          >
             Reserva una visita
           </Link>
         </nav>
@@ -253,20 +351,27 @@ function Drop({ label, children }) {
         {label}
         <ChevronDown className="w-4 h-4 ml-2 transition-transform duration-300 rotate-90 group-hover:rotate-0" />
       </label>
-      <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-black/80 backdrop-blur-md rounded-box w-52 text-white mt-2">
+      <ul
+        tabIndex={0}
+        className="dropdown-content menu p-2 shadow bg-black/80 backdrop-blur-md rounded-box w-52 text-white mt-2"
+      >
         {children}
       </ul>
     </div>
   );
 }
 
-function MiniCart({ cart, clp, subtotal, removeFromCart, clearCart, goCheckout, authState }) {
+function MiniCart({
+  cart,
+  clp,
+  subtotal,
+  removeFromCart,
+  clearCart,
+  goCheckout,
+  authState,
+}) {
   if (!cart?.length) {
-    return (
-      <div className="p-4 text-sm opacity-80">
-        Tu carrito está vacío.
-      </div>
-    );
+    return <div className="p-4 text-sm opacity-80">Tu carrito está vacío.</div>;
   }
 
   return (
@@ -276,9 +381,15 @@ function MiniCart({ cart, clp, subtotal, removeFromCart, clearCart, goCheckout, 
           <li key={it._id} className="py-2 flex items-start gap-3">
             <div className="w-12 h-12 rounded bg-base-100/20 overflow-hidden flex-shrink-0">
               {it.image ? (
-                <img src={it.image} alt={it.title} className="w-full h-full object-cover" />
+                <img
+                  src={it.image}
+                  alt={it.title}
+                  className="w-full h-full object-cover"
+                />
               ) : (
-                <div className="w-full h-full grid place-items-center text-xs opacity-60">Img</div>
+                <div className="w-full h-full grid place-items-center text-xs opacity-60">
+                  Img
+                </div>
               )}
             </div>
             <div className="flex-1">
@@ -310,7 +421,10 @@ function MiniCart({ cart, clp, subtotal, removeFromCart, clearCart, goCheckout, 
         <button
           className="btn btn-primary btn-sm flex-1"
           onClick={goCheckout}
-          disabled={!authState && false /* permitimos ver /perfil; pago se bloquea ahí */}
+          disabled={
+            !authState &&
+            false /* permitimos ver /perfil; pago se bloquea ahí */
+          }
         >
           Ir a pagar
         </button>
