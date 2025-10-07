@@ -109,12 +109,11 @@ export const updateUser = async (req, res) => {
   }
 };
 
-
 export const verifyUser = async (req, res) => {
     
   try {
     const user = await User.findById(req.user.id).select("-password");
-    res.json({ usuario: user });
+    res.json({ user: user });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
     
