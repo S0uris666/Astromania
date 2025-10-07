@@ -81,7 +81,7 @@ export function Home() {
                   </h3>
                   <p className="text-gray-300 mb-4">{activity.description}</p>
                   <Link
-                    to={`/${activity.id}`}
+                    to={`/${activity.linkTo}`}
                     className="btn btn-galaxy btn-lg inline-block px-5 py-3 text-white font-semibold rounded-xl shadow-lg transition transform hover:scale-105 text-center"
                   >
                     {activity.cta}
