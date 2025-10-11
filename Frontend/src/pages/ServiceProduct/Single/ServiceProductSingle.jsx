@@ -10,54 +10,57 @@ const clp = (n) => (typeof n === "number" ? currencyCLP.format(n) : "A cotizar")
 const PLACEHOLDER_PRODUCT = "https://placehold.co/1200x800?text=Producto";
 const PLACEHOLDER_SERVICE = "https://placehold.co/1200x800?text=Servicio";
 
-// Mini helper: si es Cloudinary, devuelve variante optimizada
-const cloudinaryTransf = (urlOrId, { w = 1200, h = 800, fill = true } = {}) => {
+
+const cloudinaryContain = (urlOrId, { w = 1400, h = 1050 } = {}) => {
   if (!urlOrId) return null;
   // URL completa
   if (typeof urlOrId === "string" && urlOrId.includes("/upload/")) {
-    const mode = fill ? `c_fill,` : "";
-    return urlOrId.replace("/upload/", `/upload/f_auto,q_auto,${mode}w_${w},h_${h}/`);
+    return urlOrId.replace(
+      "/upload/",
+      `/upload/f_auto,q_auto,c_pad,b_auto:predominant,w_${w},h_${h}/`
+    );
   }
   // Public ID
   const cloud = import.meta.env.VITE_CLD_CLOUD_NAME;
   if (cloud) {
-    const mode = fill ? `c_fill,` : "";
-    return `https://res.cloudinary.com/${cloud}/image/upload/f_auto,q_auto,${mode}w_${w},h_${h}/${urlOrId}`;
+    return `https://res.cloudinary.com/${cloud}/image/upload/f_auto,q_auto,c_pad,b_auto:predominant,w_${w},h_${h}/${urlOrId}`;
   }
   return null;
 };
 
-// Devuelve [{src, alt}] a partir del esquema nuevo o antiguo
+// Normaliza imágenes a [{src, alt}]
 const normalizeImages = (sp) => {
   const imgs = sp?.images ?? [];
-  if (!imgs.length) {
-    return [{
-      src: sp?.type === "product" ? PLACEHOLDER_PRODUCT : PLACEHOLDER_SERVICE,
-      alt: sp?.title || "Sin imagen",
-    }];
-  }
-  // nuevo esquema
+  const fallback = {
+    src: sp?.type === "product" ? PLACEHOLDER_PRODUCT : PLACEHOLDER_SERVICE,
+    alt: sp?.title || "Sin imagen",
+  };
+
+  if (!imgs.length) return [fallback];
+
+  // Esquema nuevo
   if (typeof imgs[0] === "object") {
     return imgs
       .map((im) => {
-        const base = im?.url || im?.public_id || null;
-        const src = cloudinaryTransf(base, { w: 1200, h: 800, fill: true }) || base;
-        return src ? { src, alt: im?.alt || sp?.title || "Imagen" } : null;
+        const base = im?.url || im?.public_id;
+        if (!base) return null;
+        const src = cloudinaryContain(base) || base;
+        return { src, alt: im?.alt || sp?.title || "Imagen" };
       })
       .filter(Boolean);
   }
-  // antiguo: strings
+
+  // Esquema antiguo: strings
   return imgs
     .map((s) => {
-      const src = cloudinaryTransf(s, { w: 1200, h: 800, fill: true }) || s;
+      const src = cloudinaryContain(s) || s;
       return { src, alt: sp?.title || "Imagen" };
     })
     .filter(Boolean);
 };
 
-// Miniaturas
-const thumbSrc = (srcOrPublicId) =>
-  cloudinaryTransf(srcOrPublicId, { w: 160, h: 160, fill: true }) || srcOrPublicId;
+// Miniaturas cuadradas (también contenidas)
+const thumbContain = (srcOrId) => cloudinaryContain(srcOrId, { w: 360, h: 360 }) || srcOrId;
 
 export const ServiceProductSingle = () => {
   const { slug: paramSlugOrId } = useParams();
@@ -67,29 +70,25 @@ export const ServiceProductSingle = () => {
   const { addToCart } = useContext(UserContext);
   const { serviceProduct = [], getSP } = useContext(ServiceProductContext);
 
-  // Preferimos el item del state (viene fresco desde la lista)
   const spFromState = location?.state?.serviceProduct || null;
 
   const [selected, setSelected] = useState(0);
   const [loading, setLoading] = useState(!spFromState);
 
-  // Asegura catálogo cargado cuando entramos directo por URL
   useEffect(() => {
     let mounted = true;
     (async () => {
-      if (!spFromState) {
-        await getSP();
-      }
+      if (!spFromState) await getSP();
       if (mounted) setLoading(false);
     })();
-    return () => (mounted = false);
+    return () => {
+      mounted = false;
+    };
   }, [spFromState, getSP]);
 
-  // Busca por slug o id si no vino por state
   const sp = useMemo(() => {
     if (spFromState) return spFromState;
     if (!serviceProduct?.length) return null;
-    // match por slug o _id
     return (
       serviceProduct.find((p) => p.slug === paramSlugOrId) ||
       serviceProduct.find((p) => p._id === paramSlugOrId) ||
@@ -97,13 +96,12 @@ export const ServiceProductSingle = () => {
     );
   }, [spFromState, serviceProduct, paramSlugOrId]);
 
-  // loading / not found
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mt-15 grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="card bg-base-200 h-96 animate-pulse" />
-          <div className="space-y-3">
+        <div className="mt-15 grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <div className="rounded-2xl border border-base-300 bg-base-200 h-[480px] animate-pulse" />
+          <div className="space-y-4">
             <div className="h-8 w-2/3 bg-base-200 rounded" />
             <div className="h-4 w-3/4 bg-base-200 rounded" />
             <div className="h-4 w-1/2 bg-base-200 rounded" />
@@ -128,7 +126,7 @@ export const ServiceProductSingle = () => {
   const imgs = normalizeImages(sp);
   const main = imgs[selected] || imgs[0];
   const isProduct = sp.type === "product";
-  const hasStock = !isProduct || (Number(sp.stock) > 0);
+  const hasStock = !isProduct || Number(sp.stock) > 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -141,33 +139,45 @@ export const ServiceProductSingle = () => {
         </ul>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Galería */}
-        <section className="space-y-3">
-          <figure className="aspect-[3/2] bg-base-200 rounded-2xl overflow-hidden">
-            <img
-              src={main.src}
-              alt={main.alt}
-              className="w-full h-full object-cover"
-              loading="eager"
-            />
+        <section className="space-y-4">
+          {/* Marco limpio y contenido sin recorte */}
+          <figure className="relative rounded-2xl border border-base-300 bg-base-200/70 overflow-hidden">
+            <div className="aspect-[4/3] w-full grid place-items-center">
+              <img
+                src={main.src}
+                alt={main.alt}
+                className="max-w-full max-h-full object-contain"
+                loading="eager"
+              />
+            </div>
+            <div className="absolute inset-x-0 top-0 h-px bg-base-100/20" />
           </figure>
 
+          {/* Miniaturas */}
           {imgs.length > 1 && (
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {imgs.map((im, i) => (
                 <button
                   key={i}
                   type="button"
-                  className={`rounded-xl overflow-hidden border ${i === selected ? "border-primary" : "border-base-300"}`}
                   onClick={() => setSelected(i)}
+                  className={[
+                    "rounded-xl overflow-hidden border transition-all",
+                    i === selected
+                      ? "border-primary ring-2 ring-primary/20"
+                      : "border-base-300 hover:border-base-200"
+                  ].join(" ")}
                 >
-                  <img
-                    src={thumbSrc(im.src)}
-                    alt={im.alt}
-                    className="w-full h-full object-cover aspect-square"
-                    loading="lazy"
-                  />
+                  <div className="aspect-square bg-base-200 grid place-items-center">
+                    <img
+                      src={thumbContain(im.src)}
+                      alt={im.alt}
+                      className="max-w-full max-h-full object-contain"
+                      loading="lazy"
+                    />
+                  </div>
                 </button>
               ))}
             </div>
@@ -176,27 +186,29 @@ export const ServiceProductSingle = () => {
 
         {/* Info */}
         <section>
-          <h1 className="text-3xl font-bold">{sp.title}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{sp.title}</h1>
 
           <div className="mt-2 flex items-center gap-2">
-            <span className={`badge ${isProduct ? "badge-primary" : "badge-secondary"}`}>
+            <span
+              className={`badge ${isProduct ? "badge-primary/90" : "badge-secondary/90"} font-medium`}
+            >
               {isProduct ? "Producto" : "Servicio"}
             </span>
             {isProduct && (
-              <span className={`badge ${hasStock ? "badge-success" : "badge-error"}`}>
+              <span className={`badge ${hasStock ? "badge-success/90" : "badge-error/90"}`}>
                 {hasStock ? `Stock: ${sp.stock}` : "Sin stock"}
               </span>
             )}
           </div>
 
           {/* Precio */}
-          <div className="mt-4 text-2xl font-semibold">
+          <div className="mt-5 text-3xl font-semibold tracking-tight">
             {isProduct ? clp(sp.price) : (sp.price ? clp(sp.price) : "A cotizar")}
           </div>
 
           {/* Descripciones */}
           {sp.shortDescription && (
-            <p className="mt-3 text-base-content/80">{sp.shortDescription}</p>
+            <p className="mt-4 text-base-content/80 leading-relaxed">{sp.shortDescription}</p>
           )}
           {sp.description && (
             <div className="mt-3 prose prose-sm max-w-none text-base-content/90 whitespace-pre-line">
@@ -206,7 +218,7 @@ export const ServiceProductSingle = () => {
 
           {/* Tags */}
           {!!sp.tags?.length && (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-5 flex flex-wrap gap-2">
               {sp.tags.map((t) => (
                 <span key={t} className="badge badge-ghost">#{t}</span>
               ))}
@@ -214,7 +226,7 @@ export const ServiceProductSingle = () => {
           )}
 
           {/* Acciones */}
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-7 flex flex-wrap gap-3">
             {isProduct ? (
               <button
                 className="btn btn-primary"
@@ -225,24 +237,18 @@ export const ServiceProductSingle = () => {
                 Añadir al carrito
               </button>
             ) : (
-              <>
-                {/* Para servicios puedes linkear a reserva/contacto */}
-                <Link to="/contacto" className="btn btn-primary">
-                  Agendar / Consultar
-                </Link>
-              </>
+              <Link to="/contacto" className="btn btn-primary">
+                Agendar / Consultar
+              </Link>
             )}
 
-            <button
-              className="btn btn-ghost"
-              onClick={() => navigate(-1)}
-            >
+            <button className="btn btn-ghost" onClick={() => navigate(-1)}>
               Volver
             </button>
           </div>
 
           {/* Metadatos opcionales */}
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             {sp.category && (
               <div><span className="opacity-60">Categoría: </span>{sp.category}</div>
             )}

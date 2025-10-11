@@ -1,12 +1,16 @@
 import { useReducer, useEffect } from "react";
 import UserReducer from "./UserReducer";
 import { UserContext } from "./UserContext";
+import {getHttpErrorMessage} from "../../utils/httpError.js";
+
 import {
   registerRequest,
   loginRequest,
   verifyRequest,
   updateRequest,
   logoutRequest,
+  apiGetAllUsersAdmin,
+  apiPromoteToSuperuser,
 } from "../../api/auth";
 
 const STORAGE_KEY = "astromania_cart";
@@ -22,6 +26,12 @@ const UserState = (props) => {
     },
     cart: [],
     authState: false,
+    adminUsers: {
+    list: [],
+    total: 0,
+    page: 1,
+    pages: 1,
+  },
   };
 
   const [globalState, dispatch] = useReducer(UserReducer, initialState);
@@ -54,19 +64,21 @@ const UserState = (props) => {
   const registerUser = async (form) => {
     try {
       const response = await registerRequest(form);
-      console.log(response);
+      
 
       dispatch({
         type: "REGISTRO_EXITOSO",
         payload: response.data,
       });
 
-      return true;
+      return response.data;
     } catch (error) {
-      console.error(error);
-      return false;
-    }
-  };
+  const msg = getHttpErrorMessage(error, "Error al registrarse, intenta de nuevo", {
+    fieldLabels: { password: "Contraseña", email: "Correo", username: "Nombre de usuario" },
+    maxIssues: 2, // si quieres mostrar hasta 2 mensajes
+  });
+  throw new Error(msg);
+}}
 
   const loginUser = async (form) => {
     try {
@@ -139,6 +151,25 @@ const UserState = (props) => {
 
   const clearCart = () => dispatch({ type: "CART_CLEAR" });
 
+
+  // ================== ADMIN USERS ==================
+  const getAllUsersAdmin = async (params = {}) => {
+  const res = await apiGetAllUsersAdmin(params);
+  // res esperado: { data, page, limit, total, pages }
+  dispatch({ type: "ADMIN_USERS_SET", payload: res.data || res });
+  return res.data || res;
+};
+
+const promoteUserToSuperuser = async (id) => {
+  const res = await apiPromoteToSuperuser(id);
+  // si tu backend devuelve { user: {...} }, dispara la acción local
+  const updatedUser = res.user || res.data?.user || null;
+  if (updatedUser) {
+    dispatch({ type: "ADMIN_USER_PROMOTED", payload: updatedUser });
+  }
+  return res;
+};
+
   return (
     <UserContext.Provider
       value={{
@@ -154,6 +185,10 @@ const UserState = (props) => {
         removeFromCart,
         setQty,
         clearCart,
+        // Admin Users
+        adminUsers: globalState.adminUsers,
+        getAllUsersAdmin,
+        promoteUserToSuperuser,
       }}
     >
       {props.children}

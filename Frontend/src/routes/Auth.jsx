@@ -12,11 +12,16 @@ export default function AuthRoute({ component: Component }) {
     })();
   }, []);
 
-  if (checking) return null; 
+  if (checking) return null;
 
   if (authState && currentUser) {
-    const role = (currentUser.role || "").toLowerCase();
-    return <Navigate replace to={role === "admin" ? "/admin" : "/perfil"} />;
+    const role = String(currentUser.role || "").toLowerCase().trim();
+    return (
+      <Navigate
+        replace
+        to={role === "admin" ? "/admin" : role === "superuser" ? "/perfilsuperuser" : "/perfil"}
+      />
+    );
   }
 
   return <Component />;

@@ -45,6 +45,14 @@ export default function PerfilAdmin() {
               >
                 Nuevo 
               </Link>
+
+                            <Link
+                to="/admin/productos/seleccionar"
+                className="btn btn-primary"
+                state={{ presetType: "product" }}
+              >
+                Editar o borrar
+              </Link>
             </div>
           </div>
         </div>
@@ -66,9 +74,30 @@ export default function PerfilAdmin() {
               <Link to="/admin/eventos/nuevo" className="btn btn-accent">
                 Nuevo evento
               </Link>
+                            <Link to="/admin/eventos/editar" className="btn btn-accent">
+                Editar o borrar
+              </Link>
             </div>
           </div>
         </div>
+
+        {/* Gestionar Usuarios */}
+<div className="card bg-base-200 shadow-md hover:shadow-lg transition-shadow">
+  <div className="card-body">
+    <div className="flex items-center justify-between">
+      <h2 className="card-title">Gestionar Usuarios</h2>
+      <span className="badge badge-secondary">Roles</span>
+    </div>
+    <p className="text-sm text-base-content/70">
+      Lista usuarios y promueve el rol de <b>user</b> a <b>superuser</b>.
+    </p>
+    <div className="card-actions justify-end">
+      <Link to="/admin/usuarios" className="btn btn-secondary">
+        Abrir
+      </Link>
+    </div>
+  </div>
+</div>
       </section>
                     {authState && (
           <button

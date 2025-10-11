@@ -1,6 +1,6 @@
 import ServiceProductItem from "../models/ServiceProduct.model.js";
-import slugify from "slugify"
-import {v2 as cloudinary} from "cloudinary"
+import slugify from "slugify";
+import { v2 as cloudinary } from "cloudinary";
 
 
 export const getAllServiceProducts = async (req, res) => {
@@ -39,6 +39,24 @@ const toNum = (v, def = undefined) => {
   if (v === undefined || v === null || v === "") return def;
   const n = Number(v);
   return Number.isFinite(n) ? n : def;
+};
+
+// Extrae id de usuario
+const getUserId = (u) => u?.id || u?._id || u?.userId || null;
+
+// Extrae id de propietario del documento
+const getOwnerId = (doc) =>
+  doc?.createdBy?._id || doc?.createdBy || doc?.owner?._id || doc?.owner || doc?.user?._id || doc?.user || null;
+
+// Verifica si el usuario puede editar/eliminar el recurso
+// Nota: los endpoints ya están protegidos por authRol("admin");
+
+const canEdit = (doc, user) => {
+  const role = String(user?.role || "").toLowerCase();
+  if (role === "admin") return true;
+  const ownerId = getOwnerId(doc);
+  const uid = getUserId(user);
+  return ownerId && uid && String(ownerId) === String(uid);
 };
 
 // Sube una imagen (buffer) a Cloudinary
@@ -119,16 +137,6 @@ const buildPayload = ({ body, images, userId }) => {
   return payload;
 };
 
-/** **********************
- * Controllers
- *************************/
-
-/**
- * POST /api/service-products
- * multipart/form-data
- *  - images[]  (archivos)
- *  - otros campos de texto
- */
 export const createServiceProduct = async (req, res) => {
   const uploadedIds = []; // para cleanup si algo falla
   try {
@@ -173,3 +181,118 @@ export const createServiceProduct = async (req, res) => {
   }
 };
 
+export const updateServiceProduct = async (req, res) => {
+  const uploadedIds = []; // para revertir si algo falla
+  try {
+    const { id } = req.params;
+
+    const doc = await ServiceProductItem.findById(id);
+    if (!doc) return res.status(404).json({ message: "Producto/Servicio no encontrado" });
+
+    // permisos (opcional, quítalo si no usas auth)
+    if (!canEdit(doc, req.user)) {
+      return res.status(403).json({ message: "No tienes permisos para editar este recurso" });
+    }
+
+    // 1) Subir nuevas imágenes
+    const files = req.files || [];
+    const newImages = [];
+    for (const f of files) {
+      const img = await uploadToCloudinary(f, "service-products");
+      newImages.push(img);
+      uploadedIds.push(img.public_id);
+    }
+
+    // 2) Remover imágenes antiguas si se pide
+    const removePublicIds = parseJSON(req.body?.removePublicIds, []);
+    const prevImages = Array.isArray(doc.images) ? [...doc.images] : [];
+    let images = prevImages.filter(
+      (img) => !removePublicIds.includes(img.public_id)
+    );
+    // concatenar nuevas (sin alt o puedes aceptar "alts" como en create)
+    images = images.concat(
+      newImages.map((img) => ({ url: img.url, public_id: img.public_id, alt: "" }))
+    );
+
+    // 3) Construir payload parcial (no pisar con undefined)
+    const title = normText(req.body?.title);
+    const payload = {
+      title,
+      slug:
+        normText(req.body?.slug) ||
+        (title ? slugify(title, { lower: true, strict: true }) : doc.slug),
+
+      type: normText(req.body?.type) ?? doc.type,
+      category: normText(req.body?.category) ?? doc.category,
+      shortDescription: normText(req.body?.shortDescription) ?? doc.shortDescription,
+      description: normText(req.body?.description) ?? doc.description,
+
+      price: toNum(req.body?.price, doc.price),
+      currency: normText(req.body?.currency) ?? (doc.currency || "CLP"),
+      active: toBool(req.body?.active, doc.active ?? true),
+
+      stock: toNum(req.body?.stock, doc.stock),
+
+      delivery: normText(req.body?.delivery) ?? doc.delivery,
+
+      durationMinutes: toNum(req.body?.durationMinutes, doc.durationMinutes),
+      capacity: toNum(req.body?.capacity, doc.capacity),
+
+      // arrays desde JSON string (si no vienen, mantenemos las previas)
+      locations: parseJSON(req.body?.locations, doc.locations || []),
+      tags: parseJSON(req.body?.tags, doc.tags || []),
+
+      mpMetadata: parseJSON(req.body?.mpMetadata, doc.mpMetadata),
+
+      images,
+    };
+
+    // limpiar undefined para no sobreescribir con undefined
+    Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
+
+    const updated = await ServiceProductItem.findByIdAndUpdate(id, payload, {
+      new: true,
+      runValidators: true,
+    });
+
+    // 4) Limpiar en Cloudinary las imágenes removidas
+    if (Array.isArray(removePublicIds) && removePublicIds.length) {
+      await cleanupCloudinary(removePublicIds);
+    }
+
+    return res.status(200).json(updated);
+  } catch (err) {
+    // revertir imágenes recién subidas si falló algo
+    await cleanupCloudinary(uploadedIds);
+    console.error("updateServiceProduct error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+export const deleteServiceProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const doc = await ServiceProductItem.findById(id);
+    if (!doc) return res.status(404).json({ message: "Producto/Servicio no encontrado" });
+
+    // permisos (opcional, quítalo si no usas auth)
+    if (!canEdit(doc, req.user)) {
+      return res.status(403).json({ message: "No tienes permisos para eliminar este recurso" });
+    }
+
+    // borra doc
+    await ServiceProductItem.findByIdAndDelete(id);
+
+    // borra imágenes en Cloudinary
+    const publicIds = (doc.images || []).map((i) => i.public_id).filter(Boolean);
+    await cleanupCloudinary(publicIds);
+
+    return res.status(200).json({ message: "Eliminado correctamente" });
+  } catch (err) {
+    console.error("deleteServiceProduct error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};

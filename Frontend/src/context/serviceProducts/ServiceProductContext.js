@@ -1,4 +1,10 @@
-import { createContext } from "react";
-const ServiceProductContext = createContext();
+import { createContext, useContext } from "react";
 
-export default ServiceProductContext;
+const ServiceProductsContext = createContext(null);
+export default ServiceProductsContext;
+
+export function useServiceProducts() {
+  const ctx = useContext(ServiceProductsContext);
+  if (!ctx) throw new Error("useServiceProducts debe usarse dentro de <ServiceProductsState>");
+  return ctx;
+}

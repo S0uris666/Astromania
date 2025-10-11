@@ -2,9 +2,28 @@ import Event from "../models/Event.model.js";
 
 export const getAllEvents = async (req, res) => {
   try {
-    const events = await Event.find({createdBy:req.user.id});
-    res.json(events);
+    const role = String(req.user?.role || "").toLowerCase();
+    const isAdmin = role === "admin";
+    const isSuper = role === "superuser";
+
+    // filtro principal: admin ve todo; otros solo propios
+    const baseFilter = isAdmin ? {} : { createdBy: req.user.id };
+
+    // filtro opcional por status ?status=published|draft|cancelled
+    const { status } = req.query;
+    const filter = { ...baseFilter };
+    if (status && ["published", "draft", "cancelled"].includes(status)) {
+      filter.status = status;
+    }
+
+    // trae todo (published/draft/cancelled según filtro)
+    const events = await Event.find(filter)
+      .sort({ startDateTime: 1 })                 // o { createdAt: -1 }
+      .populate({ path: "createdBy", select: "username email role" }); // opcional
+
+    res.status(200).json(events);
   } catch (error) {
+    console.error("getAllEvents error:", error);
     res.status(500).json({ error: "Error al obtener los eventos" });
   }
 };

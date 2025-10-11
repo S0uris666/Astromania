@@ -20,12 +20,18 @@ export default function Header() {
 
   //destino segun rol
 
-  const accountPath = useMemo(() => {
-    if (!authState) return "/login";
-    const u = currentUser?.user || currentUser;
-    const role = (u?.role || "user").toLowerCase();
-    return role === "admin" ? "/admin" : "/perfil";
-  }, [authState, currentUser]);
+const accountPath = useMemo(() => {
+  if (!authState) return "/login";
+
+  
+  const u = currentUser?.user ?? currentUser;
+
+  const role = String(u?.role || "").toLowerCase().trim();
+
+  if (role === "admin") return "/admin";
+  if (role === "superuser") return "/perfilsuperuser";
+  return "/perfil";
+}, [authState, currentUser]);
 
   const qty = useMemo(
     () => cart.reduce((acc, it) => acc + Number(it.quantity || 0), 0),
@@ -312,7 +318,7 @@ export default function Header() {
           </Link>
 
           <Link
-            to="/reserva"
+            to="/contacto"
             className="block text-center btn btn-secondary text-white mt-6"
             onClick={() => setMenuOpen(false)}
           >

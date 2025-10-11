@@ -79,6 +79,36 @@ const UserReducer = (globalState, action) => {
 
     default:
       return globalState;
+
+    /* ------------ ADMIN USERS ------------ */
+    case "ADMIN_USERS_SET":
+      return {
+        ...globalState,
+        adminUsers: {
+          list: action.payload.users || [],
+          total: action.payload.total || 0,
+          page: action.payload.page || 1,
+          pages: action.payload.pages || 1,
+        },
+      };
+
+      case "ADMIN_USER_PROMOTED": {
+  const updated = (globalState.adminUsers.list || []).map(u =>
+    u._id === action.payload._id ? { ...u, role: "superuser" } : u
+  );
+  return {
+    ...globalState,
+    adminUsers: {
+      ...globalState.adminUsers,
+      list: updated,
+    },
+  };
+}
+
+      
+
+
+
   }
 };
 

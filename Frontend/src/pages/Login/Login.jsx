@@ -28,10 +28,15 @@ export function Login() {
     try {
       const user = await loginUser(formData);
       const role = user.role;
-
-      if (next && role !== "admin") navigate(next, { replace: true });
-      else if (role === "admin") navigate("/admin", { replace: true });
-      else navigate("/perfil", { replace: true });
+      if (next && !["admin", "superuser"].includes(role)) {
+        navigate(next, { replace: true });
+      } else if (role === "admin") {
+        navigate("/admin", { replace: true });
+      } else if (role === "superuser") {
+        navigate("/perfilsuperuser", { replace: true });
+      } else {
+        navigate("/perfil", { replace: true });
+      }
 
       setStatus("¡Estas dentro!");
       setFormData({ email: "", password: "" });

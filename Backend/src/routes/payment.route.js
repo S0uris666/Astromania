@@ -1,5 +1,5 @@
 import express from "express";
-import { createPreference, testPreference, getStatus,successReturn,failureReturn,
+import { createPreference, getStatus,successReturn,failureReturn,
   pendingReturn, webhook
  } from "../controllers/payment.controller.js";
 
@@ -8,7 +8,7 @@ const paymentRouter = express.Router();
 
 paymentRouter.post("/create_preference", createPreference);//http://localhost:3000/api/payments/create_preference
  
-paymentRouter.get("/test_preference", testPreference);//http://localhost:3000/api/payments/test_preference
+
 
 
 paymentRouter.get("/status/:paymentId", getStatus); //http://localhost:3000/api/payments/status/:paymentId

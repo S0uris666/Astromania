@@ -23,10 +23,18 @@ import PaymentProvider from "./context/payment/paymentState.jsx";
 import { Perfil } from "./pages/Perfil/Perfil.jsx";
 import PrivateRoute from "./routes/Private.jsx";
 import AuthRoute from "./routes/Auth.jsx";
-import AdminRoute from "./routes/AdminRoute.jsx";
+import {AdminRoute} from "./routes/AdminRoute.jsx";
 import  PerfilAdmin  from "./pages/Admin/PerfilAdmin.jsx";
-import { CrearProductos } from "./pages/Admin/Crearproductos.jsx";
-import { CrearEventos } from "./pages/Admin/CrearEventos.jsx";
+import { CrearProductos } from "./pages/ServiceProduct/Crearproductos.jsx";
+import { CrearEventos } from "./pages/Events/CrearEventos.jsx";
+import {SuperUserRoute} from "./routes/SuperUserRoute.jsx";
+import { SuperUserPerfil } from "./pages/Perfil/SuperUserPerfil.jsx";
+import { AdminUsers } from "./pages/Admin/AdminUsers.jsx";
+import {AdminoSuperuserRoute} from "./routes/AdminoSuperuserRoute.jsx";
+import { EditarEventos } from "./pages/Events/EditarEventos.jsx";
+import { Editar } from "./pages/Events/Editar.jsx";
+import { EditarProductos } from "./pages/ServiceProduct/EditarProductos.jsx";
+import { SeleccionProductos } from "./pages/ServiceProduct/SeleccionProductos.jsx";
 // Subpáginas "Nosotros"
 // Subpáginas "Actividades y Servicios"
 // Subpáginas "Recursos"
@@ -62,12 +70,23 @@ export default function AppRouter() {
                     path="login"
                     element={<AuthRoute component={Login} />}
                   />
-                  <Route path="/registro" element={<Registro />} />
+                  <Route path="/registro" element={<AuthRoute component={Registro} />} />
+                  
                   <Route
                     path="perfil"
                     element={<PrivateRoute component={Perfil} />}
                   />
+                  <Route path="perfilsuperuser" element={<SuperUserRoute component={SuperUserPerfil} />} />
+
                   <Route path="/eventos" element={<EventsCalendarPage />} />
+
+                  {/* Rutas de Admin */}
+                  <Route path="/admin/usuarios" element={<AdminRoute component={AdminUsers} />} />
+                  <Route path="/admin/eventos/editar" element={<AdminoSuperuserRoute component={EditarEventos} />} />
+                  <Route path="/admin/eventos/editar/:id" element={<AdminoSuperuserRoute component={Editar} />} />
+                  <Route path="/admin/productos/editar/:id" element={<AdminRoute component={EditarProductos} />} />
+                  <Route path="/admin/productos/seleccionar" element={<AdminRoute component={SeleccionProductos} />} />
+
 
                   <Route
                     path="/admin/productos/nuevo"
@@ -75,8 +94,10 @@ export default function AppRouter() {
                   />
                                     <Route
                     path="/admin/eventos/nuevo"
-                    element={<AdminRoute component={CrearEventos} />}
+                    element={<AdminoSuperuserRoute component={CrearEventos} />}
                   />
+
+
                                     <Route
                     path="/admin"
                     element={<AdminRoute component={PerfilAdmin} />}

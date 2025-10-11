@@ -1,11 +1,29 @@
-import { useState, useMemo } from "react";
-import { createEvent } from "../../api/auth";
 
-// convierte 'YYYY-MM-DDTHH:mm' (local) a ISO real
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { useEvents } from "../../context/events/eventsContext";
+
+// Helpers de fecha
 const toISO = (localDt) => (localDt ? new Date(localDt).toISOString() : null);
+const toLocalInput = (iso) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
 
+export function Editar() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { PrivateEvents, getPrivateEvents, updateOneEvent } = useEvents();
 
-export function CrearEventos() {
+  // Buscar el evento en store
+  const current = useMemo(() => {
+    const list = Array.isArray(PrivateEvents) ? PrivateEvents : [];
+    return list.find((e) => (e._id || e.id) === id) || null;
+  }, [PrivateEvents, id]);
+
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -18,125 +36,133 @@ export function CrearEventos() {
     capacity: "",
     tags: "",
     isOnline: false,
-    url: "",                
+    url: "",
     status: "draft",
   });
-
-  const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
 
-  const durationMins = useMemo(() => {
-    if (!form.startDateTime || !form.endDateTime) return null;
-    const s = new Date(form.startDateTime).getTime();
-    const e = new Date(form.endDateTime).getTime();
-    if (isNaN(s) || isNaN(e) || e < s) return null;
-    return Math.round((e - s) / 60000);
-  }, [form.startDateTime, form.endDateTime]);
+  
+  useEffect(() => {
+    if (!current) getPrivateEvents().catch(() => {});
+  }, [current, getPrivateEvents]);
+
+  // Hidrata formulario cuando haya current
+  useEffect(() => {
+    if (!current) return;
+    setForm({
+      title: current.title || "",
+      description: current.description || "",
+      organizer: current.organizer || "",
+      location: current.location || "",
+      startDateTime: toLocalInput(current.startDateTime),
+      endDateTime: toLocalInput(current.endDateTime),
+      requiresRegistration: !!current.requiresRegistration,
+      price: current.price ?? "",
+      capacity: current.capacity ?? "",
+      tags: Array.isArray(current.tags) ? current.tags.join(", ") : (current.tags || ""),
+      isOnline: !!current.isOnline,
+      url: current.url || "",
+      status: current.status || "draft",
+    });
+    setErrors({});
+  }, [current]);
 
   const onChange = (e) => {
     const { name, type, value, checked } = e.target;
     setForm((f) => ({ ...f, [name]: type === "checkbox" ? checked : value }));
   };
 
-const sameCalendarDate = (a, b) => {
-  if (!a || !b) return false;
-  const A = new Date(a), B = new Date(b);
-  return A.getFullYear() === B.getFullYear()
-    && A.getMonth() === B.getMonth()
-    && A.getDate() === B.getDate();
-};
+  const sameDay = (a, b) => {
+    if (!a || !b) return false;
+    const A = new Date(a), B = new Date(b);
+    return A.getFullYear() === B.getFullYear() &&
+           A.getMonth() === B.getMonth() &&
+           A.getDate() === B.getDate();
+  };
 
-const validate = () => {
-  const err = {};
-  if (!form.title || form.title.trim().length < 3) err.title = "Mínimo 3 caracteres";
-  if (!form.description || form.description.trim().length < 10) err.description = "Mínimo 10 caracteres";
-  if (!form.organizer) err.organizer = "Requerido";
-  if (!form.startDateTime) err.startDateTime = "Requerido";
-  if (!form.endDateTime) err.endDateTime = "Requerido";
+  const validate = () => {
+    const err = {};
+    if (!form.title || form.title.trim().length < 3) err.title = "Mínimo 3 caracteres";
+    if (!form.description || form.description.trim().length < 10) err.description = "Mínimo 10 caracteres";
+    if (!form.organizer || form.organizer.trim().length < 3) err.organizer = "Mínimo 3 caracteres";
+    if (!form.startDateTime) err.startDateTime = "Requerido";
+    if (!form.endDateTime) err.endDateTime = "Requerido";
 
-  if (form.startDateTime && form.endDateTime) {
-    const s = new Date(form.startDateTime).getTime();
-    const e = new Date(form.endDateTime).getTime();
-
-    if (isNaN(s) || isNaN(e)) {
-      err.endDateTime = "Fecha/hora inválida";
-    } else if (e <= s) {
-      // mismo día permitido, pero hora de término debe ser posterior
-      if (sameCalendarDate(form.startDateTime, form.endDateTime)) {
-        err.endDateTime = "Misma fecha permitida, pero la hora de término debe ser posterior a la de inicio";
-      } else {
-        err.endDateTime = "La fecha/hora de término debe ser posterior a la de inicio";
+    if (form.startDateTime && form.endDateTime) {
+      const s = new Date(form.startDateTime).getTime();
+      const e = new Date(form.endDateTime).getTime();
+      if (isNaN(s) || isNaN(e)) {
+        err.endDateTime = "Fecha/hora inválida";
+      } else if (e <= s) {
+        err.endDateTime = sameDay(form.startDateTime, form.endDateTime)
+          ? "Misma fecha permitida, pero la hora de término debe ser posterior a la de inicio"
+          : "La fecha/hora de término debe ser posterior a la de inicio";
       }
     }
-  }
 
-  if (form.price && Number(form.price) < 0) err.price = "No puede ser negativo";
-  if (form.capacity && Number(form.capacity) < 0) err.capacity = "No puede ser negativo";
+    if (form.price !== "" && Number(form.price) < 0) err.price = "No puede ser negativo";
+    if (form.capacity !== "" && Number(form.capacity) < 0) err.capacity = "No puede ser negativo";
+    if (form.url && !/^https?:\/\/.{3,}/i.test(form.url.trim())) err.url = "URL inválida. Ej: https://ejemplo.com/evento";
 
-  if (form.url && !/^https?:\/\/.{3,}/i.test(form.url.trim())) {
-    err.url = "URL inválida. Ej: https://ejemplo.com/evento";
-  }
+    setErrors(err);
+    return Object.keys(err).length === 0;
+  };
 
-  setErrors(err);
-  return Object.keys(err).length === 0;
-};
-
-  const submit = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
+    if (!current) return;
     if (!validate()) return;
 
     try {
-      setSubmitting(true);
-
+      setSaving(true);
       const payload = {
         title: form.title.trim(),
         description: form.description.trim(),
         organizer: form.organizer.trim(),
-        // si es online y location vacío -> "Online"
-        location: (form.isOnline && !form.location.trim()) ? "Online" : form.location.trim(),
+        location: form.isOnline && !form.location.trim() ? "Online" : form.location.trim(),
         startDateTime: toISO(form.startDateTime),
         endDateTime: toISO(form.endDateTime),
         requiresRegistration: !!form.requiresRegistration,
-        price: form.price ? Number(form.price) : 0,
-        capacity: form.capacity ? Number(form.capacity) : null,
-        tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
+        price: form.price === "" ? 0 : Number(form.price),
+        capacity: form.capacity === "" ? null : Number(form.capacity),
+        tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
         isOnline: !!form.isOnline,
-        url: form.url.trim(),      // ⬅️ SIEMPRE se envía (vacío o con valor)
+        url: form.url.trim(),
         status: form.status,
       };
 
-      await createEvent(payload);
-      alert("Evento creado ✅");
-
-      setForm({
-        title: "",
-        description: "",
-        organizer: "",
-        location: "",
-        startDateTime: "",
-        endDateTime: "",
-        requiresRegistration: false,
-        price: "",
-        capacity: "",
-        tags: "",
-        isOnline: false,
-        url: "", // reset
-        status: "draft",
-      });
-      setErrors({});
+      await updateOneEvent(current._id || current.id, payload);
+      alert("Evento actualizado ✅");
+      navigate("/admin/eventos/editar");
     } catch (err) {
-      console.error(err);
-      alert(err?.response?.data?.error || err?.response?.data?.message || "Error al crear el evento");
+      alert(err.message || "Error al actualizar el evento");
     } finally {
-      setSubmitting(false);
+      setSaving(false);
     }
   };
 
+  if (!current) {
+    return (
+      <main className="max-w-4xl mx-auto p-6">
+        <div className="alert alert-info">
+          <span>Cargando evento…</span>
+        </div>
+        <div className="mt-4">
+          <Link to="/admin/eventos/editar" className="btn btn-ghost">Volver</Link>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mt-15 mb-6">Crear evento</h1>
+      <div className="mt-15 mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Editar evento</h1>
+        <Link to="/admin/eventos/editar" className="btn btn-ghost btn-sm">Volver</Link>
+      </div>
 
-      <form onSubmit={submit} className="space-y-6">
+      <form onSubmit={onSubmit} className="space-y-6">
         {/* Básicos */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="form-control">
@@ -176,7 +202,7 @@ const validate = () => {
           </label>
         </section>
 
-        {/* Modalidad + URL de referencia (siempre visible) */}
+        {/* Modalidad + URL */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <label className="form-control md:col-span-2">
             <span className="label-text">Lugar</span>
@@ -200,7 +226,6 @@ const validate = () => {
             <span className="label-text">Evento online</span>
           </label>
 
-          {/* URL SIEMPRE visible */}
           <label className="form-control md:col-span-3">
             <span className="label-text">URL de referencia (opcional)</span>
             <input
@@ -236,16 +261,12 @@ const validate = () => {
               className={`input input-bordered ${errors.endDateTime ? "input-error" : ""}`}
               name="endDateTime"
               value={form.endDateTime}
-              min={form.startDateTime || undefined} 
+              min={form.startDateTime || undefined}
               onChange={onChange}
               required
             />
             {errors.endDateTime && <span className="text-error text-xs mt-1">{errors.endDateTime}</span>}
           </label>
-
-          <div className="md:col-span-2 text-sm text-base-content/70">
-            {durationMins ? `Duración estimada: ${durationMins} min` : "Define inicio y término para ver la duración."}
-          </div>
         </section>
 
         {/* Inscripción/Precio/Cupos/Estado */}
@@ -317,10 +338,9 @@ const validate = () => {
           </label>
         </section>
 
-        {/* Submit */}
         <div className="flex justify-end gap-3">
-          <button type="submit" className="btn btn-primary" disabled={submitting}>
-            {submitting ? "Creando..." : "Crear evento"}
+          <button type="submit" className="btn btn-primary" disabled={saving}>
+            {saving ? "Guardando..." : "Guardar cambios"}
           </button>
         </div>
       </form>

@@ -76,45 +76,10 @@ export const webhook = async (req, res) => {
     // Obtén el pago para verificar monto, estado, etc.
     const payment = await getPaymentById(paymentId);
 
-    // TODO: aquí actualiza base de datos
-    // - Busca por external_reference o metadata.eventId/userId
-    // - Valida transaction_amount y currency_id
-    // - Guarda status/status_detail, fecha, payer info, etc.
-
     return res.status(200).send("OK");
   } catch (err) {
     // Igualmente responde 200 para evitar tormenta de reintentos, pero loguea el error
     console.error("Webhook error:", err);
     return res.status(200).send("OK");
-  }
-};
-
-
-export const testPreference = async (req, res) => {
-  const preferenceData = {
-    items: [
-      { title: "Producto test", quantity: 1, unit_price: 100 },
-      { title: "Producto extra", quantity: 2, unit_price: 50 },
-    ],
-    back_urls: {
-      success:"https://hyperangelic-ira-unturgid.ngrok-free.dev/api/payments/success",
-      failure:"https://hyperangelic-ira-unturgid.ngrok-free.dev/api/payments/failure",
-      pending:"https://hyperangelic-ira-unturgid.ngrok-free.dev/api/payments/pending",
-    } ,
-     auto_return: "approved",  //vuelve a la pagina de success, failure o pending segun el caso
-     notification_url: "https://hyperangelic-ira-unturgid.ngrok-free.dev/api/payments/notification",  //se hace el pago y me avisa a esta url
-
-  };
-
-  try {
-    const preference = await createPaymentPreference(preferenceData);
-
-    console.log("ID de preferencia:", preference.id);
-    console.log("Checkout URL:", preference.init_point);
-    console.log("success URL:", preference.back_urls.success);
-
-    res.json(preference);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
 };

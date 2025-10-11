@@ -1,10 +1,13 @@
+// src/pages/Admin/CrearProductos.jsx
 import { useLocation } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
-import { createServiceProductRequest } from "../../api/auth.js";
+import { useServiceProducts } from "../../context/serviceProducts/ServiceProductContext";
 
 export function CrearProductos() {
   const location = useLocation();
   const presetType = location?.state?.presetType; // "product" | "service"
+
+  const { createSP } = useServiceProducts();
 
   const [form, setForm] = useState({
     title: "",
@@ -39,15 +42,16 @@ export function CrearProductos() {
   const isProduct = useMemo(() => form.type === "product", [form.type]);
   const isService = !isProduct;
 
+  // al cambiar de tipo, limpiamos campos ajenos
   useEffect(() => {
-    // Al cambiar de tipo, limpia campos específicos del otro tipo
     setForm((f) => ({
       ...f,
       ...(isProduct
         ? { durationMinutes: "", capacity: "", locations: "" }
         : { stock: "", delivery: "" }),
     }));
-  }, [form.type]); // eslint-disable-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.type]);
 
   const onPickFiles = (e) => {
     const f = Array.from(e.target.files || []);
@@ -77,7 +81,7 @@ export function CrearProductos() {
       // básicos
       fd.append("title", form.title);
       fd.append("type", form.type);
-      if (form.price) fd.append("price", String(form.price));
+      if (form.price !== "") fd.append("price", String(form.price));
       if (form.shortDescription) fd.append("shortDescription", form.shortDescription);
       if (form.description) fd.append("description", form.description);
       if (form.category) fd.append("category", form.category);
@@ -85,14 +89,14 @@ export function CrearProductos() {
 
       // producto
       if (isProduct) {
-        if (form.stock) fd.append("stock", String(form.stock));
+        if (form.stock !== "") fd.append("stock", String(form.stock));
         if (form.delivery) fd.append("delivery", form.delivery);
       }
 
       // servicio
       if (isService) {
-        if (form.durationMinutes) fd.append("durationMinutes", String(form.durationMinutes));
-        if (form.capacity) fd.append("capacity", String(form.capacity));
+        if (form.durationMinutes !== "") fd.append("durationMinutes", String(form.durationMinutes));
+        if (form.capacity !== "") fd.append("capacity", String(form.capacity));
         const locs = form.locations
           .split(",")
           .map((t) => t.trim())
@@ -113,8 +117,11 @@ export function CrearProductos() {
       // archivos
       files.forEach((f) => fd.append("images", f));
 
-      const { data } = await createServiceProductRequest(fd);
-      alert("Creado con éxito ✅");
+      // llamar al contexto
+      await createSP(fd);
+
+      if (window?.toast?.success) window.toast.success("Creado con éxito ✅");
+      else alert("Creado con éxito ✅");
 
       // limpiar
       setForm({
@@ -135,10 +142,15 @@ export function CrearProductos() {
       setFiles([]);
       setAlts([]);
       setPreview([]);
-      console.log("created:", data);
     } catch (err) {
       console.error(err);
-      alert(err?.response?.data?.message || "Error al crear");
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Error al crear";
+      if (window?.toast?.error) window.toast.error(msg);
+      else alert(msg);
     } finally {
       setLoading(false);
     }
@@ -229,15 +241,15 @@ export function CrearProductos() {
             />
           </label>
 
-            <label className="form-control md:col-span-2">
-              <span className="label-text">Descripción</span>
-              <textarea
-                className="textarea textarea-bordered min-h-28"
-                name="description"
-                value={form.description}
-                onChange={onChange}
-              />
-            </label>
+          <label className="form-control md:col-span-2">
+            <span className="label-text">Descripción</span>
+            <textarea
+              className="textarea textarea-bordered min-h-28"
+              name="description"
+              value={form.description}
+              onChange={onChange}
+            />
+          </label>
         </section>
 
         {/* Producto */}
@@ -322,7 +334,7 @@ export function CrearProductos() {
           </label>
         </section>
 
-        {/* Imágenes: botón notorio DaisyUI + previsualización */}
+        {/* Imágenes */}
         <section className="space-y-3">
           <div className="flex items-center gap-3">
             <input
@@ -337,6 +349,7 @@ export function CrearProductos() {
               📷 Subir imágenes
             </label>
           </div>
+
           {!!preview.length && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {preview.map((p, idx) => (
@@ -363,6 +376,7 @@ export function CrearProductos() {
               ))}
             </div>
           )}
+
           {!preview.length && (
             <div className="rounded-2xl border-2 border-dashed border-base-300 p-6 text-center text-base-content/70">
               Arrastra y suelta imágenes aquí, o usa el botón “Subir imágenes”.
@@ -371,7 +385,7 @@ export function CrearProductos() {
         </section>
 
         <div className="flex justify-end gap-3">
-          <button type="submit" className="btn btn-primary" disabled={loading}>
+          <button type="submit" className={`btn btn-primary ${loading ? "loading" : ""}`} disabled={loading}>
             {loading ? "Creando..." : `Crear ${isProduct ? "producto" : "servicio"}`}
           </button>
         </div>

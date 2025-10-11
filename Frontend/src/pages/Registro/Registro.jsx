@@ -31,25 +31,23 @@ export function Registro() {
     }
 
     try {
-      await registerUser(formData);
-     
-        setStatus("¡Registro exitoso!");
-        setFormData({ username: "", email: "", password: "", confirmPassword: "" });
-        setLoading(false);
-      
-    } catch (error) {
-  console.error(error);
+      await registerUser({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+      });
 
-  // si es un error del backend REVISAR!!
-  if (error.response && error.response.data && error.response.data.message) {
-    setStatus(error.response.data.message);
-  } else {
-    setStatus("Error al registrarse, intenta de nuevo");
-  }
-} finally {
-  setLoading(false);
-}
+      setStatus("¡Registro exitoso!");
+      setFormData({ username: "", email: "", password: "", confirmPassword: "" });
+    } catch (error) {
+      
+      setStatus(error.message || "Error al registrarse, intenta de nuevo");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200 px-4 py-12">

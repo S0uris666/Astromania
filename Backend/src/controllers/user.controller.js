@@ -2,38 +2,56 @@
 import User from "../models/User.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 //
 
 export const createUser = async (req, res) => {
-  const { username, email, password, role } = req.body;
   try {
-    // Check if user already exists
-    let foundUser = await User.findOne({ email });
-    if (foundUser) {
-      return res.status(400).json({ message: "User already exists" });
+    const { username = "", email = "", password = "" } = req.body;
+
+    // Validaciones simples
+    if (!username.trim() || !email.trim() || !password) {
+      return res.status(400).json({ error: "Todos los campos son obligatorios" });
     }
-    // Hash the password before saving
+    if (password.length < 6) {
+      return res.status(422).json({ error: "La contraseña debe tener al menos 6 caracteres" });
+    }
+
+    // Usuario existente
+    const foundUser = await User.findOne({ email: email.toLowerCase().trim() });
+    if (foundUser) {
+      return res.status(409).json({ error: "El usuario ya existe con ese correo" });
+    }
+
+    // Hash
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    /* const newCart= await Cart.create({}); */
-
-    //create user
+   
     const newUser = await User.create({
-      username,
-      email,
-      role,
+      username: username.trim(),
+      email: email.toLowerCase().trim(),
+      role: "user", // <- no aceptamos rol del cliente por seguridad
       password: hashedPassword,
-      /* cart: newCart */
     });
+
     
-    if (!newUser) {
-      return res.status(400).json({ message: "Invalid user data" });
+    const safe = newUser.toObject();
+    delete safe.password;
+    delete safe.__v;
+
+    return res.status(201).json({ user: safe });
+  } catch (err) {
+    console.error("Error creating user:", err);
+
+    
+    if (err?.code === 11000 && err?.keyPattern?.email) {
+      return res.status(409).json({ error: "El correo ya está registrado" });
     }
-    return res.status(201).json({ datos: newUser });
-  } catch (error) {
-    console.error("Error creating user:", error);
-    res.status(500).json({ message: "Server error" });
+
+    return res.status(500).json({ error: "Error del servidor" });
   }
 };
 
@@ -121,6 +139,101 @@ export const verifyUser = async (req, res) => {
 }
 
 
+export const adminGetAllUsers = async (req, res) => {
+  try {
+    // Seguridad adicional por si la ruta no tiene el middleware
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ error: "Acceso denegado" });
+    }
+
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 100);
+    const q = (req.query.q || "").trim();
+
+    const filter = q
+      ? {
+          $or: [
+            { name: { $regex: q, $options: "i" } },
+            { email: { $regex: q, $options: "i" } },
+          ],
+        }
+      : {};
+
+    const [total, users] = await Promise.all([
+      User.countDocuments(filter),
+      User.find(filter)
+        .select("-password -__v") // no exponer campos sensibles
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+    ]);
+
+    return res.json({
+      data: users,
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    });
+  } catch (err) {
+    console.error("adminGetAllUsers error:", err);
+    return res.status(500).json({ error: "Error al obtener usuarios" });
+  }
+};
 
 
 
+export const adminPromoteUserToSuperuser = async (req, res) => {
+  try {
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ error: "Acceso denegado" });
+    }
+
+    const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
+
+    // Solo se acepta role=superuser explícitamente
+    const { role } = req.body || {};
+    if ((role || "").toLowerCase() !== "superuser") {
+      return res.status(400).json({
+        error: "Solo se permite actualizar el rol a 'superuser'",
+      });
+    }
+
+    // Evitar que el admin se cambie a sí mismo (opcional pero recomendable)
+    if (String(req.user.id) === String(id)) {
+      return res
+        .status(409)
+        .json({ error: "No puedes modificar tu propio rol" });
+    }
+
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+
+    // Regla de negocio: solo de 'user' => 'superuser'
+    if ((user.role || "").toLowerCase() !== "user") {
+      return res.status(409).json({
+        error:
+          "Solo puedes promover cuentas con rol 'user' al rol 'superuser'",
+      });
+    }
+
+    user.role = "superuser";
+    await user.save();
+
+    const safeUser = user.toObject();
+    delete safeUser.password;
+    delete safeUser.__v;
+
+    return res.json({
+      message: "Rol actualizado a 'superuser'",
+      user: safeUser,
+    });
+  } catch (err) {
+    console.error("adminPromoteUserToSuperuser error:", err);
+    return res.status(500).json({ error: "Error al actualizar el rol" });
+  }
+};
