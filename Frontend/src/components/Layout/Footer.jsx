@@ -14,12 +14,12 @@ export function Footer() {
           </p>
 
 
-           <a
-              href="/contacto"
-              className="w-full sm:w-auto text-center px-6 py-3 btn-galaxy hover:btn-galaxy text-white rounded-lg shadow-lg transition transform hover:scale-105"
-            >
-              Reserva una visita
-            </a>
+<Link
+  to="/contacto"
+  className="w-full sm:w-auto text-center px-6 py-3 btn-galaxy hover:btn-galaxy text-white rounded-lg shadow-lg transition transform hover:scale-105"
+>
+  Reserva una visita
+</Link>
         </div>
 
         {/* Sección enlaces rápidos */}
