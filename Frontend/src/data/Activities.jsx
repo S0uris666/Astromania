@@ -4,7 +4,7 @@ export const Activities = [
     linkTo:"contacto",
     title: "Visitas a colegios",
     cta: "Revisa disponibilidad",
-    image: "/public/Images/planetario.webp",
+    image: "/src/assets/planetario.webp",
     description: "Llevamos la astronomía a tu colegio con actividades interactivas."
   },
    {
@@ -12,7 +12,7 @@ export const Activities = [
     title: "Juegos de mesa",
     linkTo:"servicios-productos-list",
     cta: "Descubre nuestros juegos",
-    image: "/public/Images/juegosdemesa.webp",
+    image: "/src/assets/juegosdemesa.webp",
     description: "Juegos originales de la fundación para aprender jugando."
   },
   
@@ -21,7 +21,7 @@ export const Activities = [
     title: "Exposición Misión Luna-Marte",
     linkTo:"servicios-productos-list",
     cta: "Explora la exposición",
-    image: "/public/Images/misionlunamarte.webp",
+    image: "/src/assets/misionlunamarte.webp",
     description: "Conoce la historia y los secretos de la Luna y Marte."
   },
   {
@@ -29,7 +29,7 @@ export const Activities = [
     title: "Concursos",
     linkTo:"servicios-productos-list",
     cta: "Participa aquí",
-    image: "/public/Images/concursos.webp",
+    image: "/src/assets/concursos.webp",
     description: "Participa en nuestros concursos astronómicos y gana premios."
   },
   {
@@ -37,7 +37,7 @@ export const Activities = [
     title: "Cuentos Astronómicos",
     linkTo:"servicios-productos-list",
     cta: "Descubre Cosmocuentos",
-    image: "/public/Images/cuentos.webp",
+    image: "/src/assets/cuentos.webp",
     description: "Aprende astronomía de manera divertida con cuentos"
   },
   {
@@ -45,7 +45,7 @@ export const Activities = [
     title: "Charlas y Talleres",
     linkTo:"servicios-productos-list",
     cta: "Solicita información",
-    image: "/public/Images/charlasytalleres.webp",
+    image: "/src/assets/charlasytalleres.webp",
     description: "Llevamos charlas y talleres a tu institucion."
   }
    
