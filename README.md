@@ -1,8 +1,8 @@
-<p align="right" style="margin-top: 40px;">
-  <img src="logo.png" alt="Astromanía" width="160" />
-</p>
+<div style="display:flex; align-items:center; justify-content:space-between; margin-top:24px;">
+  <h1 style="margin:0;">Astromanía WEB</h1>
+  <img src="logo.png" alt="Astromanía" width="160">
+</div>
 
-# Astromanía WEB
 
 Astromanía es una aplicación web full‑stack para gestionar eventos astronómicos, servicios/productos y pagos online. Incluye autenticación con roles, panel de administración, integración con Mercado Pago, subida de imágenes a Cloudinary y contacto por email.
 
