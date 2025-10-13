@@ -1,13 +1,6 @@
-<table width="100%">
-  <tr>
-    <td>
-      <h1>Astromanía WEB</h1>
-    </td>
-    <td align="right">
-      <img src="logo.png" alt="Astromanía" width="160">
-    </td>
-  </tr>
-</table>
+<img src="logo.png" alt="Astromanía" width="160" align="right">
+<h1>Astromanía WEB</h1>
+
 
 
 
