@@ -1,10 +1,17 @@
+import planetarioImg from "../assets/Images/planetario.webp";
+import juegosMesaImg from "../assets/Images/juegosdemesa.webp";
+import misionLunaMarteImg from "../assets/Images/misionlunamarte.webp";
+import concursosImg from "../assets/Images/concursos.webp";
+import cuentosImg from "../assets/Images/cuentos.webp";
+import charlasTalleresImg from "../assets/Images/charlasytalleres.webp";
+
 export const Activities = [
   {
     id: "reserva",
     linkTo:"contacto",
     title: "Visitas a colegios",
     cta: "Revisa disponibilidad",
-    image: "src/assets/Images/planetario.webp",
+    image: planetarioImg,
     description: "Llevamos la astronomía a tu colegio con actividades interactivas."
   },
    {
@@ -12,7 +19,7 @@ export const Activities = [
     title: "Juegos de mesa",
     linkTo:"servicios-productos-list",
     cta: "Descubre nuestros juegos",
-    image: "src/assets/Images/juegosdemesa.webp",
+    image: juegosMesaImg,
     description: "Juegos originales de la fundación para aprender jugando."
   },
   
@@ -21,7 +28,7 @@ export const Activities = [
     title: "Exposición Misión Luna-Marte",
     linkTo:"servicios-productos-list",
     cta: "Explora la exposición",
-    image: "src/assets/Images/misionlunamarte.webp",
+    image: misionLunaMarteImg,
     description: "Conoce la historia y los secretos de la Luna y Marte."
   },
   {
@@ -29,7 +36,7 @@ export const Activities = [
     title: "Concursos",
     linkTo:"servicios-productos-list",
     cta: "Participa aquí",
-    image: "src/assets/Images/concursos.webp",
+    image: concursosImg,
     description: "Participa en nuestros concursos astronómicos y gana premios."
   },
   {
@@ -37,7 +44,7 @@ export const Activities = [
     title: "Cuentos Astronómicos",
     linkTo:"servicios-productos-list",
     cta: "Descubre Cosmocuentos",
-    image: "src/assets/Images/cuentos.webp",
+    image: cuentosImg,
     description: "Aprende astronomía de manera divertida con cuentos"
   },
   {
@@ -45,7 +52,7 @@ export const Activities = [
     title: "Charlas y Talleres",
     linkTo:"servicios-productos-list",
     cta: "Solicita información",
-    image: "src/assets/Images/charlasytalleres.webp",
+    image: charlasTalleresImg,
     description: "Llevamos charlas y talleres a tu institucion."
   }
    

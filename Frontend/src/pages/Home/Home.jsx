@@ -2,6 +2,7 @@ import { Activities } from "../../data/Activities";
 import { AboutData } from "../../data/AboutData";
 import { Link } from "react-router-dom";
 import { Partners } from "../../data/Partners";
+import HeroImage from "../../assets/Images/Hero.webp";
 
 
 
@@ -14,7 +15,7 @@ export function Home() {
         {/* Fondo */}
         <div className="absolute inset-0">
           <img
-            src="../assets/Images/Hero.webp"
+            src={HeroImage}
             
             alt="Cielo estrellado"
             className="w-full h-full object-cover"
