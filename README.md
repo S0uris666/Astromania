@@ -1,6 +1,6 @@
-<div style="padding-top: 15px; align: right;">
+<p align="right" style="margin-top: 40px;">
   <img src="logo.png" alt="Astromanía" width="160" />
-</div>
+</p>
 
 # Astromanía WEB
 
