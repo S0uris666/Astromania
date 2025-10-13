@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="logo.png" alt="Astromanía" width="160" />
-</p>
+<img src="logo.png" alt="Astromanía" width="160" align="right" />
 
 # Astromanía WEB
 
