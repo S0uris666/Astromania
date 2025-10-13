@@ -35,10 +35,7 @@ import { EditarEventos } from "./pages/Events/EditarEventos.jsx";
 import { Editar } from "./pages/Events/Editar.jsx";
 import { EditarProductos } from "./pages/ServiceProduct/EditarProductos.jsx";
 import { SeleccionProductos } from "./pages/ServiceProduct/SeleccionProductos.jsx";
-// Subpáginas "Nosotros"
-// Subpáginas "Actividades y Servicios"
-// Subpáginas "Recursos"
-// Subpáginas "Comunidad"
+
 
 export default function AppRouter() {
   return (
