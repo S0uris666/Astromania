@@ -14,7 +14,8 @@ export function Home() {
         {/* Fondo */}
         <div className="absolute inset-0">
           <img
-            src="/src/assets/Hero.webp" // Cambia por tu imagen o video
+            src="src/assets/Images/Hero.webp"
+            
             alt="Cielo estrellado"
             className="w-full h-full object-cover"
           />

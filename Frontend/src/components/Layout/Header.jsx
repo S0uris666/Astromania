@@ -101,7 +101,7 @@ const accountPath = useMemo(() => {
         </button>
 
         <img
-          src="/vite.svg"
+          src="src/assets/vite.svg"
           alt="Astromanía Logo"
           className="h-12 w-auto z-[70]"
         />
@@ -144,7 +144,7 @@ const accountPath = useMemo(() => {
       <div className="hidden lg:flex container mx-auto items-center justify-between h-20 px-4">
         {/* Logo */}
         <div className="flex items-center space-x-3">
-          <img src="/vite.svg" alt="Astromanía Logo" className="h-12 w-auto" />
+          <img src="src/assets/vite.svg" alt="Astromanía Logo" className="h-12 w-auto" />
         </div>
 
         {/* Menú */}
