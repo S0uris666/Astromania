@@ -376,6 +376,21 @@ function MiniCart({
   goCheckout,
   authState,
 }) {
+  // Intenta encontrar una URL de miniatura según distintos esquemas posibles
+  const getThumb = (it) => {
+    const img = it.image;
+    if (typeof img === "string") return img;
+    if (img && typeof img === "object") {
+      return img.url || img.secure_url || img.public_id || null;
+    }
+    const first = Array.isArray(it.images) ? it.images[0] : null;
+    if (typeof first === "string") return first;
+    if (first && typeof first === "object") return first.url || first.secure_url || null;
+    return it.thumbnail || it.cover || it.media?.[0]?.url || it.photo || null;
+  };
+
+  const getKey = (it) => it._id || it.id || `${it.title}-${it.variant || ""}`;
+
   if (!cart?.length) {
     return <div className="p-4 text-sm opacity-80">Tu carrito está vacío.</div>;
   }
@@ -383,36 +398,45 @@ function MiniCart({
   return (
     <div className="space-y-3">
       <ul className="max-h-72 overflow-auto divide-y divide-base-300/30 pr-1">
-        {cart.map((it) => (
-          <li key={it._id} className="py-2 flex items-start gap-3">
-            <div className="w-12 h-12 rounded bg-base-100/20 overflow-hidden flex-shrink-0">
-              {it.image ? (
-                <img
-                  src={it.image}
-                  alt={it.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full grid place-items-center text-xs opacity-60">
-                  Img
-                </div>
-              )}
-            </div>
-            <div className="flex-1">
-              <div className="font-semibold leading-tight">{it.title}</div>
-              <div className="text-xs opacity-70">
-                {clp(it.price)} × {it.quantity}
+        {cart.map((it) => {
+          const thumb = getThumb(it);
+          return (
+            <li key={getKey(it)} className="py-2 flex items-start gap-3">
+              {/* Miniatura */}
+              <div className="w-14 h-14 rounded-lg overflow-hidden border border-base-300/50 bg-base-100/30 flex-shrink-0">
+                {thumb ? (
+                  <img
+                    src={thumb}
+                    alt={it.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full grid place-items-center text-[10px] uppercase tracking-wide opacity-60">
+                    Sin imagen
+                  </div>
+                )}
               </div>
-            </div>
-            <button
-              className="btn btn-ghost btn-xs"
-              title="Quitar"
-              onClick={() => removeFromCart(it._id)}
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </li>
-        ))}
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <div className="font-medium leading-tight truncate">{it.title}</div>
+                <div className="text-xs opacity-70">
+                  {clp(it.price)} × {it.quantity}
+                </div>
+              </div>
+
+              {/* Quitar */}
+              <button
+                className="btn btn-ghost btn-xs"
+                title="Quitar"
+                onClick={() => removeFromCart(it._id || it.id)}
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </li>
+          );
+        })}
       </ul>
 
       <div className="flex items-center justify-between pt-1">
@@ -427,10 +451,7 @@ function MiniCart({
         <button
           className="btn btn-primary btn-sm flex-1"
           onClick={goCheckout}
-          disabled={
-            !authState &&
-            false /* permitimos ver /perfil; pago se bloquea ahí */
-          }
+          disabled={!authState && false}
         >
           Ir a pagar
         </button>
@@ -438,3 +459,4 @@ function MiniCart({
     </div>
   );
 }
+
