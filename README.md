@@ -1,5 +1,5 @@
 <img src="logo.png" alt="Astromanía" width="100" align="right" style="margin-top:-14px;">
-<h1>Astromanía WEB</h1>
+<h1 style="margin-top:0;">Astromanía WEB</h1>
 
 
 
