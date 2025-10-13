@@ -130,13 +130,21 @@ const UserState = (props) => {
 
   // ================== CART ==================
   const addToCart = (product) => {
+    // Normaliza imagen de producto a URL string cuando sea posible
+    const firstImage = Array.isArray(product.images) ? product.images[0] : null;
+    const imageUrl =
+      (typeof firstImage === "string" ? firstImage : firstImage?.url || firstImage?.secure_url) ||
+      (typeof product.image === "string" ? product.image : product.image?.url || product.image?.secure_url) ||
+      (typeof product.thumbnail === "string" ? product.thumbnail : null) ||
+      null;
+
     const safe = {
       _id: product._id || product.id || crypto.randomUUID(),
       title: String(product.title),
       price: Number(product.price) || 0,
       description:
         product.description || product.shortDescription || product.title,
-      image: product.images?.[0] || product.image || null,
+      image: imageUrl,
       quantity: Number(product.quantity) || 1,
       type: product.type || "product",
       stock: typeof product.stock === "number" ? product.stock : undefined,
