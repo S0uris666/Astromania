@@ -1,4 +1,4 @@
-<div style="padding-top: 15px; text-align: right;">
+<div style="padding-top: 15px; align: right;">
   <img src="logo.png" alt="Astromanía" width="160" />
 </div>
 
