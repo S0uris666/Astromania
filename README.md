@@ -1,25 +1,19 @@
-<p align="center">
-  <img src="logo.png" alt="Astromanía" width="160" />
-</p>
-
-# Astromanía WEB
+# <img src="logo.png" alt="Astromanía" width="40" style="vertical-align: middle; margin-right: 8px;"> Astromanía WEB
 
 Astromanía es una aplicación web full‑stack para gestionar eventos astronómicos, servicios/productos y pagos online. Incluye autenticación con roles, panel de administración, integración con Mercado Pago, subida de imágenes a Cloudinary y contacto por email.
 
 
 ## Arquitectura
-- Backend (Node.js/Express): API REST con MongoDB/Mongoose, JWT, Zod, Multer, Cloudinary y Mercado Pago.
+- Backend (Node.js/Express, ESM): API REST con MongoDB/Mongoose, JWT, Zod, Multer, Cloudinary y Mercado Pago.
 - Frontend (React + Vite): SPA con Tailwind CSS v4 + DaisyUI y React Router.
-
-## Despliegue
 
 Estructura del repo:
 
 ```
-Backend/              # (Node.js, Express)
+Backend/              # API REST (Node.js, Express)
   src/
     app.js            # App Express, middlewares y rutas
-    index.js          # dotenv, DB, listen
+    index.js          # Bootstrap (dotenv, DB, listen)
     config/           # DB, Cloudinary, Mercado Pago
     controllers/      # Contacto, eventos, pagos, servicios/productos, usuarios
     middlewares/      # auth (JWT), authRol, validator (Zod)
@@ -28,7 +22,7 @@ Backend/              # (Node.js, Express)
     schemas/          # Esquemas Zod
     services/         # Lógica de Mercado Pago
 
-Frontend/             # (React, Vite, Tailwind)
+Frontend/             # SPA (React, Vite, Tailwind)
   src/
     api/              # Clientes Axios y servicios
     components/       # Layout, pagos, utilidades
@@ -40,9 +34,9 @@ Frontend/             # (React, Vite, Tailwind)
 
 
 ## Tecnologías
-- Backend: Node.js, Express 5, Mongoose 8, JWT, Zod, Nodemailer, Multer, Cloudinary, Mercado Pago SDK
+- Backend: Node.js (ESM), Express 5, Mongoose 8, JWT, Zod, Nodemailer, Multer, Cloudinary, Mercado Pago SDK
 - Frontend: React 19, Vite 7, Tailwind CSS 4, DaisyUI 5, React Router 7, Axios
-- Base de datos: MongoDB Atlas
+- Base de datos: MongoDB Atlas (o self‑hosted)
 
 
 ## Requisitos
@@ -54,6 +48,7 @@ Frontend/             # (React, Vite, Tailwind)
 
 
 ## Variables de Entorno
+No expongas credenciales en el repositorio. Crea archivos `.env` locales.
 
 Backend (`Backend/.env`):
 
@@ -83,7 +78,7 @@ MP_WEBHOOK_URL=<https_public_webhook_url>
 ```
 
 Notas importantes:
-- Las URLs de éxito/fracaso/pendiente y webhook deben ser públicas (HTTPS) en producción o al usar túneles (ngrok).
+- Las URLs de éxito/fracaso/pendiente y webhook deben ser públicas (HTTPS) en producción o al usar túneles (ngrok). 
 - Rota todas las credenciales que actualmente existan en el repo por seguridad (revoca y vuelve a emitir tokens/secretos).
 
 Frontend (`Frontend/.env`):
@@ -205,9 +200,19 @@ El cliente HTTP (`Frontend/src/api/client.js`) usa `VITE_BACKEND_URL` y `withCre
 - En errores, se realiza limpieza de imágenes subidas recientemente.
 
 
-## Proyección a corto plazo
-
+## Buenas Prácticas y Seguridad
+- No subas `.env` a control de versiones. Usa `.env.example` para documentación (opcional).
+- Rota las credenciales expuestas: JWT secret, MP tokens, Cloudinary, SMTP, MongoDB.
+- Usa HTTPS y dominios públicos para las URLs de retorno/webhook de Mercado Pago en producción.
 - Considera rate‑limiting/CAPTCHA en `/contact` para mitigar spam.
 
 
+## Licencia
+No especificada. Si lo deseas, se puede añadir (MIT, Apache‑2.0, etc.).
+
+
+## Siguientes Pasos (Opcional)
+- Añadir `.env.example` en Backend/Frontend.
+- Documentar esquemas de datos (User, Event, ServiceProductItem) y validaciones Zod.
+- Guía de despliegue (Docker/PM2/Vercel/Netlify/Render).
 
