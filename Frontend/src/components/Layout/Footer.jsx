@@ -15,7 +15,7 @@ export function Footer() {
 
 
            <a
-              href="/reserva"
+              href="/contacto"
               className="w-full sm:w-auto text-center px-6 py-3 btn-galaxy hover:btn-galaxy text-white rounded-lg shadow-lg transition transform hover:scale-105"
             >
               Reserva una visita
