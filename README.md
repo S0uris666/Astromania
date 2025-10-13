@@ -1,9 +1,9 @@
-<table width="100%" style="margin-top:24px;">
+<table width="100%">
   <tr>
-    <td style="vertical-align:middle;">
-      <h1 style="margin:0;">Astromanía WEB</h1>
+    <td>
+      <h1>Astromanía WEB</h1>
     </td>
-    <td style="text-align:right; vertical-align:middle;">
+    <td align="right">
       <img src="logo.png" alt="Astromanía" width="160">
     </td>
   </tr>
