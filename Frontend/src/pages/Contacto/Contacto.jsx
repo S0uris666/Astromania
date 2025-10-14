@@ -24,6 +24,10 @@ export function Contacto() {
     try {
       const response = await sendMessage(formData);
       console.log("Respuesta del servidor:", response);
+      if (!response || !response.success) {
+        setStatus(response?.error || "Hubo un error al enviar el correo.");
+        return;
+      }
 
       setStatus("¡Correo enviado correctamente!");
       setFormData({ name: "", email: "", subject: "", message: "" });

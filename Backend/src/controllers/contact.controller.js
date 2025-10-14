@@ -1,6 +1,18 @@
 
 import nodemailer from "nodemailer";
 
+// Helper: fetch con timeout (Node 18+ tiene fetch global)
+async function fetchWithTimeout(url, options = {}, timeoutMs = 12000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(id);
+  }
+}
+
 
 export const createContact = async (req, res) => {
   const { name, email, subject, message } = req.body;
@@ -10,7 +22,53 @@ export const createContact = async (req, res) => {
   }
 
   try {
-    const { EMAIL_USER, EMAIL_PASS, EMAIL_JP } = process.env;
+    const { EMAIL_USER, EMAIL_PASS, EMAIL_JP, RESEND_API_KEY, RESEND_FROM } = process.env;
+
+    // Intentar primero vía API (Resend) si está configurado
+    const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <h2>Nuevo mensaje desde Astromania WEB</h2>
+      <p><strong>Nombre:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      
+      <p><strong>Mensaje:</strong></p>
+      <p style=\"padding: 10px; background-color: #f4f4f4; border-radius: 5px;\">${message}</p>
+      <hr>
+      <p style=\"font-size: 0.9em; color: #555;\">Este mensaje fue enviado desde el formulario de contacto de Astromania WEB.</p>
+    </div>`;
+
+    if (RESEND_API_KEY && RESEND_FROM && EMAIL_JP) {
+      try {
+        const r = await fetchWithTimeout(
+          "https://api.resend.com/emails",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${RESEND_API_KEY}`,
+            },
+            body: JSON.stringify({
+              from: RESEND_FROM,
+              to: [EMAIL_JP],
+              subject,
+              html,
+              reply_to: email,
+            }),
+          },
+          12000
+        );
+        if (r.ok) {
+          return res.json({ success: true, message: "Correo enviado con éxito" });
+        } else {
+          const body = await r.text().catch(() => "");
+          console.error("[Resend] Error:", r.status, body);
+        }
+      } catch (e) {
+        console.error("[Resend] Exception:", e?.message || e);
+      }
+      // si Resend falla, seguimos con SMTP como fallback
+    }
+
     if (!EMAIL_USER || !EMAIL_PASS || !EMAIL_JP) {
       return res.status(503).json({ error: "Servicio de correo no configurado" });
     }
