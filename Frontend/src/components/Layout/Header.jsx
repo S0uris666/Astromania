@@ -321,14 +321,26 @@ const accountPath = useMemo(() => {
           >
             Contacto
           </Link>
-
-          <Link
-            to="/contacto"
-            className="block text-center btn btn-secondary text-white mt-6"
+                    <Link
+            to="/eventos"
+            className="block text-xl"
             onClick={() => setMenuOpen(false)}
           >
-            Reserva una visita
+            Eventos
           </Link>
+
+<Link
+  to="/login"
+  onClick={() => setMenuOpen(false)}
+  className="btn btn-secondary w-full sm:w-auto inline-flex items-center justify-center mt-6 px-6 py-3
+             text-base font-semibold normal-case tracking-wide leading-tight text-white
+             shadow-md hover:shadow-lg focus:outline-none focus-visible:ring-2
+             focus-visible:ring-secondary focus-visible:ring-offset-2"
+  aria-label="Inicia sesión"
+  title="Inicia sesión"
+>
+  Inicia sesión
+</Link>
         </nav>
       </div>
     </header>
