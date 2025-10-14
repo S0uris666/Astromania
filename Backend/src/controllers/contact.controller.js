@@ -21,9 +21,15 @@ export const createContact = async (req, res) => {
       requireTLS: true,
       family: 4,
       auth: { user: EMAIL_USER, pass: EMAIL_PASS },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000,
+      // pool para reutilizar conexión y bajar latencia
+      pool: true,
+      maxConnections: 1,
+      maxMessages: 50,
+      keepAlive: true,
+      // timeouts más amplios para entornos PaaS
+      connectionTimeout: 20000,
+      greetingTimeout: 20000,
+      socketTimeout: 20000,
     });
 
     // Verificar conexión SMTP rápidamente (debug)
@@ -58,7 +64,7 @@ const mailOptions = {
 };
 
     // Enviar correo con timeout de operación
-    const sendWithTimeout = (options, timeoutMs = 12000) =>
+    const sendWithTimeout = (options, timeoutMs = 20000) =>
       new Promise((resolve, reject) => {
         const to = setTimeout(() => reject(new Error("MAIL_TIMEOUT")), timeoutMs);
         transporter

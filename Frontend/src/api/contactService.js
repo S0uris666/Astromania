@@ -2,7 +2,8 @@ const API = import.meta.env.VITE_BACKEND_URL;
 
 export const sendMessage = async ({ name, email, subject, message }) => {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000);
+  const timeoutMs = 25000;
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(`${API}/contact`, {
       method: "POST",
@@ -23,6 +24,9 @@ export const sendMessage = async ({ name, email, subject, message }) => {
     return { error: "Respuesta no válida del servidor" };
   } catch (error) {
     clearTimeout(timeoutId);
+    if (error?.name === "AbortError") {
+      return { error: "Tiempo de espera agotado al enviar el mensaje" };
+    }
     console.error("Error al enviar mensaje:", error);
     return { error: "No se pudo enviar el mensaje" };
   }
