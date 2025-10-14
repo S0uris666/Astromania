@@ -1,6 +1,6 @@
 const API = import.meta.env.VITE_BACKEND_URL;
 
-export const sendMessage = async ({ name, email, subject, message }) => {
+export const sendMessage = async ({ name, email, subject, message, recaptcha, captchaA, captchaB, captchaAnswer }) => {
   const controller = new AbortController();
   const timeoutMs = 25000;
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -8,7 +8,7 @@ export const sendMessage = async ({ name, email, subject, message }) => {
     const res = await fetch(`${API}/contact`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, subject, message }),
+      body: JSON.stringify({ name, email, subject, message, recaptcha, captchaA, captchaB, captchaAnswer }),
       signal: controller.signal,
     });
     clearTimeout(timeoutId);

@@ -1,7 +1,8 @@
-import nodemailer from "nodemailer";
+import { verifyRecaptcha } from "../services/captcha.service.js";
+import { sendContactMail } from "../services/mailer.service.js";
 
 export const createContact = async (req, res) => {
-  const { name, email, subject, message } = req.body || {};
+  const { name, email, subject, message, recaptcha, captchaA, captchaB, captchaAnswer } = req.body || {};
 
   if (!name || !email || !subject || !message) {
     return res.status(400).json({ error: "Todos los campos son obligatorios" });
@@ -13,10 +14,16 @@ export const createContact = async (req, res) => {
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { user: EMAIL_USER, pass: EMAIL_PASS },
-    });
+    if (process.env.RECAPTCHA_SECRET) {
+      if (!recaptcha) return res.status(400).json({ error: "Captcha requerido" });
+      const vr = await verifyRecaptcha(recaptcha, req.ip);
+      if (!vr.ok) return res.status(400).json({ error: "Captcha inválido" });
+    } else {
+      const a = Number(captchaA), b = Number(captchaB), ans = Number(captchaAnswer);
+      if (!Number.isFinite(a) || !Number.isFinite(b) || !Number.isFinite(ans) || ans !== a + b) {
+        return res.status(400).json({ error: "Captcha inválido" });
+      }
+    }
 
     const html = `
       <div style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
@@ -30,17 +37,10 @@ export const createContact = async (req, res) => {
       </div>
     `;
 
-    await transporter.sendMail({
-      from: `"Astromanía WEB" <${EMAIL_USER}>`,
-      to: EMAIL_JP,
-      replyTo: email,
-      subject,
-      html,
-    });
-
+    await sendContactMail({ replyTo: email, subject, html });
     return res.json({ success: true, message: "Correo enviado con éxito" });
   } catch (err) {
-    console.error("MAIL ERROR:", err?.code, err?.message);
+    console.error("MAIL ERROR:", err?.code, err?.message || err);
     return res.status(502).json({ error: "Hubo un problema al enviar el correo" });
   }
 };
