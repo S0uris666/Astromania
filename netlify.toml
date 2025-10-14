@@ -1,0 +1,12 @@
+# Proxy de API (debe ir antes del SPA)
+[[redirects]]
+  from = "/api/*"
+  to = "https://astromania-a37r.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# SPA: React Router (catch-all)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
