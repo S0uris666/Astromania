@@ -26,10 +26,22 @@ export const createContact = async (req, res) => {
       socketTimeout: 10000,
     });
 
+    // Verificar conexión SMTP rápidamente (debug)
+    try {
+      await Promise.race([
+        transporter.verify(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("VERIFY_TIMEOUT")), 8000)),
+      ]);
+    } catch (verr) {
+      console.error("[SMTP VERIFY]", verr?.code || verr?.message || verr);
+      // seguimos para intentar enviar; verify puede fallar incluso si sendMail funciona
+    }
+
     // Configuración del correo
 const mailOptions = {
   from: `"${subject}" <${EMAIL_USER}>`,
   to: EMAIL_JP,
+  replyTo: email,
   subject: subject,
   html: `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -65,7 +77,12 @@ const mailOptions = {
 
     return res.json({ success: true, message: "Correo enviado con éxito" });
   } catch (error) {
-    console.error("Error enviando correo:", error);
+    console.error("Error enviando correo:", {
+      message: error?.message,
+      code: error?.code,
+      command: error?.command,
+      response: error?.response,
+    });
     return res.status(502).json({ error: "Hubo un problema al enviar el correo" });
   }
 };
