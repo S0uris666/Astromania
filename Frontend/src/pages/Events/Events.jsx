@@ -1,4 +1,4 @@
-// src/pages/EventsCalendarPage.jsx
+// src/pages/Events/Events.jsx
 import { useContext, useEffect, useMemo, useState } from "react";
 import EventContext from "../../context/events/eventsContext";
 
@@ -32,26 +32,41 @@ const statusBadge = (status) =>
     ? "badge-error"
     : "badge-ghost";
 
-// ====== Estilo visual de los eventos en el calendario ======
+/** ===== Render de eventos (chip vs barra multidía) ===== */
 function renderEventContent(arg) {
-  const timeOnly = arg.timeText.split(" - ")[0] || arg.timeText;
-  const event = arg.event.extendedProps.ev;
+  const ev = arg.event.extendedProps.ev;
+  const isMultiDay = arg.event.extendedProps?._multiDay || arg.event.allDay;
 
+  // Colores por tipo
   let colorClasses = "";
-  if (event?.isOnline) {
-    colorClasses = "bg-gradient-to-r from-cyan-500 to-cyan-600";
-  } else if (event?.requiresRegistration) {
-    colorClasses = "bg-gradient-to-r from-amber-500 to-amber-600";
-  } else {
-    colorClasses = "bg-gradient-to-r from-purple-500 to-purple-600";
+  if (ev?.isOnline) colorClasses = "bg-gradient-to-r from-cyan-500 to-cyan-600";
+  else if (ev?.requiresRegistration) colorClasses = "bg-gradient-to-r from-amber-500 to-amber-600";
+  else colorClasses = "bg-gradient-to-r from-purple-500 to-purple-600";
+
+  if (isMultiDay) {
+    // Barra full-width que se estira a través de los días
+    return (
+      <div
+        className={`
+          ${colorClasses}
+          w-full text-white px-3 py-1.5 rounded-lg text-xs font-semibold
+          shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg
+        `}
+        title={arg.event.title}
+      >
+        <div className="truncate">{arg.event.title}</div>
+      </div>
+    );
   }
 
+  // Evento con hora: chip compacto
+  const timeOnly = arg.timeText.split(" - ")[0] || arg.timeText;
   return (
     <div
       className={`
         ${colorClasses}
         text-white px-2.5 py-1 rounded-xl text-xs font-semibold text-center
-        shadow-md min-w-[45px] max-w-[70px] overflow-hidden whitespace-nowrap
+        shadow-md min-w-[45px] overflow-hidden whitespace-nowrap
         transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg
       `}
       title={arg.event.title}
@@ -61,7 +76,7 @@ function renderEventContent(arg) {
   );
 }
 
-// ====== Hook simple para detectar vista móvil ======
+/** ===== Hook simple para detectar vista móvil ===== */
 const useIsMobile = (query = "(max-width: 640px)") => {
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.matchMedia(query).matches : false
@@ -88,7 +103,7 @@ export function EventsCalendarPage() {
     getAllEvents();
   }, [getAllEvents]);
 
-  // ====== Datos de prueba (comentar si la API ya responde) ======
+  // ===== Datos de prueba (comentar si la API ya responde) =====
   const testEvents = [
     {
       _id: "test1",
@@ -97,7 +112,7 @@ export function EventsCalendarPage() {
       organizer: "Astromanía",
       location: "Santiago",
       startDateTime: "2025-01-15T14:30:00-03:00",
-      endDateTime: "2025-01-15T16:30:00-03:00",
+      endDateTime: "2025-01-16T16:30:00-03:00", // <- 2 días para probar barra
       status: "published",
       isOnline: false,
       requiresRegistration: true,
@@ -130,27 +145,44 @@ export function EventsCalendarPage() {
     return dt.isValid;
   };
 
-  // ====== Mapeo a eventos de FullCalendar ======
+  /** ===== Mapeo a eventos de FullCalendar (multi-día -> allDay con fin exclusivo) ===== */
   const calendarEvents = useMemo(() => {
     const mapped = (eventsToUse || [])
       .filter((ev) => isISO(ev.startDateTime))
       .map((ev) => {
-        const startDT = DateTime.fromISO(ev.startDateTime, { zone: TZ });
-        const endDT = ev.endDateTime
-          ? DateTime.fromISO(ev.endDateTime, { zone: TZ })
-          : null;
+        const s = DateTime.fromISO(ev.startDateTime, { zone: TZ });
+        const e = ev.endDateTime ? DateTime.fromISO(ev.endDateTime, { zone: TZ }) : null;
+
+        const isMultiDay = !!(e && !s.hasSame(e, "day"));
+
+        if (isMultiDay) {
+          // allDay y end exclusivo al día siguiente 00:00
+          const startAllDay = s.startOf("day").toISODate(); // "YYYY-MM-DD"
+          const endAllDay = e.plus({ days: 1 }).startOf("day").toISODate(); // exclusivo
+          return {
+            id: ev._id,
+            title: ev.title,
+            start: startAllDay,
+            end: endAllDay,
+            allDay: true,
+            extendedProps: { ev, _multiDay: true },
+          };
+        }
+
+        // Evento normal (mismo día / con hora)
         return {
           id: ev._id,
           title: ev.title,
-          start: startDT.toISO(),
-          end: endDT ? endDT.toISO() : null,
-          extendedProps: { ev },
+          start: s.toISO(),
+          end: e ? e.toISO() : null,
+          allDay: false,
+          extendedProps: { ev, _multiDay: false },
         };
       });
     return mapped;
   }, [eventsToUse]);
 
-  // ====== Eventos del día seleccionado (panel lateral) ======
+  /** ===== Eventos del día seleccionado (panel lateral) ===== */
   const dayEvents = useMemo(() => {
     if (!selectedDateISO) return [];
     const d = DateTime.fromISO(selectedDateISO, { zone: TZ });
@@ -159,7 +191,7 @@ export function EventsCalendarPage() {
       .sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
   }, [eventsToUse, selectedDateISO]);
 
-  // ====== Handlers ======
+  /** ===== Handlers ===== */
   const handleDateSelect = (selectInfo) => {
     setSelectedDateISO(selectInfo.startStr.slice(0, 10)); // YYYY-MM-DD
     setSelectedEvent(null);
@@ -173,7 +205,7 @@ export function EventsCalendarPage() {
 
   const handleEventsSet = () => {};
 
-  // ====== Toolbar e InitialView responsivos ======
+  /** ===== Toolbar e InitialView responsivos ===== */
   const headerToolbar = useMemo(
     () =>
       isMobile
@@ -194,7 +226,7 @@ export function EventsCalendarPage() {
         /* Limpia estilos del evento para usar el render custom */
         .fc-event { border: none !important; background: none !important; padding: 2px !important; }
         .fc-daygrid-event { margin: 1px 0 !important; }
-        .fc-event-title { display: none !important; }
+        .fc-event-title { display: none !important; } /* usamos render custom */
 
         /* Ajustes responsivos en la toolbar */
         .fc .fc-toolbar-title { font-size: ${isMobile ? "1rem" : "1.25rem"}; }
@@ -202,6 +234,9 @@ export function EventsCalendarPage() {
         .fc .fc-button { text-transform: none; } /* Evita MAYÚSCULAS forzadas */
         .fc .fc-daygrid-day-number { font-size: 0.9rem; }
         .fc .fc-timegrid-slot-label { font-size: 0.8rem; }
+
+        /* Asegura que las barras all-day ocupen todo el ancho */
+        .fc-daygrid-block-event .fc-event-main { width: 100%; }
       `}</style>
 
       <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 mt-20">
@@ -221,40 +256,42 @@ export function EventsCalendarPage() {
                   />
                 </label>
               </div>
-<div className="[--fc-page-bg-color:transparent] [--fc-list-bg-color:transparent]">
-              <FullCalendar
-                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-                // Localización en español
-                locales={[esLocale]}
-                locale="es"
-                buttonText={{ today: "Hoy", month: "Mes", week: "Semana", day: "Día", list: "Lista" }}
-                // Toolbar / vista inicial responsivas
-                headerToolbar={headerToolbar}
-                initialView={initialView}
-                // Ajustes de tamaño
-                height="auto"
-                contentHeight="auto"
-                expandRows={true}
-                handleWindowResize={true}
-                // Comportamiento
-                dayMaxEvents={true}
-                weekends={weekendsVisible}
-                selectable={true}
-                selectMirror={true}
-                firstDay={1} // lunes
-                // Zona horaria
-                timeZone={TZ}
-                eventTimeFormat={{ hour: "2-digit", minute: "2-digit", hour12: false }}
-                displayEventTime={true}
-                forceEventDuration={true}
-                eventDisplay="block"
-                // Datos
-                events={calendarEvents}
-                select={handleDateSelect}
-                eventClick={handleEventClick}
-                eventsSet={handleEventsSet}
-                eventContent={renderEventContent}
-              />
+
+              <div
+                className="
+                  [&_.fc-theme-standard]:[--fc-page-bg-color:transparent]
+                  [&_.fc-theme-standard]:[--fc-list-bg-color:transparent]
+                  [&_.fc-theme-standard]:[--fc-today-bg-color:rgba(187,0,255,0.39)]
+                  [&_.fc-theme-standard]:[--fc-now-indicator-color:rgba(187,0,255,0.39)]
+                "
+              >
+                <FullCalendar
+                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                  locales={[esLocale]}
+                  locale="es"
+                  buttonText={{ today: "Hoy", month: "Mes", week: "Semana", day: "Día", list: "Lista" }}
+                  headerToolbar={headerToolbar}
+                  initialView={initialView}
+                  height="auto"
+                  contentHeight="auto"
+                  expandRows={true}
+                  handleWindowResize={true}
+                  dayMaxEvents={true}
+                  weekends={weekendsVisible}
+                  selectable={true}
+                  selectMirror={true}
+                  firstDay={1}
+                  timeZone={TZ}
+                  eventTimeFormat={{ hour: "2-digit", minute: "2-digit", hour12: false }}
+                  displayEventTime={true}
+                  forceEventDuration={true}
+                  eventDisplay="block"
+                  events={calendarEvents}
+                  select={handleDateSelect}
+                  eventClick={handleEventClick}
+                  eventsSet={handleEventsSet}
+                  eventContent={renderEventContent}
+                />
               </div>
             </div>
           </div>
@@ -306,9 +343,7 @@ export function EventsCalendarPage() {
               {selectedEvent && (
                 <div className="mt-4 p-4 rounded-xl bg-base-100 border border-base-300">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`badge ${statusBadge(selectedEvent.status)}`}>
-                      {selectedEvent.status}
-                    </span>
+                    <span className={`badge ${statusBadge(selectedEvent.status)}`}>{selectedEvent.status}</span>
                     {selectedEvent.isOnline ? (
                       <span className="badge badge-info">Online</span>
                     ) : (
@@ -370,12 +405,7 @@ export function EventsCalendarPage() {
                     )}
                     {selectedEvent.isOnline && selectedEvent.url && (
                       <div className="pt-2">
-                        <a
-                          href={selectedEvent.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="link link-primary"
-                        >
+                        <a href={selectedEvent.url} target="_blank" rel="noreferrer" className="link link-primary">
                           Ir al enlace del evento
                         </a>
                       </div>
