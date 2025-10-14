@@ -38,6 +38,7 @@ import { SeleccionProductos } from "./pages/ServiceProduct/SeleccionProductos.js
 import SearchResults from "./pages/SearchResults/SearchResults.jsx";
 import { Literatura } from "./pages/Recursos/Literatura/Literatura.jsx";
 import { Aprendizaje } from "./pages/Recursos/Literatura/Aprendizaje.jsx";
+import { Cuentos } from "./pages/Recursos/Literatura/Cuentos.jsx";
 
 export default function AppRouter() {
   return (
@@ -65,6 +66,7 @@ export default function AppRouter() {
                   {/* Subpaginas de recursos */}
                   <Route path="/recursos/literatura" element={<Literatura />} />
                   <Route path="/literatura/aprendizaje" element={<Aprendizaje />} />
+                  <Route path="/literatura/juvenil-cuentos" element={<Cuentos />} />
 
 
 
