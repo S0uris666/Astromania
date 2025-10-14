@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useContext, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, ChevronDown, ShoppingCart, Trash2 } from "lucide-react";
+import { Menu, X, ChevronDown, ShoppingCart, Trash2, Search } from "lucide-react";
 import { UserContext } from "../../context/user/UserContext";
 import logoImg from "../../assets/Images/logo.png";
 
@@ -29,6 +29,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // <-- NUEVO
   const cartRefMobile = useRef(null);
   const cartRefDesktop = useRef(null);
   const navigate = useNavigate();
@@ -94,6 +95,17 @@ export default function Header() {
     navigate("/perfil");
   };
 
+  // ---- SUBMIT de búsqueda (desktop y móvil comparten handler)
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (!q) return;
+    // navega a la página de resultados con query param ?q=
+    navigate(`/buscar?q=${encodeURIComponent(q)}`);
+    setMenuOpen(false);
+    setCartOpen(false);
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 w-full z-[80] transition-colors duration-300 ${
@@ -101,7 +113,6 @@ export default function Header() {
       } text-white`}
     >
       <style>{`
-        /* Evita que utilidades y logo se encojan demasiado */
         .hdr-logo, .hdr-utils { flex-shrink: 0; }
         .site-logo img { width: auto !important; height: auto; max-height: 3rem; }
         @media (min-width: 1024px) { .site-logo img { max-height: 3rem; } }
@@ -191,16 +202,30 @@ export default function Header() {
 
         {/* Utilidades: búsqueda + auth + carrito */}
         <div className="hdr-utils flex items-center gap-2 md:gap-3">
-          <div className="form-control">
-            <input
-              type="text"
-              placeholder="Buscar..."
-              className="input input-bordered input-sm
-                         w-36 md:w-44 lg:w-48 xl:w-56 2xl:w-64
-                         min-w-[9rem]
-                         bg-white/10 text-white placeholder-gray-300"
-            />
-          </div>
+          {/* --- BUSCADOR DESKTOP --- */}
+          <form onSubmit={handleSearchSubmit} className="form-control">
+            <div className="relative">
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar..."
+                className="input input-bordered input-sm
+                           w-36 md:w-44 lg:w-48 xl:w-56 2xl:w-64
+                           min-w-[9rem]
+                           bg-white/10 text-white placeholder-gray-300 pr-9"
+                aria-label="Buscar"
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs px-1"
+                aria-label="Buscar"
+                title="Buscar"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+            </div>
+          </form>
 
           <Link to={accountPath} className="btn btn-secondary btn-sm text-white whitespace-nowrap">
             {authState ? "Mi cuenta" : "Ingresa"}
@@ -260,13 +285,27 @@ export default function Header() {
           className="absolute top-16 left-0 w-full px-6 py-8 space-y-6 bg-black/80 backdrop-blur-sm"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="form-control mb-4">
-            <input
-              type="text"
-              placeholder="Buscar..."
-              className="input input-bordered w-full bg-white/10 text-white placeholder-gray-300"
-            />
-          </div>
+          {/* --- BUSCADOR MÓVIL --- */}
+          <form onSubmit={handleSearchSubmit} className="form-control mb-4">
+            <div className="relative">
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar..."
+                className="input input-bordered w-full bg-white/10 text-white placeholder-gray-300 pr-10"
+                aria-label="Buscar"
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm px-2"
+                aria-label="Buscar"
+                title="Buscar"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+            </div>
+          </form>
 
           <Link to="/" className="block text-xl" onClick={() => setMenuOpen(false)}>Inicio</Link>
           <Link to="/nosotros" className="block text-xl" onClick={() => setMenuOpen(false)}>Nosotros</Link>

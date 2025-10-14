@@ -35,7 +35,7 @@ import { EditarEventos } from "./pages/Events/EditarEventos.jsx";
 import { Editar } from "./pages/Events/Editar.jsx";
 import { EditarProductos } from "./pages/ServiceProduct/EditarProductos.jsx";
 import { SeleccionProductos } from "./pages/ServiceProduct/SeleccionProductos.jsx";
-
+import SearchResults from "./pages/SearchResults/SearchResults.jsx";
 
 export default function AppRouter() {
   return (
@@ -63,6 +63,7 @@ export default function AppRouter() {
                   <Route path="/comunidad" element={<Comunidad />} />
                   <Route path="/contacto" element={<Contacto />} />
                   <Route path="/reserva" element={<Reserva />} />
+                  {/* Rutas de Autenticación y Perfil */}
                   <Route
                     path="login"
                     element={<AuthRoute component={Login} />}
@@ -99,7 +100,10 @@ export default function AppRouter() {
                     path="/admin"
                     element={<AdminRoute component={PerfilAdmin} />}
                   />
+                  <Route path="/buscar" element={<SearchResults />} />
                 </Route>
+
+                
               </Routes>
             </BrowserRouter>
           </ServiceProductState>
