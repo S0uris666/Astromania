@@ -16,8 +16,10 @@ export const createContact = async (req, res) => {
     }
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      family: 4,
       auth: { user: EMAIL_USER, pass: EMAIL_PASS },
       connectionTimeout: 10000,
       greetingTimeout: 10000,
