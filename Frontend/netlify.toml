@@ -7,6 +7,6 @@
 # Proxy de API
 [[redirects]]
   from = "/api/*"
-  to = "https://astromania-a37r.onrender.com"
+  to = "https://astromania-a37r.onrender.com/api/:splat"
   status = 200
   force = true
