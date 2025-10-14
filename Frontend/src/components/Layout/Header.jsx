@@ -8,7 +8,9 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const cartRef = useRef(null);
+  // Refs separados para carrito móvil y escritorio
+  const cartRefMobile = useRef(null);
+  const cartRefDesktop = useRef(null);
   const navigate = useNavigate();
 
   const {
@@ -70,8 +72,10 @@ const accountPath = useMemo(() => {
   // cerrar dropdown carrito al hacer click fuera
   useEffect(() => {
     const onClick = (e) => {
-      if (!cartRef.current) return;
-      if (!cartRef.current.contains(e.target)) setCartOpen(false);
+      const target = e.target;
+      const insideMobile = cartRefMobile.current?.contains(target);
+      const insideDesktop = cartRefDesktop.current?.contains(target);
+      if (!insideMobile && !insideDesktop) setCartOpen(false);
     };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
@@ -108,7 +112,7 @@ const accountPath = useMemo(() => {
         />
 
         {/* Botón carrito móvil */}
-        <div className="relative z-[80]" ref={cartRef}>
+        <div className="relative z-[80]" ref={cartRefMobile}>
           <button
             aria-label="Carrito"
             className="btn btn-ghost btn-circle"
@@ -209,7 +213,7 @@ const accountPath = useMemo(() => {
           </Link>
 
           {/* Carrito escritorio */}
-          <div className="relative" ref={cartRef}>
+          <div className="relative" ref={cartRefDesktop}>
             <button
               aria-label="Carrito"
               className="btn btn-ghost btn-circle"
@@ -460,4 +464,3 @@ function MiniCart({
     </div>
   );
 }
-
