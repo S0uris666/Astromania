@@ -36,6 +36,8 @@ import { Editar } from "./pages/Events/Editar.jsx";
 import { EditarProductos } from "./pages/ServiceProduct/EditarProductos.jsx";
 import { SeleccionProductos } from "./pages/ServiceProduct/SeleccionProductos.jsx";
 import SearchResults from "./pages/SearchResults/SearchResults.jsx";
+import { Literatura } from "./pages/Recursos/Literatura/Literatura.jsx";
+import { Aprendizaje } from "./pages/Recursos/Literatura/Aprendizaje.jsx";
 
 export default function AppRouter() {
   return (
@@ -60,6 +62,19 @@ export default function AppRouter() {
                     element={<ServiceProductSingle />}
                   />
                   <Route path="/recursos" element={<Recursos />} />
+                  {/* Subpaginas de recursos */}
+                  <Route path="/recursos/literatura" element={<Literatura />} />
+                  <Route path="/literatura/aprendizaje" element={<Aprendizaje />} />
+
+
+
+
+
+
+
+
+
+
                   <Route path="/comunidad" element={<Comunidad />} />
                   <Route path="/contacto" element={<Contacto />} />
                   <Route path="/reserva" element={<Reserva />} />
@@ -101,6 +116,9 @@ export default function AppRouter() {
                     element={<AdminRoute component={PerfilAdmin} />}
                   />
                   <Route path="/buscar" element={<SearchResults />} />
+
+                  
+
                 </Route>
 
                 
