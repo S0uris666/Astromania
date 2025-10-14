@@ -221,7 +221,7 @@ export function EventsCalendarPage() {
                   />
                 </label>
               </div>
-
+<div className="[--fc-page-bg-color:transparent] [--fc-list-bg-color:transparent]">
               <FullCalendar
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
                 // Localización en español
@@ -255,6 +255,7 @@ export function EventsCalendarPage() {
                 eventsSet={handleEventsSet}
                 eventContent={renderEventContent}
               />
+              </div>
             </div>
           </div>
         </section>
