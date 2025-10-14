@@ -10,19 +10,24 @@ export const createContact = async (req, res) => {
   }
 
   try {
-    // Configurar el transporte de nodemailer
+    const { EMAIL_USER, EMAIL_PASS, EMAIL_JP } = process.env;
+    if (!EMAIL_USER || !EMAIL_PASS || !EMAIL_JP) {
+      return res.status(503).json({ error: "Servicio de correo no configurado" });
+    }
     const transporter = nodemailer.createTransport({
-      service: "gmail", // o usa host: "smtp.gmail.com"
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: { user: EMAIL_USER, pass: EMAIL_PASS },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
     });
 
     // Configuración del correo
 const mailOptions = {
-  from: `"${subject}" <${process.env.EMAIL_USER}>`,
-  to: process.env.EMAIL_JP,
+  from: `"${subject}" <${EMAIL_USER}>`,
+  to: EMAIL_JP,
   subject: subject,
   html: `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -38,12 +43,27 @@ const mailOptions = {
   `,
 };
 
-    // Enviar correo
-    await transporter.sendMail(mailOptions);
+    // Enviar correo con timeout de operación
+    const sendWithTimeout = (options, timeoutMs = 12000) =>
+      new Promise((resolve, reject) => {
+        const to = setTimeout(() => reject(new Error("MAIL_TIMEOUT")), timeoutMs);
+        transporter
+          .sendMail(options)
+          .then((r) => {
+            clearTimeout(to);
+            resolve(r);
+          })
+          .catch((err) => {
+            clearTimeout(to);
+            reject(err);
+          });
+      });
+
+    await sendWithTimeout(mailOptions);
 
     return res.json({ success: true, message: "Correo enviado con éxito" });
   } catch (error) {
     console.error("Error enviando correo:", error);
-    return res.status(500).json({ error: "Hubo un problema al enviar el correo" });
+    return res.status(502).json({ error: "Hubo un problema al enviar el correo" });
   }
 };
