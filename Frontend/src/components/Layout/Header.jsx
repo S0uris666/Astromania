@@ -183,14 +183,14 @@ export default function Header() {
           <div className="flex flex-wrap items-center gap-x-4 xl:gap-x-6 gap-y-2">
             <Drop label="Recursos">
               <li><Link to="/recursos/literatura">Literatura Astronómica</Link></li>
-              <li><Link to="/recursos/musica">Música Astronómica</Link></li>
+              <li><Link to="/recursos/musica">Música y Podcast</Link></li>
               <li><Link to="/recursos/peliculas-series">Películas y series</Link></li>
               <li><Link to="/recursos/sofware-y-apps">Software y apps</Link></li>
             </Drop>
 
             <Drop label="Comunidad">
               <li><Link to="/comunidad/astromania-responde">Astromanía responde</Link></li>
-              <li><Link to="/comunidad/podcast">Podcast</Link></li>
+              
               <li><Link to="/comunidad/galeria">Galería</Link></li>
             </Drop>
 

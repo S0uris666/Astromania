@@ -39,6 +39,8 @@ import SearchResults from "./pages/SearchResults/SearchResults.jsx";
 import { Literatura } from "./pages/Recursos/Literatura/Literatura.jsx";
 import { Aprendizaje } from "./pages/Recursos/Literatura/Aprendizaje.jsx";
 import { Cuentos } from "./pages/Recursos/Literatura/Cuentos.jsx";
+import { Novelas } from "./pages/Recursos/Literatura/Novelas.jsx";
+import MusicaAstronomica from "./pages/Recursos/Musica/musica.jsx";
 
 export default function AppRouter() {
   return (
@@ -67,13 +69,8 @@ export default function AppRouter() {
                   <Route path="/recursos/literatura" element={<Literatura />} />
                   <Route path="/literatura/aprendizaje" element={<Aprendizaje />} />
                   <Route path="/literatura/juvenil-cuentos" element={<Cuentos />} />
-
-
-
-
-
-
-
+                  <Route path="/literatura/novelas-textos" element={<Novelas />} />
+                  <Route path="/recursos/musica" element={<MusicaAstronomica />} />
 
 
 
