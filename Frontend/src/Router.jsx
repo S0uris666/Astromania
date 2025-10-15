@@ -36,6 +36,7 @@ import SearchResults from "./pages/SearchResults/SearchResults.jsx";
 import { Literatura } from "./pages/Recursos/Literatura/Literatura.jsx";
 import MusicaAstronomica from "./pages/Recursos/Musica/musica.jsx";
 import { Audiovisual } from "./pages/Recursos/Audiovisual/Audiovisual.jsx";
+import { Stellarium } from "./pages/Sofware/Stellarium.jsx";
 
 export default function AppRouter() {
   return (
@@ -59,7 +60,7 @@ export default function AppRouter() {
                     path="/servicios-productos/:id"
                     element={<ServiceProductSingle />}
                   />
-                  <Route path="/recursos" element={<Recursos />} />
+                  <Route path="/recursos/stellarium" element={<Stellarium />} />
                   {/* Subpaginas de recursos */}
                   {/* Literatura */}
                   <Route path="/recursos/literatura" element={<Literatura />} />

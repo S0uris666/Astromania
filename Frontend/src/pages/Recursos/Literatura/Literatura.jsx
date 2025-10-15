@@ -1,14 +1,37 @@
 import { useMemo, useState } from "react";
+import {
+  Search,
+  Library,
+  GraduationCap,
+  Sparkles,
+  BookOpenText,
+} from "lucide-react";
 
 import { literatura_aprendizaje } from "../../../data/Literatura_aprendizaje.jsx";
 import { literatura_cuento } from "../../../data/Literatura_cuento.jsx";
 import { literatura_novela } from "../../../data/Literatura_novela.jsx";
 
 const CATEGORY_OPTIONS = [
-  { id: "all", label: "Todos" },
-  { id: "aprendizaje", label: "Aprendizaje" },
-  { id: "cuentos", label: "Juvenil y cuentos" },
-  { id: "novelas", label: "Novelas y textos" },
+  {
+    id: "all",
+    label: "Todos",
+    icon: <Library className="w-4 h-4" />,
+  },
+  {
+    id: "aprendizaje",
+    label: "Aprendizaje",
+    icon: <GraduationCap className="w-4 h-4" />,
+  },
+  {
+    id: "cuentos",
+    label: "Juvenil y cuentos",
+    icon: <Sparkles className="w-4 h-4" />,
+  },
+  {
+    id: "novelas",
+    label: "Novelas y textos",
+    icon: <BookOpenText className="w-4 h-4" />,
+  },
 ];
 
 const CATEGORY_LABEL = CATEGORY_OPTIONS.reduce(
@@ -27,6 +50,7 @@ const CATEGORY_DESCRIPTION = {
 };
 
 export function Literatura() {
+  const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
 
   const catalogue = useMemo(
@@ -38,10 +62,27 @@ export function Literatura() {
     []
   );
 
-  const filteredBooks =
-    activeCategory === "all"
-      ? catalogue
-      : catalogue.filter((book) => book.category === activeCategory);
+  const filteredBooks = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    return catalogue.filter((book) => {
+      const matchesCategory =
+        activeCategory === "all" || book.category === activeCategory;
+
+      if (!matchesCategory) return false;
+      if (!normalizedQuery) return true;
+
+      const fieldsToCheck = [
+        book?.title ?? "",
+        book?.autor ?? "",
+        book?.description ?? "",
+      ];
+
+      return fieldsToCheck.some((field) =>
+        field.toLowerCase().includes(normalizedQuery)
+      );
+    });
+  }, [activeCategory, catalogue, query]);
 
   return (
     <main className="min-h-[calc(100vh-6rem)] bg-base-200">
@@ -58,6 +99,8 @@ export function Literatura() {
           <FilterBar
             activeCategory={activeCategory}
             onChange={setActiveCategory}
+            query={query}
+            onQueryChange={setQuery}
           />
 
           <p className="text-sm sm:text-base text-base-content/70">
@@ -77,7 +120,7 @@ export function Literatura() {
             </p>
           </div>
         ) : (
-          <ul className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          <ul className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
             {filteredBooks.map((book) => (
               <li key={`${book.category}-${book.id}`}>
                 <BookCard
@@ -93,35 +136,73 @@ export function Literatura() {
   );
 }
 
-function FilterBar({ activeCategory, onChange }) {
+function FilterBar({ activeCategory, onChange, query, onQueryChange }) {
   return (
-    <div className="join w-full flex flex-wrap gap-2">
-      {CATEGORY_OPTIONS.map((option) => {
-        const isActive = option.id === activeCategory;
-        return (
-          <button
-            key={option.id}
-            type="button"
-            className={`btn join-item btn-sm sm:btn-md ${
-              isActive ? "btn-primary" : "btn-outline"
-            }`}
-            onClick={() => onChange(option.id)}
-            aria-pressed={isActive}
-          >
-            {option.label}
-          </button>
-        );
-      })}
+    <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+      <label className="input input-bordered flex items-center gap-2 w-full md:max-w-md bg-base-100">
+        <Search className="w-4 h-4 opacity-70" />
+        <input
+          type="text"
+          className="grow"
+          placeholder="Buscar por título, autor o descripción..."
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+          aria-label="Buscar en catálogo de literatura"
+        />
+      </label>
+
+      <div className="join">
+        {CATEGORY_OPTIONS.map((option) => {
+          const isActive = option.id === activeCategory;
+          return (
+            <button
+              key={option.id}
+              type="button"
+              className={`btn btn-sm join-item ${
+                isActive ? "btn-primary" : "btn-outline"
+              }`}
+              onClick={() => onChange(option.id)}
+              aria-pressed={isActive}
+            >
+              <span className="mr-2 hidden sm:inline-flex">{option.icon}</span>
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
+
+
 function BookCard({ book, categoryLabel }) {
   const { title, autor, description, imagen, link } = book || {};
   const isValidUrl = typeof link === "string" && /^https?:\/\//i.test(link);
+  const [expanded, setExpanded] = useState(false);
+
+  const normalizedDescription = (description ?? "").trim();
+  const THRESHOLD = 140;
+  const COLLAPSED_LINES = 3;
+  const LINE_HEIGHT_REM = 1.5;
+  const collapsedDescriptionHeight = `${(
+    COLLAPSED_LINES * LINE_HEIGHT_REM
+  ).toFixed(2)}rem`;
+  const needsToggle = useMemo(() => {
+    return normalizedDescription.length > THRESHOLD;
+  }, [normalizedDescription]);
+  const shortText = useMemo(() => {
+    return normalizedDescription.slice(0, THRESHOLD).trimEnd();
+  }, [normalizedDescription]);
+  const cardClassName = [
+    "card bg-base-100 border border-base-300/70 hover:border-base-300 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden",
+    expanded ? "" : "min-h-[22rem]",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <article className="card h-full bg-base-100 border border-base-300 shadow-sm transition-shadow hover:shadow-xl ">
+    <article className={cardClassName}>
       <figure className="relative h-44 sm:h-56 bg-base-300 grid place-items-center p-2 sm:p-3">
         {imagen ? (
           <img
@@ -157,10 +238,30 @@ function BookCard({ book, categoryLabel }) {
           </p>
         )}
 
-        {description && (
-          <p className="mt-3 text-sm sm:text-[0.95rem] text-base-content/80 line-clamp-4">
-            {description}
-          </p>
+        {normalizedDescription && (
+          <div className="mt-1 text-sm sm:text-[0.95rem] text-base-content/80">
+            <p
+              className={!expanded ? "line-clamp-3" : ""}
+              style={{ minHeight: collapsedDescriptionHeight }}
+            >
+              {expanded
+                ? normalizedDescription
+                : needsToggle
+                ? `${shortText}...`
+                : normalizedDescription}
+            </p>
+
+            {needsToggle && (
+              <button
+                type="button"
+                onClick={() => setExpanded((value) => !value)}
+                className="mt-2 btn btn-link btn-xs p-0 h-auto min-h-0 no-underline text-secondary"
+                aria-expanded={expanded}
+              >
+                {expanded ? "Ver menos" : "Ver mas"}
+              </button>
+            )}
+          </div>
         )}
 
         <div className="card-actions mt-4">
