@@ -38,10 +38,10 @@ export default function MusicaAstronomica() {
   }, [query, type]);
 
   return (
-    <main className="min-h-[calc(100vh-6rem)] bg-base-200 mt-15">
+    <main className="min-h-[calc(100vh-6rem)] bg-base-200">
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
         {/* Header */}
-        <header className="max-w-3xl">
+        <header className="max-w-3xl mt-15">
           <h1 className="text-3xl lg:text-4xl ">Música astronómica</h1>
           <p className="mt-2 text-base text-base-content/80">
             En Fundación Astromanía creemos que la música inspira el

@@ -1,10 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ServiceProductState from "./context/serviceProducts/ServiceProductState.jsx";
-
 //Layout Principal
 import Layout from "./components/Layout/Layout.jsx";
-
-// Páginas principales
+// Páginas
 import { Home } from "./pages/Home/Home.jsx";
 import { AboutUs } from "./pages/AboutUs/AboutUs.jsx";
 import { ServiceProductList } from "./pages/ServiceProduct/List/ServiceProductList.jsx";
@@ -12,7 +10,6 @@ import { ServiceProductSingle } from "./pages/ServiceProduct/Single/ServiceProdu
 import { Recursos } from "./pages/Recursos/Recursos.jsx";
 import { Comunidad } from "./pages/Comunidad/Comunidad.jsx";
 import { Contacto } from "./pages/Contacto/Contacto.jsx";
-import { Reserva } from "./pages/Reserva/Reserva.jsx";
 import { ScrollToTop } from "./components/ScrollToTop.jsx";
 import { Login } from "./pages/Login/Login.jsx";
 import { Registro } from "./pages/Registro/Registro.jsx";
@@ -37,10 +34,8 @@ import { EditarProductos } from "./pages/ServiceProduct/EditarProductos.jsx";
 import { SeleccionProductos } from "./pages/ServiceProduct/SeleccionProductos.jsx";
 import SearchResults from "./pages/SearchResults/SearchResults.jsx";
 import { Literatura } from "./pages/Recursos/Literatura/Literatura.jsx";
-import { Aprendizaje } from "./pages/Recursos/Literatura/Aprendizaje.jsx";
-import { Cuentos } from "./pages/Recursos/Literatura/Cuentos.jsx";
-import { Novelas } from "./pages/Recursos/Literatura/Novelas.jsx";
 import MusicaAstronomica from "./pages/Recursos/Musica/musica.jsx";
+import { Audiovisual } from "./pages/Recursos/Audiovisual/Audiovisual.jsx";
 
 export default function AppRouter() {
   return (
@@ -66,17 +61,19 @@ export default function AppRouter() {
                   />
                   <Route path="/recursos" element={<Recursos />} />
                   {/* Subpaginas de recursos */}
+                  {/* Literatura */}
                   <Route path="/recursos/literatura" element={<Literatura />} />
-                  <Route path="/literatura/aprendizaje" element={<Aprendizaje />} />
-                  <Route path="/literatura/juvenil-cuentos" element={<Cuentos />} />
-                  <Route path="/literatura/novelas-textos" element={<Novelas />} />
+                  {/* Música */}
                   <Route path="/recursos/musica" element={<MusicaAstronomica />} />
+
+                  {/* Peliculas */}
+                   <Route path="/recursos/peliculas-series" element={<Audiovisual />} />
 
 
 
                   <Route path="/comunidad" element={<Comunidad />} />
                   <Route path="/contacto" element={<Contacto />} />
-                  <Route path="/reserva" element={<Reserva />} />
+                  
                   {/* Rutas de Autenticación y Perfil */}
                   <Route
                     path="login"
