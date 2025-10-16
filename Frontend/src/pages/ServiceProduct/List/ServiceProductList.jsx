@@ -1,177 +1,231 @@
-import { useContext, useEffect, useMemo } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import ServiceProductContext from "../../../context/serviceProducts/ServiceProductContext";
 import { UserContext } from "../../../context/user/UserContext";
 
-const currencyCLP = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" });
-const fmtPrice = (n) => (typeof n === "number" ? currencyCLP.format(n) : "A cotizar");
-const truncate = (s = "", n = 120) => (s.length > n ? s.slice(0, n) + "…" : s);
+const TYPE_FILTERS = [
+  { value: "all", label: "Todo" },
+  { value: "product", label: "Productos" },
+  { value: "service", label: "Servicios" },
+  { value: "activity", label: "Actividades" },
+];
 
-// Placeholders
+const TYPE_LABEL = {
+  product: "Producto",
+  service: "Servicio",
+  activity: "Actividad",
+};
+
 const PLACEHOLDER_PRODUCT = "https://placehold.co/900x600?text=Producto";
 const PLACEHOLDER_SERVICE = "https://placehold.co/900x600?text=Servicio";
+const PLACEHOLDER_ACTIVITY = "https://placehold.co/900x600?text=Actividad";
 
-const cloudinaryThumb = (urlOrId) => {
+const currencyCLP = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" });
+const formatPrice = (value) =>
+  typeof value === "number" ? currencyCLP.format(value) : "A cotizar";
+
+const cloudinaryContain = (urlOrId) => {
   if (!urlOrId) return null;
   if (typeof urlOrId === "string" && urlOrId.includes("/upload/")) {
     return urlOrId.replace(
       "/upload/",
-      "/upload/f_auto,q_auto,c_pad,b_auto:predominant,w_1000,h_750/"
+      "/upload/f_auto,q_auto,c_pad,b_auto:predominant,w_1200,h_800/"
     );
   }
   const cloudName = import.meta.env.VITE_CLD_CLOUD_NAME;
   if (cloudName) {
-    return `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,c_pad,b_auto:predominant,w_1000,h_750/${urlOrId}`;
+    return `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,c_pad,b_auto:predominant,w_1200,h_800/${urlOrId}`;
   }
   return null;
 };
 
-const getCoverData = (sp) => {
-  const first = sp?.images?.[0];
+const getCoverData = (item) => {
+  const first = item?.images?.[0];
   if (first && (first.url || first.public_id)) {
-    const srcOptim = cloudinaryThumb(first.url || first.public_id);
-    const src = srcOptim || first.url || null;
-    const alt = first.alt || sp.title || "Imagen";
-    if (src) return { src, alt };
+    const src = cloudinaryContain(first.url || first.public_id) || first.url || null;
+    if (src) return { src, alt: first.alt || item.title || "Imagen" };
   }
-  if (Array.isArray(sp?.images) && typeof sp.images[0] === "string") {
-    const srcOptim = cloudinaryThumb(sp.images[0]);
-    const src = srcOptim || sp.images[0];
-    return { src, alt: sp.title || "Imagen" };
+  if (Array.isArray(item?.images) && typeof item.images[0] === "string") {
+    const src = cloudinaryContain(item.images[0]) || item.images[0];
+    return { src, alt: item.title || "Imagen" };
   }
-  return {
-    src: sp?.type === "product" ? PLACEHOLDER_PRODUCT : PLACEHOLDER_SERVICE,
-    alt: sp?.title || "Sin imagen",
-  };
+  const type = String(item?.type || "").toLowerCase();
+  if (type === "service") return { src: PLACEHOLDER_SERVICE, alt: "Servicio" };
+  if (type === "activity") return { src: PLACEHOLDER_ACTIVITY, alt: "Actividad" };
+  return { src: PLACEHOLDER_PRODUCT, alt: "Producto" };
 };
 
 export const ServiceProductList = () => {
   const { addToCart } = useContext(UserContext);
   const { serviceProduct = [], getSP } = useContext(ServiceProductContext);
 
-  useEffect(() => { getSP(); }, [getSP]);
+  const [filterType, setFilterType] = useState("all");
 
-  const items = useMemo(() => serviceProduct, [serviceProduct]);
+  useEffect(() => {
+    getSP().catch(() => {});
+  }, [getSP]);
+
+  const items = useMemo(() => (Array.isArray(serviceProduct) ? serviceProduct : []), [serviceProduct]);
+
+  const filtered = useMemo(() => {
+    if (filterType === "all") return items.filter((item) => item.active !== false);
+    return items.filter(
+      (item) => item.active !== false && String(item.type || "").toLowerCase() === filterType
+    );
+  }, [items, filterType]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <header className="mt-15 mb-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+      <header className="mt-15 space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Servicios y Productos</h1>
-        <p className="text-base-content/70 mt-1">Explora el catálogo de Astromanía ✨</p>
+        <p className="text-base text-base-content/70 max-w-3xl">
+          Explora nuestro catálogo de productos, servicios y actividades preparados para acercar la astronomía a todas las edades.
+        </p>
       </header>
 
-      {!items.length ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="rounded-2xl border border-base-300/60 bg-base-200/50 shadow-sm overflow-hidden animate-pulse"
-            >
-              <div className="aspect-[4/3] bg-base-300" />
-              <div className="p-5 space-y-3">
-                <div className="h-6 w-2/3 bg-base-300 rounded" />
-                <div className="h-4 w-full bg-base-300 rounded" />
-                <div className="h-4 w-3/4 bg-base-300 rounded" />
-                <div className="mt-2 h-10 w-28 bg-base-300 rounded" />
-              </div>
-            </div>
-          ))}
+      <div className="flex flex-wrap items-center gap-2">
+        {TYPE_FILTERS.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            className={`btn btn-sm ${filterType === option.value ? "btn-primary" : "btn-outline"}`}
+            onClick={() => setFilterType(option.value)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+
+      {!filtered.length ? (
+        <div className="rounded-xl border border-base-300 p-8 text-base-content/70 text-center">
+          No encontramos elementos para esta categoría por ahora.
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
-          {items.map((sp) => {
-            const isProduct = sp.type === "product";
-            const href = `/servicios-productos/${sp.slug || sp._id}`;
-            const { src: coverSrc, alt: coverAlt } = getCoverData(sp);
+          {filtered.map((item) => {
+            const type = String(item.type || "").toLowerCase();
+            const { src, alt } = getCoverData(item);
+            const href = `/servicios-productos/${item.slug || item._id}`;
+            const tags = Array.isArray(item.tags) ? item.tags.slice(0, 4) : [];
+            const priceLabel =
+              type === "product" || type === "service"
+                ? formatPrice(item.price)
+                : undefined;
+            const stockLabel =
+              type === "product" && typeof item.stock === "number"
+                ? item.stock > 0
+                  ? `Stock: ${item.stock}`
+                  : "Sin stock"
+                : null;
+            const infoService = [];
+            if (type === "service") {
+              if (item.durationMinutes) infoService.push(`Duración: ${item.durationMinutes} min`);
+              if (item.capacity) infoService.push(`Capacidad: ${item.capacity} personas`);
+              if (Array.isArray(item.locations) && item.locations.length) {
+                infoService.push(`Ubicaciones: ${item.locations.join(", ")}`);
+              }
+            }
+            const activityLocation =
+              type === "activity" && item.location ? `Ubicación: ${item.location}` : null;
 
             return (
               <article
-                key={sp._id}
+                key={item._id || item.id}
                 className="group rounded-2xl border border-base-300/60 bg-neutral shadow-sm hover:shadow-xl hover:border-base-300 transition-all overflow-hidden"
               >
-                {/* Imagen contenida, sin recorte */}
-                <figure className="relative aspect-[4/3] bg-base-300/70">
+                <figure className="relative aspect-[4/3] bg-base-300/60">
                   <div className="absolute inset-0 grid place-items-center">
                     <img
-                      src={coverSrc}
-                      alt={coverAlt}
+                      src={src}
+                      alt={alt}
                       className="max-h-full max-w-full object-contain"
                       loading="lazy"
                     />
                   </div>
-                  {/* Borde superior sutil */}
-                  <div className="absolute inset-x-0 top-0 h-px bg-base-100/20" />
                 </figure>
 
-                <div className="p-5">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`badge badge-sm font-medium ${
-                        isProduct ? "badge-primary/90" : "badge-secondary/90"
-                      }`}
-                    >
-                      {isProduct ? "Producto" : "Servicio"}
+                <div className="p-5 space-y-4">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="badge badge-secondary/90 font-medium">
+                      {TYPE_LABEL[type] || type}
                     </span>
-                    {isProduct && (
+                    {type === "product" && stockLabel ? (
                       <span
                         className={`badge badge-sm ${
-                          sp.stock > 0 ? "badge-success/90" : "badge-error/90"
+                          stockLabel.includes("Sin") ? "badge-error/90" : "badge-success/90"
                         }`}
                       >
-                        {sp.stock > 0 ? `Stock: ${sp.stock}` : "Sin stock"}
+                        {stockLabel}
                       </span>
-                    )}
+                    ) : null}
+                    {type === "service" && priceLabel ? (
+                      <span className="badge badge-ghost badge-sm">{priceLabel}</span>
+                    ) : null}
+                    {type === "activity" && activityLocation ? (
+                      <span className="badge badge-ghost badge-sm">{activityLocation}</span>
+                    ) : null}
                   </div>
 
-                  <h2 className="text-lg font-semibold mt-3 leading-tight group-hover:opacity-90">
-                    {sp.title}
+                  <h2 className="text-lg font-semibold leading-tight group-hover:opacity-90">
+                    {item.title}
                   </h2>
 
-                  {(sp.shortDescription || sp.description) && (
-                    <p className="mt-2 text-sm text-base-content/80 leading-relaxed">
-                      {truncate(sp.shortDescription || sp.description, 140)}
+                  {item.shortDescription && (
+                    <p className="text-sm text-base-content/80 leading-relaxed line-clamp-4">
+                      {item.shortDescription}
                     </p>
                   )}
 
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="text-xl font-semibold tracking-tight">
-                      {isProduct ? fmtPrice(sp.price) : (sp.price ? fmtPrice(sp.price) : "A cotizar")}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Link
-                        to={href}
-                        state={{ serviceProduct: sp }}
-                        className="btn btn-sm btn-primary"
-                      >
-                        Ver más
-                      </Link>
-
-                      {isProduct && sp.stock > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => addToCart(sp)}
-                          className="btn btn-sm btn-outline"
-                          title="Añadir al carrito"
-                        >
-                          Añadir
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {!!sp.tags?.length && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {sp.tags.slice(0, 4).map((t) => (
-                        <span key={t} className="badge badge-ghost badge-sm">
-                          {t}
-                        </span>
-                      ))}
-                      {sp.tags.length > 4 && (
-                        <span className="badge badge-ghost badge-sm">+{sp.tags.length - 4}</span>
-                      )}
+                  {type === "product" && (
+                    <div className="flex items-center justify-between text-sm font-semibold">
+                      <span>{formatPrice(item.price)}</span>
+                      {item.delivery ? <span className="opacity-70">{item.delivery}</span> : null}
                     </div>
                   )}
+
+                  {type === "service" && infoService.length ? (
+                    <ul className="text-xs text-base-content/70 space-y-1">
+                      {infoService.map((info) => (
+                        <li key={info}>{info}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+
+                  {tags.length ? (
+                    <div className="flex flex-wrap gap-2">
+                      {tags.map((tag) => (
+                        <span key={tag} className="badge badge-ghost badge-sm">
+                          #{tag}
+                        </span>
+                      ))}
+                      {Array.isArray(item.tags) && item.tags.length > tags.length ? (
+                        <span className="badge badge-ghost badge-sm">
+                          +{item.tags.length - tags.length}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  <div className="flex items-center justify-between gap-2 pt-2">
+                    <Link
+                      to={href}
+                      state={{ serviceProduct: item }}
+                      className="btn btn-primary btn-sm"
+                    >
+                      Ver detalles
+                    </Link>
+
+                    {type === "product" && item.stock > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => addToCart(item)}
+                        className="btn btn-sm btn-outline"
+                        title="Añadir al carrito"
+                      >
+                        Añadir
+                      </button>
+                    )}
+                  </div>
                 </div>
               </article>
             );

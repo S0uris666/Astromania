@@ -1,8 +1,6 @@
 // src/pages/MusicaAstronomica.jsx
 import { useMemo, useState } from "react";
 import {
-  Play,
-  ExternalLink,
   Search,
   Music2,
   Sparkles,

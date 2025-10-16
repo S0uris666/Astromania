@@ -19,7 +19,7 @@ export async function searchAll(query) {
     const staticPages = [
       { title: "Inicio", path: "/", keywords: ["home", "inicio", "astromania", "astromanía"] },
       { title: "Nosotros", path: "/nosotros", keywords: ["nosotros", "quienes somos", "about", "misión", "vision", "visión", "mision"] },
-      { title: "Servicios y Productos", path: "/servicios-productos-list", keywords: ["servicios", "productos", "tienda", "catálogo", "catalogo"] },
+      { title: "Servicios y Productos", path: "/servicios-productos-list", keywords: ["servicios", "productos", "tienda", "catalogo", "catalogue", "actividades", "recursos"] },
       { title: "Recursos", path: "/recursos", keywords: ["recursos", "material", "contenido", "artículos", "articulos", "blog"] },
       { title: "Comunidad", path: "/comunidad", keywords: ["comunidad", "foro", "charlas", "talleres", "participa"] },
       { title: "Contacto", path: "/contacto", keywords: ["contacto", "email", "soporte", "mensaje"] },
@@ -37,7 +37,7 @@ export async function searchAll(query) {
     const evAll = evRes.status === "fulfilled" ? evRes.value.data ?? [] : [];
 
     const products = (Array.isArray(spAll) ? spAll : []).filter((p) =>
-      includesQ(q, p.title, p.shortDescription, p.description, p.category, p.type, p.tags)
+      includesQ(q, p.title, p.shortDescription, p.description, p.category, p.type, p.tags, p.location, p.locations)
     );
 
     const events = (Array.isArray(evAll) ? evAll : []).filter((e) =>
@@ -52,3 +52,6 @@ export async function searchAll(query) {
     return { products: [], events: [], pages: [] };
   }
 }
+
+
+

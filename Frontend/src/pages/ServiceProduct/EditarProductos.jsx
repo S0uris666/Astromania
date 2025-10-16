@@ -1,318 +1,357 @@
-
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useServiceProducts } from "../../context/serviceProducts/ServiceProductContext";
 
-/* ---------- UI helpers (coherentes con las otras pantallas) ---------- */
 const baseInput =
   "w-full input input-bordered input-sm rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40";
-const baseSelect =
-  "select select-bordered select-sm rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40";
 const baseTextarea =
   "textarea textarea-bordered textarea-sm rounded-lg min-h-28 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40";
 
-function SectionTitle({ icon = "★", title, subtitle }) {
+const TYPE_OPTIONS = [
+  { value: "product", label: "Producto" },
+  { value: "service", label: "Servicio" },
+  { value: "activity", label: "Actividad" },
+];
+
+const TYPE_LABEL = {
+  product: "producto",
+  service: "servicio",
+  activity: "actividad",
+};
+
+const LINK_TEMPLATE = { label: "", url: "" };
+
+const EMPTY_FORM = {
+  title: "",
+  type: "product",
+  category: "",
+  shortDescription: "",
+  description: "",
+  location: "",
+  price: "",
+  tags: "",
+  active: true,
+  stock: "",
+  delivery: "",
+  durationMinutes: "",
+  capacity: "",
+  locations: "",
+};
+
+function Section({ title, subtitle, children }) {
   return (
-    <div className="flex items-start gap-3">
-      <div className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
-        <span className="text-sm">{icon}</span>
+    <section className="card bg-base-100/70 border border-base-200 shadow-sm">
+      <div className="card-body p-5 space-y-5">
+        <header>
+          <h2 className="text-lg font-semibold tracking-tight text-primary">{title}</h2>
+          {subtitle ? <p className="text-xs opacity-70 mt-1 max-w-2xl">{subtitle}</p> : null}
+          <div className="mt-3 h-1 w-12 rounded-full bg-primary/30" />
+        </header>
+        <div className="space-y-4">{children}</div>
       </div>
-      <div className="flex-1">
-        <h2 className="text-lg font-semibold tracking-tight">
-          <span className="bg-secondary bg-clip-text text-transparent">{title}</span>
-        </h2>
-        {subtitle && <p className="text-xs opacity-70 mt-0.5">{subtitle}</p>}
-        <div className="h-1 w-16 rounded-full bg-primary/30 mt-3" />
-      </div>
-    </div>
+    </section>
   );
 }
 
-function Row({ label, children, htmlFor }) {
+function Row({ label, htmlFor, children }) {
   return (
     <div className="md:relative">
-      <label htmlFor={htmlFor} className="label md:absolute md:left-0 md:top-1 md:w-56 pb-0">
+      <label htmlFor={htmlFor} className="label md:absolute md:left-0 md:top-1 md:w-52 pb-0">
         <span className="label-text text-sm font-medium opacity-90">{label}</span>
       </label>
-      <div className="md:ml-56">{children}</div>
+      <div className="md:ml-52">{children}</div>
     </div>
   );
 }
-
-function Field({ id, label, hint, ...inputProps }) {
-  return (
-    <Row label={label} htmlFor={id}>
-      <div className="form-control gap-1.5">
-        <input id={id} className={baseInput} {...inputProps} />
-        {hint ? <span className="text-xs opacity-60">{hint}</span> : null}
-      </div>
-    </Row>
-  );
-}
-
-function FieldArea({ id, label, hint, ...areaProps }) {
-  return (
-    <Row label={label} htmlFor={id}>
-      <div className="form-control gap-1.5">
-        <textarea id={id} className={baseTextarea} {...areaProps} />
-        {hint ? <span className="text-xs opacity-60">{hint}</span> : null}
-      </div>
-    </Row>
-  );
-}
-
-function FieldSelect({ id, label, children, ...selectProps }) {
-  return (
-    <Row label={label} htmlFor={id}>
-      <div className="form-control">
-        <select id={id} className={baseSelect} {...selectProps}>
-          {children}
-        </select>
-      </div>
-    </Row>
-  );
-}
-
-function FieldToggle({ label, checked, onChange, textRight = "Activar" }) {
-  return (
-    <Row label={label}>
-      <label className="label cursor-pointer justify-start gap-3">
-        <input type="checkbox" className="toggle toggle-sm toggle-primary" checked={checked} onChange={onChange} />
-        <span className="label-text text-sm">{textRight}</span>
-      </label>
-    </Row>
-  );
-}
-/* -------------------------------------------------------------------- */
 
 export function EditarProductos() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { serviceProduct, getSP, updateSP, deleteOneServiceProduct } = useServiceProducts();
 
-  // Buscar en store
-  const current = useMemo(() => {
-    const list = Array.isArray(serviceProduct) ? serviceProduct : [];
-    return list.find((x) => (x._id || x.id) === id) || null;
-  }, [serviceProduct, id]);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [links, setLinks] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [toRemove, setToRemove] = useState({});
 
-  // Form local
-  const [form, setForm] = useState({
-    title: "",
-    type: "product",
-    price: "",
-    shortDescription: "",
-    description: "",
-    category: "",
-    tags: "",
-    active: true,
-    // product
-    stock: "",
-    delivery: "",
-    // service
-    durationMinutes: "",
-    capacity: "",
-    locations: "",
-  });
-
-  // Imágenes actuales (backend) y selección de borrado
-  const [existingImages, setExistingImages] = useState([]); // [{url, public_id, alt}]
-  const [toRemove, setToRemove] = useState({});             // { public_id: true }
-
-  // Nuevas imágenes
-  const [files, setFiles] = useState([]);     // File[]
-  const [alts, setAlts] = useState([]);       // string[]
-  const [preview, setPreview] = useState([]); // [{url, name}]
+  const [files, setFiles] = useState([]);
+  const [alts, setAlts] = useState([]);
+  const [preview, setPreview] = useState([]);
 
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const isProduct = useMemo(() => form.type === "product", [form.type]);
-  const isService = !isProduct;
-
-  // Si no está en memoria, cargar lista
   useEffect(() => {
-    if (!current) getSP().catch(() => {});
-  }, [current, getSP]);
+    getSP().catch(() => {});
+  }, [getSP]);
 
-  // Hidratar formulario cuando llega current
+  const current = useMemo(() => {
+    const list = Array.isArray(serviceProduct) ? serviceProduct : [];
+    return list.find((item) => String(item._id || item.id) === String(id)) || null;
+  }, [serviceProduct, id]);
+
   useEffect(() => {
     if (!current) return;
-
-    const tagsStr = Array.isArray(current.tags) ? current.tags.join(", ") : (current.tags || "");
-    const locationsStr = Array.isArray(current.locations) ? current.locations.join(", ") : (current.locations || "");
-
-    const imgs = Array.isArray(current.images) ? current.images : [];
-    setExistingImages(imgs);
-    setToRemove({});
-
+    const type = String(current.type || "product").toLowerCase();
+    const tagString = Array.isArray(current.tags) ? current.tags.join(", ") : "";
+    const locationsString = Array.isArray(current.locations) ? current.locations.join(", ") : "";
     setForm({
       title: current.title || "",
-      type: current.type || "product",
-      price: Number.isFinite(current.price) ? String(current.price) : "",
+      type,
+      category: current.category || "",
       shortDescription: current.shortDescription || "",
       description: current.description || "",
-      category: current.category || "",
-      tags: tagsStr,
+      location: current.location || "",
+      price: typeof current.price === "number" ? String(current.price) : "",
+      tags: tagString,
       active: current.active !== false,
-      stock: Number.isFinite(current.stock) ? String(current.stock) : "",
+      stock: typeof current.stock === "number" ? String(current.stock) : "",
       delivery: current.delivery || "",
-      durationMinutes: Number.isFinite(current.durationMinutes) ? String(current.durationMinutes) : "",
-      capacity: Number.isFinite(current.capacity) ? String(current.capacity) : "",
-      locations: locationsStr,
+      durationMinutes: typeof current.durationMinutes === "number" ? String(current.durationMinutes) : "",
+      capacity: typeof current.capacity === "number" ? String(current.capacity) : "",
+      locations: locationsString,
     });
-
-    // limpiar nuevas imágenes
-    preview.forEach((p) => URL.revokeObjectURL(p.url));
+    setLinks(
+      type === "activity" && Array.isArray(current.links) && current.links.length
+        ? current.links.map((link) => ({
+            label: link.label || "",
+            url: link.url || "",
+          }))
+        : type === "activity"
+        ? [LINK_TEMPLATE]
+        : []
+    );
+    setExistingImages(Array.isArray(current.images) ? current.images : []);
+    setToRemove({});
     setFiles([]);
     setAlts([]);
     setPreview([]);
-  }, [current]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [current]);
 
-  const onChange = (e) => {
-    const { name, type, value, checked } = e.target;
-    setForm((f) => ({ ...f, [name]: type === "checkbox" ? checked : value }));
+  useEffect(
+    () => () => {
+      preview.forEach((item) => URL.revokeObjectURL(item.url));
+    },
+    [preview]
+  );
+
+  if (!current) {
+    return (
+      <main className="max-w-5xl mx-auto px-4 py-16 text-center space-y-4">
+        <p className="opacity-70">Buscando la información de la actividad...</p>
+        <Link to="/admin/productos/seleccionar" className="btn btn-primary">
+          Regresar
+        </Link>
+      </main>
+    );
+  }
+
+  const isProduct = form.type === "product";
+  const isService = form.type === "service";
+  const isActivity = form.type === "activity";
+
+  const handleTypeChange = (type) => {
+    setForm((prev) => {
+      if (prev.type === type) return prev;
+      const next = { ...prev, type };
+      if (type === "product") {
+        return {
+          ...next,
+          durationMinutes: "",
+          capacity: "",
+          locations: "",
+          location: "",
+        };
+      }
+      if (type === "service") {
+        return {
+          ...next,
+          stock: "",
+          delivery: "",
+          location: "",
+        };
+      }
+      if (type === "activity") {
+        return {
+          ...next,
+          price: "",
+          stock: "",
+          delivery: "",
+          durationMinutes: "",
+          capacity: "",
+          locations: "",
+        };
+      }
+      return next;
+    });
+    setLinks((prev) => (type === "activity" ? prev.length ? prev : [LINK_TEMPLATE] : []));
   };
 
-  const toggleRemove = (publicId) => {
-    setToRemove((p) => ({ ...p, [publicId]: !p[publicId] }));
+  const updateForm = (event) => {
+    const { name, type, value, checked } = event.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
-  const onPickFiles = (e) => {
-    const f = Array.from(e.target.files || []);
-    if (!f.length) return;
-    setFiles((prev) => [...prev, ...f]);
-    setAlts((a) => [...a, ...Array(f.length).fill("")]);
-    const pv = f.map((file) => ({ url: URL.createObjectURL(file), name: file.name }));
-    setPreview((p) => [...p, ...pv]);
+  const updateLink = (index, field, value) => {
+    setLinks((prev) =>
+      prev.map((link, idx) => (idx === index ? { ...link, [field]: value } : link))
+    );
   };
 
-  const onChangeAlt = (idx, value) =>
-    setAlts((prev) => prev.map((a, i) => (i === idx ? value : a)));
+  const addLink = () => setLinks((prev) => [...prev, LINK_TEMPLATE]);
+  const removeLink = (index) =>
+    setLinks((prev) => {
+      const next = prev.filter((_, idx) => idx !== index);
+      return next.length ? next : [LINK_TEMPLATE];
+    });
 
-  const removeNewImage = (idx) => {
-    const item = preview[idx];
+  const toggleRemoveImage = (publicId) => {
+    setToRemove((prev) => ({
+      ...prev,
+      [publicId]: !prev[publicId],
+    }));
+  };
+
+  const onPickFiles = (event) => {
+    const picked = Array.from(event.target.files || []);
+    if (!picked.length) return;
+    setFiles((prev) => [...prev, ...picked]);
+    setAlts((prev) => [...prev, ...Array(picked.length).fill("")]);
+    const previews = picked.map((file) => ({ url: URL.createObjectURL(file), name: file.name }));
+    setPreview((prev) => [...prev, ...previews]);
+  };
+
+  const onChangeAlt = (index, value) =>
+    setAlts((prev) => prev.map((alt, idx) => (idx === index ? value : alt)));
+
+  const removeNewImage = (index) => {
+    const item = preview[index];
     if (item) URL.revokeObjectURL(item.url);
-    setFiles((prev) => prev.filter((_, i) => i !== idx));
-    setAlts((prev) => prev.filter((_, i) => i !== idx));
-    setPreview((prev) => prev.filter((_, i) => i !== idx));
+    setFiles((prev) => prev.filter((_, idx) => idx !== index));
+    setAlts((prev) => prev.filter((_, idx) => idx !== index));
+    setPreview((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  // revoke todas las URLs al desmontar
-  useEffect(() => {
-    return () => {
-      preview.forEach((p) => URL.revokeObjectURL(p.url));
-    };
-  }, [preview]);
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    if (!current) return;
-
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     try {
       setSaving(true);
-
       const fd = new FormData();
-      // básicos
-      fd.append("title", form.title);
+      fd.append("title", form.title.trim());
       fd.append("type", form.type);
-      if (form.price !== "") fd.append("price", String(form.price));
-      if (form.shortDescription) fd.append("shortDescription", form.shortDescription);
-      if (form.description) fd.append("description", form.description);
-      if (form.category) fd.append("category", form.category);
       fd.append("active", String(!!form.active));
 
-      // producto
+      fd.append("category", form.category.trim());
+      fd.append("shortDescription", form.shortDescription.trim());
+      fd.append("description", form.description.trim());
+
+      if (!isActivity) {
+        fd.append("price", form.price.trim());
+      }
+
       if (isProduct) {
-        if (form.stock !== "") fd.append("stock", String(form.stock));
-        if (form.delivery) fd.append("delivery", form.delivery);
+        fd.append("stock", form.stock.trim());
+        fd.append("delivery", form.delivery.trim());
       }
 
-      // servicio
       if (isService) {
-        if (form.durationMinutes !== "") fd.append("durationMinutes", String(form.durationMinutes));
-        if (form.capacity !== "") fd.append("capacity", String(form.capacity));
-        const locs = form.locations.split(",").map((t) => t.trim()).filter(Boolean);
+        fd.append("durationMinutes", form.durationMinutes.trim());
+        fd.append("capacity", form.capacity.trim());
+        const locs = form.locations
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean);
         fd.append("locations", JSON.stringify(locs));
+      } else {
+        fd.append("locations", JSON.stringify([]));
       }
 
-      // tags
-      const tagsArr = form.tags.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean);
-      fd.append("tags", JSON.stringify(tagsArr));
+      if (isActivity) {
+        fd.append("location", form.location.trim());
+        const linksPayload = links
+          .map((link) => ({
+            label: link.label.trim(),
+            url: link.url.trim(),
+          }))
+          .filter((link) => link.url);
+        fd.append("links", JSON.stringify(linksPayload));
+      } else {
+        fd.append("location", "");
+        fd.append("links", JSON.stringify([]));
+      }
 
-      // nuevas imágenes + alts
-      files.forEach((f) => fd.append("images", f));
+      const tagsArray = form.tags
+        .split(",")
+        .map((tag) => tag.trim().toLowerCase())
+        .filter(Boolean);
+      fd.append("tags", JSON.stringify(tagsArray));
+
+      const removeIds = Object.entries(toRemove)
+        .filter(([, value]) => value)
+        .map(([key]) => key);
+      fd.append("removePublicIds", JSON.stringify(removeIds));
+
       fd.append("alts", JSON.stringify(alts));
-
-      // imágenes a eliminar
-      const removeIds = Object.entries(toRemove).filter(([, v]) => !!v).map(([k]) => k);
-      if (removeIds.length) fd.append("removePublicIds", JSON.stringify(removeIds));
+      files.forEach((file) => fd.append("images", file));
 
       await updateSP(current._id || current.id, fd);
 
-      if (window?.toast?.success) window.toast.success("Actualizado ✅");
-      else alert("Actualizado ✅");
-
-      navigate("/admin/productos/seleccionar"); 
-    } catch (err) {
-      console.error(err);
+      window?.toast?.success?.("Cambios guardados") ?? alert("Cambios guardados");
+      setFiles([]);
+      setAlts([]);
+      setPreview([]);
+      setToRemove({});
+      await getSP();
+    } catch (error) {
+      console.error("Actualizar elemento catálogo error:", error);
       const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        "Error al actualizar";
-      if (window?.toast?.error) window.toast.error(msg);
-      else alert(msg);
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "No se pudo actualizar el elemento";
+      window?.toast?.error?.(msg) ?? alert(msg);
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!current) return;
-    const ok = window.confirm("¿Eliminar este producto/servicio? No se puede deshacer.");
-    if (!ok) return;
+    const confirm = window.confirm("¿Eliminar este elemento? Esta acción no se puede deshacer.");
+    if (!confirm) return;
     try {
       setDeleting(true);
       await deleteOneServiceProduct(current._id || current.id);
-      if (window?.toast?.success) window.toast.success("Eliminado ✅");
-      else alert("Eliminado ✅");
-      navigate("productos/seleccionar");
-    } catch (err) {
-      console.error(err);
+      window?.toast?.success?.("Elemento eliminado") ?? alert("Elemento eliminado");
+      navigate("/admin/productos/seleccionar");
+    } catch (error) {
+      console.error("Eliminar elemento catálogo error:", error);
       const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        "Error al eliminar";
-      if (window?.toast?.error) window.toast.error(msg);
-      else alert(msg);
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "No se pudo eliminar el elemento";
+      window?.toast?.error?.(msg) ?? alert(msg);
     } finally {
       setDeleting(false);
     }
   };
 
-  if (!current) {
-    return (
-      <main className="max-w-5xl mx-auto px-4 pb-20 pt-6">
-        <div className="alert alert-info"><span>Cargando producto/servicio…</span></div>
-        <div className="mt-4">
-          <Link to="/admin/productos/seleccionar" className="btn btn-ghost">Volver</Link>
-        </div>
-      </main>
-    );
-  }
-
   return (
-    <main className="max-w-5xl mx-auto px-4 pb-28 pt-6">
-      <header className="mb-6 mt-15 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <h1 className="text-3xl font-bold tracking-tight">
-          <span className="bg-secondary bg-clip-text text-transparent">
-            Editar {isProduct ? "producto" : "servicio"}
-          </span>
-        </h1>
+    <main className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      <header className="mt-15 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Editar {TYPE_LABEL[form.type]}</h1>
+          <p className="text-sm text-base-content/70">
+            Actualiza la información, imágenes y enlaces de este elemento del catálogo.
+          </p>
+        </div>
         <div className="sm:ml-auto flex gap-2">
-          <Link to="/admin/productos/seleccionar" className="btn btn-ghost btn-sm">Volver</Link>
+          <Link to="/admin/productos/seleccionar" className="btn btn-ghost btn-sm">
+            Volver
+          </Link>
           <button
             type="button"
             className={`btn btn-error btn-sm ${deleting ? "loading" : ""}`}
@@ -324,92 +363,219 @@ export function EditarProductos() {
         </div>
       </header>
 
-      <form onSubmit={onSubmit} className="space-y-6">
-        {/* Básicos */}
-        <section className="card bg-base-100/70 border border-base-200 shadow-sm">
-          <div className="card-body p-5 space-y-5">
-            <SectionTitle icon="📦" title="Información básica" subtitle="Ajusta los datos comunes." />
-            <div className="space-y-4">
-              <Field id="title" label="Título" name="title" value={form.title} onChange={onChange} required />
-              <Field id="category" label="Categoría" name="category" value={form.category} onChange={onChange} placeholder="ej: figuras, talleres" />
-              <FieldSelect id="type" label="Tipo" name="type" value={form.type} onChange={onChange}>
-                <option value="product">Producto</option>
-                <option value="service">Servicio</option>
-              </FieldSelect>
-              <Field
+      <div className="flex flex-wrap gap-2">
+        {TYPE_OPTIONS.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            className={`btn btn-sm ${form.type === option.value ? "btn-primary" : "btn-outline"}`}
+            onClick={() => handleTypeChange(option.value)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <Section title="Información básica" subtitle="Actualiza el contenido principal visible en el catálogo.">
+          <Row label="Título" htmlFor="title">
+            <input
+              id="title"
+              name="title"
+              className={baseInput}
+              value={form.title}
+              onChange={updateForm}
+              required
+            />
+          </Row>
+          <Row label="Categoría" htmlFor="category">
+            <input
+              id="category"
+              name="category"
+              className={baseInput}
+              value={form.category}
+              onChange={updateForm}
+            />
+          </Row>
+          {!isActivity && (
+            <Row label="Precio (CLP)" htmlFor="price">
+              <input
                 id="price"
-                label="Precio (CLP)"
                 name="price"
+                className={baseInput}
                 type="number"
-                inputMode="numeric"
                 min="0"
+                inputMode="numeric"
                 value={form.price}
-                onChange={onChange}
-                placeholder={isService ? "Opcional para servicios" : "0"}
+                onChange={updateForm}
+                required={isProduct}
               />
-              <FieldToggle
-                label="Estado"
+            </Row>
+          )}
+          <Row label="Resumen" htmlFor="shortDescription">
+            <textarea
+              id="shortDescription"
+              name="shortDescription"
+              className={baseTextarea}
+              value={form.shortDescription}
+              onChange={updateForm}
+            />
+          </Row>
+          <Row label="Descripción" htmlFor="description">
+            <textarea
+              id="description"
+              name="description"
+              className={baseTextarea}
+              value={form.description}
+              onChange={updateForm}
+            />
+          </Row>
+          {isActivity && (
+            <Row label="Ubicación" htmlFor="location">
+              <input
+                id="location"
+                name="location"
+                className={baseInput}
+                value={form.location}
+                onChange={updateForm}
+              />
+            </Row>
+          )}
+          <Row label="Estado">
+            <label className="label cursor-pointer justify-start gap-3">
+              <input
+                type="checkbox"
+                className="toggle toggle-sm toggle-primary"
                 checked={form.active}
-                onChange={(e) => onChange({ target: { name: "active", type: "checkbox", checked: e.target.checked } })}
-                textRight="Activo"
+                onChange={updateForm}
+                name="active"
               />
-              <Field id="shortDescription" label="Resumen" name="shortDescription" value={form.shortDescription} onChange={onChange} placeholder="Texto breve para tarjetas" />
-              <FieldArea id="description" label="Descripción" name="description" value={form.description} onChange={onChange} placeholder="Detalles, materiales, requisitos, etc." />
-            </div>
-          </div>
-        </section>
+              <span className="label-text text-sm">Visible en el catálogo</span>
+            </label>
+          </Row>
+        </Section>
 
-        {/* Producto */}
         {isProduct && (
-          <section className="card bg-base-100/70 border border-base-200 shadow-sm">
-            <div className="card-body p-5 space-y-5">
-              <SectionTitle icon="🛒" title="Detalles de producto" subtitle="Stock y formato de entrega." />
-              <div className="space-y-4">
-                <Field id="stock" label="Stock" name="stock" type="number" inputMode="numeric" min="0" value={form.stock} onChange={onChange} placeholder="0" />
-                <Field id="delivery" label="Entrega/Formato" name="delivery" value={form.delivery} onChange={onChange} placeholder="physical | digital | onsite" hint="Ejemplos: 'physical', 'digital', 'onsite'." />
-              </div>
-            </div>
-          </section>
+          <Section title="Detalles de producto" subtitle="Gestiona stock y formato de entrega.">
+            <Row label="Stock" htmlFor="stock">
+              <input
+                id="stock"
+                name="stock"
+                className={baseInput}
+                type="number"
+                min="0"
+                inputMode="numeric"
+                value={form.stock}
+                onChange={updateForm}
+              />
+            </Row>
+            <Row label="Entrega / Formato" htmlFor="delivery">
+              <input
+                id="delivery"
+                name="delivery"
+                className={baseInput}
+                value={form.delivery}
+                onChange={updateForm}
+              />
+            </Row>
+          </Section>
         )}
 
-        {/* Servicio */}
         {isService && (
-          <section className="card bg-base-100/70 border border-base-200 shadow-sm">
-            <div className="card-body p-5 space-y-5">
-              <SectionTitle icon="🛎️" title="Detalles de servicio" subtitle="Duración, cupos y ubicaciones." />
-              <div className="space-y-4">
-                <Field id="durationMinutes" label="Duración (min)" name="durationMinutes" type="number" inputMode="numeric" min="0" value={form.durationMinutes} onChange={onChange} />
-                <Field id="capacity" label="Capacidad (personas)" name="capacity" type="number" inputMode="numeric" min="0" value={form.capacity} onChange={onChange} />
-                <Field id="locations" label="Ubicaciones" name="locations" value={form.locations} onChange={onChange} placeholder="Santiago, Valparaíso" hint="Separa múltiples ubicaciones con coma." />
-              </div>
-            </div>
-          </section>
+          <Section title="Detalles de servicio" subtitle="Duración, aforo y ubicaciones disponibles.">
+            <Row label="Duración (min)" htmlFor="durationMinutes">
+              <input
+                id="durationMinutes"
+                name="durationMinutes"
+                className={baseInput}
+                type="number"
+                min="0"
+                inputMode="numeric"
+                value={form.durationMinutes}
+                onChange={updateForm}
+              />
+            </Row>
+            <Row label="Capacidad" htmlFor="capacity">
+              <input
+                id="capacity"
+                name="capacity"
+                className={baseInput}
+                type="number"
+                min="0"
+                inputMode="numeric"
+                value={form.capacity}
+                onChange={updateForm}
+              />
+            </Row>
+            <Row label="Ubicaciones" htmlFor="locations">
+              <input
+                id="locations"
+                name="locations"
+                className={baseInput}
+                value={form.locations}
+                onChange={updateForm}
+                placeholder="Ej: Santiago, Valparaíso"
+              />
+              <p className="text-xs opacity-60 mt-1">Separa múltiples ubicaciones con coma.</p>
+            </Row>
+          </Section>
         )}
 
-        {/* Tags */}
-        <section className="card bg-base-100/70 border border-base-200 shadow-sm">
-          <div className="card-body p-5 space-y-5">
-            <SectionTitle icon="🏷️" title="Etiquetas" subtitle="Mejoran la búsqueda y categorización." />
-            <div className="space-y-4">
-              <Field id="tags" label="Tags" name="tags" value={form.tags} onChange={onChange} placeholder="astro, resina, orion" hint="Usa 2–5 tags relevantes (separados por coma)." />
-            </div>
-          </div>
-        </section>
+        <Section title="Etiquetas y enlaces" subtitle="Mejoran la búsqueda y añaden material adicional.">
+          <Row label="Etiquetas" htmlFor="tags">
+            <input
+              id="tags"
+              name="tags"
+              className={baseInput}
+              value={form.tags}
+              onChange={updateForm}
+              placeholder="astro, divulgación, familia"
+            />
+          </Row>
 
-        {/* Imágenes actuales */}
-        <section className="card bg-base-100/70 border border-base-200 shadow-sm">
-          <div className="card-body p-5 space-y-4">
-            <SectionTitle icon="🖼️" title="Imágenes actuales" subtitle="Marca las que quieras eliminar." />
+          {isActivity && (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-base-content/80">Enlaces útiles</p>
+              {links.map((link, index) => (
+                <div key={index} className="grid gap-3 sm:grid-cols-[1fr_minmax(0,1fr)_auto]">
+                  <input
+                    className={baseInput}
+                    placeholder="Etiqueta (opcional)"
+                    value={link.label}
+                    onChange={(e) => updateLink(index, "label", e.target.value)}
+                  />
+                  <input
+                    className={baseInput}
+                    placeholder="https://"
+                    value={link.url}
+                    onChange={(e) => updateLink(index, "url", e.target.value)}
+                  />
+                  <div className="flex items-center justify-end gap-2">
+                    {links.length > 1 && (
+                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => removeLink(index)}>
+                        Quitar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <button type="button" className="btn btn-outline btn-sm" onClick={addLink}>
+                + Añadir enlace
+              </button>
+            </div>
+          )}
+        </Section>
+
+        <Section title="Imágenes" subtitle="Gestiona las imágenes existentes y agrega nuevas.">
+          <Row label="Actuales">
             {existingImages.length === 0 ? (
-              <div className="rounded-xl border border-base-300 p-4 text-base-content/70">
-                No hay imágenes subidas.
-              </div>
+              <div className="rounded-xl border border-base-300 p-4 text-base-content/70">No hay imágenes cargadas.</div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {existingImages.map((img, idx) => (
-                  <div key={img.public_id || idx} className="card bg-base-200/70 border border-base-300 shadow-sm">
+                {existingImages.map((img) => (
+                  <div key={img.public_id} className="card bg-base-200/70 border border-base-300 shadow-sm">
                     <figure className="aspect-square overflow-hidden">
-                      <img src={img.url} alt={img.alt || `img-${idx}`} className="object-cover w-full h-full" />
+                      <img src={img.url} alt={img.alt || "cover"} className="object-cover w-full h-full" />
                     </figure>
                     <div className="card-body p-3 gap-2">
                       <label className="label cursor-pointer justify-start gap-2">
@@ -417,64 +583,61 @@ export function EditarProductos() {
                           type="checkbox"
                           className="checkbox checkbox-error"
                           checked={!!toRemove[img.public_id]}
-                          onChange={() => toggleRemove(img.public_id)}
+                          onChange={() => toggleRemoveImage(img.public_id)}
                         />
-                        <span className="label-text">Quitar</span>
+                        <span className="label-text text-sm">Quitar</span>
                       </label>
-                      {img.alt ? <div className="text-xs opacity-70 break-all">alt: {img.alt}</div> : null}
+                      {img.alt ? <p className="text-xs opacity-70 break-all">alt: {img.alt}</p> : null}
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
-        </section>
+          </Row>
 
-        {/* Agregar nuevas imágenes */}
-        <section className="card bg-base-100/70 border border-base-200 shadow-sm">
-          <div className="card-body p-5 space-y-5">
-            <SectionTitle icon="➕" title="Agregar imágenes" subtitle="Carga nuevas fotos y añade su texto alternativo." />
+          <Row label="Agregar nuevas">
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                id="filepicker"
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={onPickFiles}
+              />
+              <label htmlFor="filepicker" className="btn btn-accent btn-sm md:btn-md">
+                Seleccionar imágenes
+              </label>
+              <span className="text-xs opacity-70">Formatos JPG o PNG hasta 5MB.</span>
+            </div>
+          </Row>
 
-            <Row label="Subida">
-              <div className="flex flex-wrap items-center gap-3">
-                <input id="filepick" type="file" multiple accept="image/*" onChange={onPickFiles} className="hidden" />
-                <label htmlFor="filepick" className="btn btn-accent btn-sm md:btn-md">📷 Agregar imágenes</label>
-                <span className="text-xs opacity-70">Puedes seleccionar varias a la vez.</span>
+          {preview.length > 0 && (
+            <Row label="Vista previa">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {preview.map((item, index) => (
+                  <div key={item.url} className="card bg-base-200/70 border border-base-300 shadow-sm">
+                    <figure className="aspect-square overflow-hidden">
+                      <img src={item.url} alt={item.name} className="object-cover w-full h-full" />
+                    </figure>
+                    <div className="card-body p-3 gap-2">
+                      <input
+                        className="input input-bordered input-sm"
+                        placeholder="Texto alternativo"
+                        value={alts[index] || ""}
+                        onChange={(e) => onChangeAlt(index, e.target.value)}
+                      />
+                      <button type="button" className="btn btn-ghost btn-xs" onClick={() => removeNewImage(index)}>
+                        Quitar
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </Row>
+          )}
+        </Section>
 
-            {preview.length > 0 && (
-              <Row label="Vista previa">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {preview.map((p, idx) => (
-                    <div key={p.url} className="card bg-base-200/70 border border-base-300 shadow-sm">
-                      <figure className="aspect-square overflow-hidden">
-                        <img src={p.url} alt={p.name} className="object-cover w-full h-full" />
-                      </figure>
-                      <div className="card-body p-3 gap-2">
-                        <input
-                          className="input input-bordered input-sm"
-                          placeholder="Alt de la imagen"
-                          value={alts[idx] || ""}
-                          onChange={(e) => onChangeAlt(idx, e.target.value)}
-                        />
-                        <button
-                          type="button"
-                          className="btn btn-ghost btn-xs"
-                          onClick={() => removeNewImage(idx)}
-                        >
-                          Quitar
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Row>
-            )}
-          </div>
-        </section>
-
-        {/* Acciones */}
         <div className="btm-nav md:static md:btm-nav-none md:flex md:justify-end md:gap-3">
           <button type="submit" className={`btn btn-primary btn-sm md:btn-md ${saving ? "loading" : ""}`} disabled={saving}>
             {saving ? "Guardando..." : "Guardar cambios"}

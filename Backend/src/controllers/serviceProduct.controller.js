@@ -2,54 +2,111 @@ import ServiceProductItem from "../models/ServiceProduct.model.js";
 import slugify from "slugify";
 import { v2 as cloudinary } from "cloudinary";
 
-
-export const getAllServiceProducts = async (req, res) => {
+export const getAllServiceProducts = async (_req, res) => {
   try {
-    const data = await ServiceProductItem.find({}); 
-    return res.status(200).json(data)
+    const data = await ServiceProductItem.find({});
+    return res.status(200).json(data);
   } catch (err) {
     console.error("getAllServiceProducts error:", err);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
-// Permite parsear JSON cuando viene como string en multipart
-const parseJSON = (v, fallback = undefined) => {
+const parseJSON = (value, fallback = undefined) => {
   try {
-    if (typeof v !== "string") return fallback;
-    return JSON.parse(v);
+    if (typeof value !== "string") return fallback;
+    return JSON.parse(value);
   } catch {
     return fallback;
   }
 };
 
-// Normaliza texto
-const normText = (v) =>
-  typeof v === "string" ? v.trim() : v;
-
-// Coerce boolean desde string ("true"/"false") o boolean
-const toBool = (v, def = true) => {
-  if (v === undefined || v === null) return def;
-  if (typeof v === "boolean") return v;
-  return String(v).toLowerCase() === "true";
+const normText = (value) => {
+  if (value === null || value === undefined) return undefined;
+  return String(value).trim();
 };
 
-// Coerce number
-const toNum = (v, def = undefined) => {
-  if (v === undefined || v === null || v === "") return def;
-  const n = Number(v);
+const toBool = (value, def = true) => {
+  if (value === undefined || value === null) return def;
+  if (typeof value === "boolean") return value;
+  return String(value).toLowerCase() === "true";
+};
+
+const toNum = (value, def = undefined) => {
+  if (value === undefined || value === null || value === "") return def;
+  const n = Number(value);
   return Number.isFinite(n) ? n : def;
 };
 
-// Extrae id de usuario
-const getUserId = (u) => u?.id || u?._id || u?.userId || null;
+const toArray = (value) => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string") {
+    return value
+      .split(/[,;\n]/g)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  return [];
+};
 
-// Extrae id de propietario del documento
+const sanitizeTags = (value) =>
+  toArray(value)
+    .map((tag) => normText(tag)?.toLowerCase())
+    .filter(Boolean);
+
+const sanitizeLocations = (value) =>
+  toArray(value)
+    .map((location) => normText(location))
+    .filter(Boolean);
+
+const sanitizeLinks = (value) => {
+  const entries = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+    ? value
+        .split(/[\n,;]/g)
+        .map((url) => ({ url: url.trim() }))
+        .filter((entry) => entry.url)
+    : [];
+
+  return entries
+    .map((entry) => {
+      if (typeof entry === "string") {
+        const url = normText(entry);
+        return url ? { label: "", url } : null;
+      }
+      if (entry && typeof entry === "object") {
+        const url = normText(entry.url || entry.href || entry.link);
+        if (!url) return null;
+        return {
+          label: normText(entry.label || entry.title) || "",
+          url,
+        };
+      }
+      return null;
+    })
+    .filter(Boolean);
+};
+
+const cleanEmptyStrings = (obj = {}) => {
+  Object.keys(obj).forEach((key) => {
+    if (typeof obj[key] === "string" && obj[key].trim() === "") {
+      obj[key] = undefined;
+    }
+  });
+  return obj;
+};
+
+const getUserId = (user) => user?.id || user?._id || user?.userId || null;
+
 const getOwnerId = (doc) =>
-  doc?.createdBy?._id || doc?.createdBy || doc?.owner?._id || doc?.owner || doc?.user?._id || doc?.user || null;
-
-// Verifica si el usuario puede editar/eliminar el recurso
-// Nota: los endpoints ya están protegidos por authRol("admin");
+  doc?.createdBy?._id ||
+  doc?.createdBy ||
+  doc?.owner?._id ||
+  doc?.owner ||
+  doc?.user?._id ||
+  doc?.user ||
+  null;
 
 const canEdit = (doc, user) => {
   const role = String(user?.role || "").toLowerCase();
@@ -59,7 +116,6 @@ const canEdit = (doc, user) => {
   return ownerId && uid && String(ownerId) === String(uid);
 };
 
-// Sube una imagen (buffer) a Cloudinary
 const uploadToCloudinary = async (file, folder = "service-products") => {
   const MAX_MB = 5;
   if (!file?.mimetype?.startsWith?.("image/")) {
@@ -76,7 +132,6 @@ const uploadToCloudinary = async (file, folder = "service-products") => {
   return { url: res.secure_url, public_id: res.public_id };
 };
 
-// Limpia en Cloudinary si hubo fallos posteriores
 const cleanupCloudinary = async (publicIds = []) => {
   if (!publicIds.length) return;
   await Promise.allSettled(
@@ -86,25 +141,22 @@ const cleanupCloudinary = async (publicIds = []) => {
   );
 };
 
-// Construye el payload final desde req.body (texto) + imágenes ya subidas
 const buildPayload = ({ body, images, userId }) => {
   const title = normText(body.title);
-  const type  = normText(body.type);
+  const type = normText(body.type);
 
-  // Arrays que podrían venir como JSON string
-  const tags      = parseJSON(body.tags, []);
-  const locations = parseJSON(body.locations, []);
-  const mpMeta    = parseJSON(body.mpMetadata, undefined);
-  const alts      = parseJSON(body.alts, []); // para alt por imagen (opcional)
+  const tagsInput = parseJSON(body.tags, body.tags);
+  const locationsInput = parseJSON(body.locations, body.locations);
+  const linksInput = parseJSON(body.links, body.links);
+  const mpMeta = parseJSON(body.mpMetadata, undefined);
+  const alts = parseJSON(body.alts, []);
 
-  // Enriquecer cada imagen con alt correspondiente (si se envió)
   const imagesWithAlt = images.map((img, idx) => ({
     url: img.url,
     public_id: img.public_id,
     alt: typeof alts?.[idx] === "string" ? alts[idx] : "",
   }));
 
-  // Armado final con normalizaciones
   const payload = {
     title,
     slug: normText(body.slug) || slugify(title ?? "", { lower: true, strict: true }),
@@ -112,53 +164,68 @@ const buildPayload = ({ body, images, userId }) => {
     category: normText(body.category),
     shortDescription: normText(body.shortDescription),
     description: normText(body.description),
+    location: normText(body.location),
 
     price: toNum(body.price),
     currency: normText(body.currency) || "CLP",
     active: toBool(body.active, true),
 
     stock: toNum(body.stock, 0),
-
     delivery: normText(body.delivery),
     images: imagesWithAlt,
 
     durationMinutes: toNum(body.durationMinutes),
     capacity: toNum(body.capacity),
 
-    locations: Array.isArray(locations) ? locations : [],
-    tags: Array.isArray(tags) ? tags : [],
+    locations: sanitizeLocations(locationsInput),
+    tags: sanitizeTags(tagsInput),
+    links: sanitizeLinks(linksInput),
 
     mpMetadata: mpMeta,
     createdBy: userId || undefined,
   };
 
-  // Quitar undefined para no pisar defaults
-  Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
+  cleanEmptyStrings(payload);
+
+  if (payload.type === "activity") {
+    delete payload.price;
+    delete payload.currency;
+    delete payload.stock;
+    delete payload.delivery;
+    delete payload.durationMinutes;
+    delete payload.capacity;
+    payload.locations = [];
+    delete payload.mpMetadata;
+  } else {
+    payload.location = undefined;
+  }
+
+  Object.keys(payload).forEach((key) => payload[key] === undefined && delete payload[key]);
   return payload;
 };
 
 export const createServiceProduct = async (req, res) => {
-  const uploadedIds = []; // para cleanup si algo falla
+  const uploadedIds = [];
   try {
-    // Validaciones mínimas
     if (!req.body?.title || !req.body?.type) {
       return res.status(400).json({ message: "title y type son obligatorios" });
     }
+
     const type = String(req.body.type).trim();
-    if (!["product", "service"].includes(type)) {
-      return res.status(400).json({ message: "type debe ser 'product' o 'service'" });
+    if (!["product", "service", "activity"].includes(type)) {
+      return res
+        .status(400)
+        .json({ message: "type debe ser 'product', 'service' o 'activity'" });
     }
 
-    // Subida de imágenes (si hay)
     const files = req.files || [];
     const uploaded = [];
-    for (const f of files) {
-      const img = await uploadToCloudinary(f, "service-products");
+    for (const file of files) {
+      const img = await uploadToCloudinary(file, "service-products");
       uploaded.push(img);
       uploadedIds.push(img.public_id);
     }
 
-    // Payload final y creación
     const payload = buildPayload({
       body: req.body,
       images: uploaded,
@@ -168,7 +235,6 @@ export const createServiceProduct = async (req, res) => {
     const created = await ServiceProductItem.create(payload);
     return res.status(201).json(created);
   } catch (err) {
-    // Revertir imágenes si falló la creación
     await cleanupCloudinary(uploadedIds);
     if (err?.code === 11000) {
       return res.status(409).json({
@@ -182,112 +248,173 @@ export const createServiceProduct = async (req, res) => {
 };
 
 export const updateServiceProduct = async (req, res) => {
-  const uploadedIds = []; // para revertir si algo falla
+  const uploadedIds = [];
   try {
     const { id } = req.params;
-
     const doc = await ServiceProductItem.findById(id);
-    if (!doc) return res.status(404).json({ message: "Producto/Servicio no encontrado" });
-
-    // permisos (opcional, quítalo si no usas auth)
-    if (!canEdit(doc, req.user)) {
-      return res.status(403).json({ message: "No tienes permisos para editar este recurso" });
+    if (!doc) {
+      return res.status(404).json({ message: "Producto/Servicio no encontrado" });
     }
 
-    // 1) Subir nuevas imágenes
+    if (!canEdit(doc, req.user)) {
+      return res
+        .status(403)
+        .json({ message: "No tienes permisos para editar este recurso" });
+    }
+
     const files = req.files || [];
     const newImages = [];
-    for (const f of files) {
-      const img = await uploadToCloudinary(f, "service-products");
+    for (const file of files) {
+      const img = await uploadToCloudinary(file, "service-products");
       newImages.push(img);
       uploadedIds.push(img.public_id);
     }
 
-    // 2) Remover imágenes antiguas si se pide
     const removePublicIds = parseJSON(req.body?.removePublicIds, []);
-    const prevImages = Array.isArray(doc.images) ? [...doc.images] : [];
-    let images = prevImages.filter(
+    const previousImages = Array.isArray(doc.images) ? [...doc.images] : [];
+    let images = previousImages.filter(
       (img) => !removePublicIds.includes(img.public_id)
     );
-    // concatenar nuevas (sin alt o puedes aceptar "alts" como en create)
     images = images.concat(
       newImages.map((img) => ({ url: img.url, public_id: img.public_id, alt: "" }))
     );
 
-    // 3) Construir payload parcial (no pisar con undefined)
-    const title = normText(req.body?.title);
-    const payload = {
-      title,
-      slug:
-        normText(req.body?.slug) ||
-        (title ? slugify(title, { lower: true, strict: true }) : doc.slug),
+    const payload = { images };
 
-      type: normText(req.body?.type) ?? doc.type,
-      category: normText(req.body?.category) ?? doc.category,
-      shortDescription: normText(req.body?.shortDescription) ?? doc.shortDescription,
-      description: normText(req.body?.description) ?? doc.description,
+    if (Object.prototype.hasOwnProperty.call(req.body, "title")) {
+      const title = normText(req.body.title);
+      if (title) {
+        payload.title = title;
+        payload.slug =
+          normText(req.body.slug) ||
+          slugify(title, { lower: true, strict: true });
+      }
+    } else if (Object.prototype.hasOwnProperty.call(req.body, "slug")) {
+      payload.slug = normText(req.body.slug) || doc.slug;
+    }
 
-      price: toNum(req.body?.price, doc.price),
-      currency: normText(req.body?.currency) ?? (doc.currency || "CLP"),
-      active: toBool(req.body?.active, doc.active ?? true),
+    if (Object.prototype.hasOwnProperty.call(req.body, "type")) {
+      const type = normText(req.body.type);
+      if (type) payload.type = type;
+    }
 
-      stock: toNum(req.body?.stock, doc.stock),
+    if (Object.prototype.hasOwnProperty.call(req.body, "category")) {
+      payload.category = normText(req.body.category);
+    }
 
-      delivery: normText(req.body?.delivery) ?? doc.delivery,
+    if (Object.prototype.hasOwnProperty.call(req.body, "shortDescription")) {
+      payload.shortDescription = normText(req.body.shortDescription);
+    }
 
-      durationMinutes: toNum(req.body?.durationMinutes, doc.durationMinutes),
-      capacity: toNum(req.body?.capacity, doc.capacity),
+    if (Object.prototype.hasOwnProperty.call(req.body, "description")) {
+      payload.description = normText(req.body.description);
+    }
 
-      // arrays desde JSON string (si no vienen, mantenemos las previas)
-      locations: parseJSON(req.body?.locations, doc.locations || []),
-      tags: parseJSON(req.body?.tags, doc.tags || []),
+    if (Object.prototype.hasOwnProperty.call(req.body, "location")) {
+      payload.location = normText(req.body.location);
+    }
 
-      mpMetadata: parseJSON(req.body?.mpMetadata, doc.mpMetadata),
+    if (Object.prototype.hasOwnProperty.call(req.body, "price")) {
+      payload.price = toNum(req.body.price);
+    }
 
-      images,
-    };
+    if (Object.prototype.hasOwnProperty.call(req.body, "currency")) {
+      payload.currency = normText(req.body.currency);
+    }
 
-    // limpiar undefined para no sobreescribir con undefined
-    Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
+    if (Object.prototype.hasOwnProperty.call(req.body, "active")) {
+      payload.active = toBool(req.body.active, doc.active ?? true);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.body, "stock")) {
+      payload.stock = toNum(req.body.stock);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.body, "delivery")) {
+      payload.delivery = normText(req.body.delivery);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.body, "durationMinutes")) {
+      payload.durationMinutes = toNum(req.body.durationMinutes);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.body, "capacity")) {
+      payload.capacity = toNum(req.body.capacity);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.body, "locations")) {
+      const locationsRaw = parseJSON(req.body.locations, req.body.locations);
+      payload.locations = sanitizeLocations(locationsRaw);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.body, "tags")) {
+      const tagsRaw = parseJSON(req.body.tags, req.body.tags);
+      payload.tags = sanitizeTags(tagsRaw);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.body, "links")) {
+      const linksRaw = parseJSON(req.body.links, req.body.links);
+      payload.links = sanitizeLinks(linksRaw);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.body, "mpMetadata")) {
+      payload.mpMetadata = parseJSON(req.body.mpMetadata, undefined);
+    }
+
+    const targetType = payload.type || doc.type;
+    if (targetType === "activity") {
+      payload.price = undefined;
+      payload.currency = undefined;
+      payload.stock = undefined;
+      payload.delivery = undefined;
+      payload.durationMinutes = undefined;
+      payload.capacity = undefined;
+      payload.locations = [];
+      payload.mpMetadata = undefined;
+    } else {
+      payload.location = payload.location ?? "";
+    }
+
+    cleanEmptyStrings(payload);
+
+    Object.keys(payload).forEach((key) => payload[key] === undefined && delete payload[key]);
 
     const updated = await ServiceProductItem.findByIdAndUpdate(id, payload, {
       new: true,
       runValidators: true,
     });
 
-    // 4) Limpiar en Cloudinary las imágenes removidas
     if (Array.isArray(removePublicIds) && removePublicIds.length) {
       await cleanupCloudinary(removePublicIds);
     }
 
     return res.status(200).json(updated);
   } catch (err) {
-    // revertir imágenes recién subidas si falló algo
     await cleanupCloudinary(uploadedIds);
     console.error("updateServiceProduct error:", err);
     return res.status(500).json({ message: "Server error" });
   }
 };
 
-
-
 export const deleteServiceProduct = async (req, res) => {
   try {
     const { id } = req.params;
-
     const doc = await ServiceProductItem.findById(id);
-    if (!doc) return res.status(404).json({ message: "Producto/Servicio no encontrado" });
-
-    // permisos (opcional, quítalo si no usas auth)
-    if (!canEdit(doc, req.user)) {
-      return res.status(403).json({ message: "No tienes permisos para eliminar este recurso" });
+    if (!doc) {
+      return res.status(404).json({ message: "Producto/Servicio no encontrado" });
     }
 
-    // borra doc
+    if (!canEdit(doc, req.user)) {
+      return res
+        .status(403)
+        .json({ message: "No tienes permisos para eliminar este recurso" });
+    }
+
     await ServiceProductItem.findByIdAndDelete(id);
 
-    // borra imágenes en Cloudinary
-    const publicIds = (doc.images || []).map((i) => i.public_id).filter(Boolean);
+    const publicIds = (doc.images || [])
+      .map((image) => image.public_id)
+      .filter(Boolean);
     await cleanupCloudinary(publicIds);
 
     return res.status(200).json({ message: "Eliminado correctamente" });

@@ -1,501 +1,548 @@
-
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { useState, useMemo, useEffect } from "react";
 import { useServiceProducts } from "../../context/serviceProducts/ServiceProductContext";
 
-/* ---------- UI helpers minimal (mismos estilos que eventos) ---------- */
 const baseInput =
   "w-full input input-bordered input-sm rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40";
-const baseSelect =
-  "select select-bordered select-sm rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40";
 const baseTextarea =
   "textarea textarea-bordered textarea-sm rounded-lg min-h-28 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40";
 
-function SectionTitle({ icon = "★", title, subtitle }) {
+const TYPE_OPTIONS = [
+  { value: "product", label: "Producto" },
+  { value: "service", label: "Servicio" },
+  { value: "activity", label: "Actividad" },
+];
+
+const TYPE_LABEL = {
+  product: "producto",
+  service: "servicio",
+  activity: "actividad",
+};
+
+const LINK_TEMPLATE = { label: "", url: "" };
+
+const BASE_FORM = {
+  title: "",
+  category: "",
+  shortDescription: "",
+  description: "",
+  location: "",
+  price: "",
+  tags: "",
+  active: true,
+  stock: "",
+  delivery: "",
+  durationMinutes: "",
+  capacity: "",
+  locations: "",
+};
+
+function Section({ title, subtitle, children }) {
   return (
-    <div className="flex items-start gap-3">
-      <div className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
-        <span className="text-sm">{icon}</span>
+    <section className="card bg-base-100/70 border border-base-200 shadow-sm">
+      <div className="card-body p-5 space-y-5">
+        <header>
+          <h2 className="text-lg font-semibold tracking-tight text-primary">{title}</h2>
+          {subtitle ? <p className="text-xs opacity-70 mt-1 max-w-2xl">{subtitle}</p> : null}
+          <div className="mt-3 h-1 w-12 rounded-full bg-primary/30" />
+        </header>
+        <div className="space-y-4">{children}</div>
       </div>
-      <div className="flex-1">
-        <h2 className="text-lg font-semibold tracking-tight">
-          <span className="bg-secondary bg-clip-text text-transparent">{title}</span>
-        </h2>
-        {subtitle && <p className="text-xs opacity-70 mt-0.5">{subtitle}</p>}
-        <div className="h-1 w-16 rounded-full bg-primary/30 mt-3" />
-      </div>
-    </div>
+    </section>
   );
 }
 
-function Row({ label, children, htmlFor }) {
+function Row({ label, htmlFor, children }) {
   return (
     <div className="md:relative">
-      <label
-        htmlFor={htmlFor}
-        className="label md:absolute md:left-0 md:top-1 md:w-56 pb-0"
-      >
+      <label htmlFor={htmlFor} className="label md:absolute md:left-0 md:top-1 md:w-52 pb-0">
         <span className="label-text text-sm font-medium opacity-90">{label}</span>
       </label>
-      <div className="md:ml-56">{children}</div>
+      <div className="md:ml-52">{children}</div>
     </div>
   );
 }
-
-function Field({ id, label, hint, ...inputProps }) {
-  return (
-    <Row label={label} htmlFor={id}>
-      <div className="form-control gap-1.5">
-        <input id={id} className={baseInput} {...inputProps} />
-        {hint ? <span className="text-xs opacity-60">{hint}</span> : null}
-      </div>
-    </Row>
-  );
-}
-
-function FieldArea({ id, label, hint, ...areaProps }) {
-  return (
-    <Row label={label} htmlFor={id}>
-      <div className="form-control gap-1.5">
-        <textarea id={id} className={baseTextarea} {...areaProps} />
-        {hint ? <span className="text-xs opacity-60">{hint}</span> : null}
-      </div>
-    </Row>
-  );
-}
-
-function FieldSelect({ id, label, children, ...selectProps }) {
-  return (
-    <Row label={label} htmlFor={id}>
-      <div className="form-control">
-        <select id={id} className={baseSelect} {...selectProps}>
-          {children}
-        </select>
-      </div>
-    </Row>
-  );
-}
-
-function FieldToggle({ label, checked, onChange, textRight = "Activar" }) {
-  return (
-    <Row label={label}>
-      <label className="label cursor-pointer justify-start gap-3">
-        <input type="checkbox" className="toggle toggle-sm toggle-primary" checked={checked} onChange={onChange} />
-        <span className="label-text text-sm">{textRight}</span>
-      </label>
-    </Row>
-  );
-}
-/* -------------------------------------------------------------------- */
 
 export function CrearProductos() {
   const location = useLocation();
-  const presetType = location?.state?.presetType; // "product" | "service"
+  const presetType = location?.state?.presetType;
+  const initialType = TYPE_OPTIONS.some((opt) => opt.value === presetType) ? presetType : "product";
 
   const { createSP } = useServiceProducts();
 
-  const [form, setForm] = useState({
-    title: "",
-    type: presetType === "service" ? "service" : "product",
-    // comunes
-    price: "",
-    shortDescription: "",
-    description: "",
-    category: "",
-    tags: "",
-    active: true,
-    // producto
-    stock: "",
-    delivery: "",
-    // servicio
-    durationMinutes: "",
-    capacity: "",
-    locations: "",
-  });
-
-  const [files, setFiles] = useState([]);     // File[]
-  const [alts, setAlts] = useState([]);       // string[]
+  const [form, setForm] = useState({ ...BASE_FORM, type: initialType });
+  const [links, setLinks] = useState(initialType === "activity" ? [LINK_TEMPLATE] : []);
+  const [files, setFiles] = useState([]); // File[]
+  const [alts, setAlts] = useState([]); // string[]
   const [preview, setPreview] = useState([]); // { url, name }[]
   const [loading, setLoading] = useState(false);
 
-  const onChange = (e) => {
-    const { name, type, value, checked } = e.target;
-    setForm((f) => ({ ...f, [name]: type === "checkbox" ? checked : value }));
-  };
+  const isProduct = form.type === "product";
+  const isService = form.type === "service";
+  const isActivity = form.type === "activity";
+  const submitLabel = `Crear ${TYPE_LABEL[form.type]}`;
 
-  const isProduct = useMemo(() => form.type === "product", [form.type]);
-  const isService = !isProduct;
+  const activeLinks = useMemo(
+    () => links.filter((link) => link.url.trim() || link.label.trim()),
+    [links]
+  );
 
-  // limpiar campos ajenos al cambiar de tipo
-  useEffect(() => {
-    setForm((f) => ({
-      ...f,
-      ...(isProduct
-        ? { durationMinutes: "", capacity: "", locations: "" }
-        : { stock: "", delivery: "" }),
+  const updateForm = (event) => {
+    const { name, type, value, checked } = event.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.type]);
-
-  const onPickFiles = (e) => {
-    const f = Array.from(e.target.files || []);
-    if (!f.length) return;
-    const merged = [...files, ...f];
-    setFiles(merged);
-    setAlts((a) => [...a, ...Array(f.length).fill("")]);
-
-    const pv = f.map((file) => ({ url: URL.createObjectURL(file), name: file.name }));
-    setPreview((p) => [...p, ...pv]);
   };
 
-  const onChangeAlt = (idx, value) =>
-    setAlts((prev) => prev.map((a, i) => (i === idx ? value : a)));
+  const handleTypeChange = (type) => {
+    setForm((prev) => {
+      if (prev.type === type) return prev;
+      const next = { ...prev, type };
+      if (type === "product") {
+        return {
+          ...next,
+          durationMinutes: "",
+          capacity: "",
+          locations: "",
+          location: "",
+        };
+      }
+      if (type === "service") {
+        return {
+          ...next,
+          stock: "",
+          delivery: "",
+          location: "",
+        };
+      }
+      if (type === "activity") {
+        return {
+          ...next,
+          price: "",
+          stock: "",
+          delivery: "",
+          durationMinutes: "",
+          capacity: "",
+          locations: "",
+        };
+      }
+      return next;
+    });
+    setLinks((prev) => (type === "activity" ? prev.length ? prev : [LINK_TEMPLATE] : []));
+  };
 
-  const removeImage = (idx) => {
-    const item = preview[idx];
+  const updateLink = (index, field, value) => {
+    setLinks((prev) =>
+      prev.map((link, idx) => (idx === index ? { ...link, [field]: value } : link))
+    );
+  };
+
+  const addLink = () => setLinks((prev) => [...prev, LINK_TEMPLATE]);
+  const removeLink = (index) =>
+    setLinks((prev) => {
+      const next = prev.filter((_, idx) => idx !== index);
+      return next.length ? next : [LINK_TEMPLATE];
+    });
+
+  const onPickFiles = (event) => {
+    const picked = Array.from(event.target.files || []);
+    if (!picked.length) return;
+    setFiles((prev) => [...prev, ...picked]);
+    setAlts((prev) => [...prev, ...Array(picked.length).fill("")]);
+    const previews = picked.map((file) => ({ url: URL.createObjectURL(file), name: file.name }));
+    setPreview((prev) => [...prev, ...previews]);
+  };
+
+  const onChangeAlt = (index, value) =>
+    setAlts((prev) => prev.map((alt, idx) => (idx === index ? value : alt)));
+
+  const removeImage = (index) => {
+    const item = preview[index];
     if (item) URL.revokeObjectURL(item.url);
-    setFiles((prev) => prev.filter((_, i) => i !== idx));
-    setAlts((prev) => prev.filter((_, i) => i !== idx));
-    setPreview((prev) => prev.filter((_, i) => i !== idx));
+    setFiles((prev) => prev.filter((_, idx) => idx !== index));
+    setAlts((prev) => prev.filter((_, idx) => idx !== index));
+    setPreview((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  // revoke todas las URLs al desmontar o limpiar
-  useEffect(() => {
-    return () => {
-      preview.forEach((p) => URL.revokeObjectURL(p.url));
-    };
-  }, [preview]);
+  useEffect(
+    () => () => {
+      preview.forEach((item) => URL.revokeObjectURL(item.url));
+    },
+    [preview]
+  );
 
-  const submit = async (e) => {
-    e.preventDefault();
+  const resetForm = () => {
+    preview.forEach((item) => URL.revokeObjectURL(item.url));
+    const nextType = initialType;
+    setForm({ ...BASE_FORM, type: nextType });
+    setLinks(nextType === "activity" ? [LINK_TEMPLATE] : []);
+    setFiles([]);
+    setAlts([]);
+    setPreview([]);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!form.title.trim()) {
+      window?.toast?.error?.("El título es obligatorio") ?? alert("El título es obligatorio");
+      return;
+    }
+
     try {
       setLoading(true);
       const fd = new FormData();
-
-      // básicos
-      fd.append("title", form.title);
+      fd.append("title", form.title.trim());
       fd.append("type", form.type);
-      if (form.price !== "") fd.append("price", String(form.price));
-      if (form.shortDescription) fd.append("shortDescription", form.shortDescription);
-      if (form.description) fd.append("description", form.description);
-      if (form.category) fd.append("category", form.category);
       fd.append("active", String(!!form.active));
 
-      // producto
-      if (isProduct) {
-        if (form.stock !== "") fd.append("stock", String(form.stock));
-        if (form.delivery) fd.append("delivery", form.delivery);
+      if (form.category.trim()) fd.append("category", form.category.trim());
+      if (form.shortDescription.trim()) fd.append("shortDescription", form.shortDescription.trim());
+      if (form.description.trim()) fd.append("description", form.description.trim());
+
+      if (!isActivity && form.price !== "") {
+        fd.append("price", String(form.price));
       }
 
-      // servicio
+      if (isProduct) {
+        if (form.stock !== "") fd.append("stock", String(form.stock));
+        if (form.delivery.trim()) fd.append("delivery", form.delivery.trim());
+      }
+
       if (isService) {
         if (form.durationMinutes !== "") fd.append("durationMinutes", String(form.durationMinutes));
         if (form.capacity !== "") fd.append("capacity", String(form.capacity));
         const locs = form.locations
           .split(",")
-          .map((t) => t.trim())
+          .map((item) => item.trim())
           .filter(Boolean);
         fd.append("locations", JSON.stringify(locs));
+      } else {
+        fd.append("locations", JSON.stringify([]));
       }
 
-      // tags
-      const tagsArr = form.tags
+      if (isActivity) {
+        if (form.location.trim()) fd.append("location", form.location.trim());
+        const linksPayload = links
+          .map((link) => ({
+            label: link.label.trim(),
+            url: link.url.trim(),
+          }))
+          .filter((link) => link.url);
+        fd.append("links", JSON.stringify(linksPayload));
+      } else {
+        fd.append("location", "");
+        fd.append("links", JSON.stringify([]));
+      }
+
+      const tagsArray = form.tags
         .split(",")
-        .map((t) => t.trim().toLowerCase())
+        .map((tag) => tag.trim().toLowerCase())
         .filter(Boolean);
-      fd.append("tags", JSON.stringify(tagsArr));
+      fd.append("tags", JSON.stringify(tagsArray));
 
-      // alts por imagen (opcional)
       fd.append("alts", JSON.stringify(alts));
+      files.forEach((file) => fd.append("images", file));
 
-      // archivos
-      files.forEach((f) => fd.append("images", f));
-
-      // crear
       await createSP(fd);
 
-      if (window?.toast?.success) window.toast.success("Creado con éxito ✅");
-      else alert("Creado con éxito ✅");
-
-      // limpiar
-      preview.forEach((p) => URL.revokeObjectURL(p.url));
-      setForm({
-        title: "",
-        type: presetType === "service" ? "service" : "product",
-        price: "",
-        shortDescription: "",
-        description: "",
-        category: "",
-        tags: "",
-        active: true,
-        stock: "",
-        delivery: "",
-        durationMinutes: "",
-        capacity: "",
-        locations: "",
-      });
-      setFiles([]);
-      setAlts([]);
-      setPreview([]);
-    } catch (err) {
-      console.error(err);
+      window?.toast?.success?.("Elemento creado correctamente") ?? alert("Elemento creado correctamente");
+      resetForm();
+    } catch (error) {
+      console.error("Crear elemento catálogo error:", error);
       const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        "Error al crear";
-      if (window?.toast?.error) window.toast.error(msg);
-      else alert(msg);
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "No se pudo crear el elemento";
+      window?.toast?.error?.(msg) ?? alert(msg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="max-w-5xl mx-auto px-4 pb-28 pt-6">
-      <header className="mb-6 mt-15 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <h1 className="text-3xl font-bold tracking-tight">
-          <span className="bg-white bg-clip-text text-transparent">
-            Nuevo {isProduct ? "producto" : "servicio"}
-          </span>
-        </h1>
-
-        <div className="sm:ml-auto">
-          <div className="join">
-            <button
-              type="button"
-              className={`btn btn-sm join-item ${isProduct ? "btn-primary" : "btn-outline"}`}
-              onClick={() => setForm((f) => ({ ...f, type: "product" }))}
-            >
-              Producto
-            </button>
-            <button
-              type="button"
-              className={`btn btn-sm join-item ${isService ? "btn-secondary" : "btn-outline"}`}
-              onClick={() => setForm((f) => ({ ...f, type: "service" }))}
-            >
-              Servicio
-            </button>
-          </div>
+    <main className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      <header className="mt-15 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Nuevo elemento del catálogo</h1>
+          <p className="text-sm text-base-content/70">
+            Selecciona el tipo de elemento y completa la información necesaria. Puedes adjuntar imágenes y enlaces de apoyo.
+          </p>
         </div>
       </header>
 
-      <form onSubmit={submit} className="space-y-6">
-        {/* Básicos */}
-        <section className="card bg-base-100/70 border border-base-200 shadow-sm">
-          <div className="card-body p-5 space-y-5">
-            <SectionTitle icon="📦" title="Información básica" subtitle="Datos comunes para producto o servicio." />
-            <div className="space-y-4 ">
-              <Field
-                id="title"
-                label="Título"
-                name="title"
-                value={form.title}
-                onChange={onChange}
-                placeholder="Ej: Figura Orión 3D / Taller de observación"
-                required
-              />
-              <Field
-                id="category"
-                label="Categoría"
-                name="category"
-                value={form.category}
-                onChange={onChange}
-                placeholder="ej: figuras, talleres"
-              />
-              <Field
-                id="price"
-                label="Precio (CLP)"
-                name="price"
-                type="number"
-                inputMode="numeric"
-                min="0"
-                value={form.price}
-                onChange={onChange}
-                placeholder={isService ? "Opcional para servicios" : "0"}
-              />
-              <FieldToggle
-                label="Estado"
-                checked={form.active}
-                onChange={(e) => onChange({ target: { name: "active", type: "checkbox", checked: e.target.checked } })}
-                textRight="Activo"
-              />
-              <Field
-                id="shortDescription"
-                label="Resumen"
-                name="shortDescription"
-                value={form.shortDescription}
-                onChange={onChange}
-                placeholder="Descripción breve visible en tarjetas"
-              />
-              <FieldArea
-                id="description"
-                label="Descripción"
-                name="description"
-                value={form.description}
-                onChange={onChange}
-                placeholder="Detalles, materiales, dinámica, requisitos, etc."
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Producto */}
-        {isProduct && (
-          <section className="card bg-base-100/70 border border-base-200 shadow-sm">
-            <div className="card-body p-5 space-y-5">
-              <SectionTitle icon="🛒" title="Detalles de producto" subtitle="Stock y formato de entrega." />
-              <div className="space-y-4">
-                <Field
-                  id="stock"
-                  label="Stock"
-                  name="stock"
-                  type="number"
-                  inputMode="numeric"
-                  min="0"
-                  value={form.stock}
-                  onChange={onChange}
-                  placeholder="0"
-                />
-                <Field
-                  id="delivery"
-                  label="Entrega/Formato"
-                  name="delivery"
-                  value={form.delivery}
-                  onChange={onChange}
-                  placeholder="physical | digital | onsite"
-                  hint="Ejemplos: 'physical', 'digital', 'onsite'."
-                />
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Servicio */}
-        {isService && (
-          <section className="card bg-base-100/70 border border-base-200 shadow-sm">
-            <div className="card-body p-5 space-y-5">
-              <SectionTitle icon="🛎️" title="Detalles de servicio" subtitle="Duración, cupos y ubicaciones." />
-              <div className="space-y-4">
-                <Field
-                  id="durationMinutes"
-                  label="Duración (min)"
-                  name="durationMinutes"
-                  type="number"
-                  inputMode="numeric"
-                  min="0"
-                  value={form.durationMinutes}
-                  onChange={onChange}
-                />
-                <Field
-                  id="capacity"
-                  label="Capacidad (personas)"
-                  name="capacity"
-                  type="number"
-                  inputMode="numeric"
-                  min="0"
-                  value={form.capacity}
-                  onChange={onChange}
-                />
-                <Field
-                  id="locations"
-                  label="Ubicaciones"
-                  name="locations"
-                  value={form.locations}
-                  onChange={onChange}
-                  placeholder="Santiago, Valparaíso"
-                  hint="Separa múltiples ubicaciones con coma."
-                />
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Tags */}
-        <section className="card bg-base-100/70 border border-base-200 shadow-sm">
-          <div className="card-body p-5 space-y-5">
-            <SectionTitle icon="🏷️" title="Etiquetas" subtitle="Mejoran la búsqueda y categorización." />
-            <div className="space-y-4">
-              <Field
-                id="tags"
-                label="Tags"
-                name="tags"
-                value={form.tags}
-                onChange={onChange}
-                placeholder="astro, resina, orion"
-                hint="Usa 2–5 tags relevantes (separados por coma)."
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Imágenes */}
-        <section className="card bg-base-100/70 border border-base-200 shadow-sm">
-          <div className="card-body p-5 space-y-5">
-            <SectionTitle icon="🖼️" title="Imágenes" subtitle="Agrega fotos y textos alternativos (accesibilidad)." />
-
-            <Row label="Subida">
-              <div className="flex flex-wrap items-center gap-3">
-                <input
-                  id="filepick"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={onPickFiles}
-                  className="hidden"
-                />
-                <label htmlFor="filepick" className="btn btn-accent btn-sm md:btn-md">
-                  📷 Subir imágenes
-                </label>
-                <span className="text-xs opacity-70">
-                  Puedes arrastrar y soltar archivos en esta página.
-                </span>
-              </div>
-            </Row>
-
-            <Row label="Vista previa">
-              {preview.length ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {preview.map((p, idx) => (
-                    <div key={p.url} className="card bg-base-200/70 border border-base-300 shadow-sm">
-                      <figure className="aspect-square overflow-hidden">
-                        <img src={p.url} alt={p.name} className="object-cover w-full h-full" />
-                      </figure>
-                      <div className="card-body p-3 gap-2">
-                        <input
-                          className="input input-bordered input-sm"
-                          placeholder="Alt de la imagen"
-                          value={alts[idx] || ""}
-                          onChange={(e) => onChangeAlt(idx, e.target.value)}
-                        />
-                        <button
-                          type="button"
-                          className="btn btn-ghost btn-xs"
-                          onClick={() => removeImage(idx)}
-                        >
-                          Quitar
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-2xl border-2 border-dashed border-base-300 p-6 text-center text-base-content/70">
-                  Aún no hay imágenes. Usa “Subir imágenes”.
-                </div>
-              )}
-            </Row>
-          </div>
-        </section>
-
-        {/* Acciones */}
-        <div className="btm-nav md:static md:btm-nav-none md:flex md:justify-end md:gap-3">
+      <div className="flex flex-wrap gap-2">
+        {TYPE_OPTIONS.map((option) => (
           <button
-            type="submit"
-            className={`btn btn-primary btn-sm md:btn-md ${loading ? "loading" : ""}`}
-            disabled={loading}
+            key={option.value}
+            type="button"
+            className={`btn btn-sm ${form.type === option.value ? "btn-primary" : "btn-outline"}`}
+            onClick={() => handleTypeChange(option.value)}
           >
-            {loading ? "Creando..." : `Crear ${isProduct ? "producto" : "servicio"}`}
+            {option.label}
+          </button>
+        ))}
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <Section title="Información básica" subtitle="Título, categoría y contenido principal del recurso.">
+          <Row label="Título" htmlFor="title">
+            <input
+              id="title"
+              name="title"
+              className={baseInput}
+              value={form.title}
+              onChange={updateForm}
+              placeholder="Ej: Taller de observación"
+              required
+            />
+          </Row>
+
+          <Row label="Categoría" htmlFor="category">
+            <input
+              id="category"
+              name="category"
+              className={baseInput}
+              value={form.category}
+              onChange={updateForm}
+              placeholder="Ej: Taller, Producto, Jornada"
+            />
+          </Row>
+
+          {!isActivity && (
+            <Row label="Precio (CLP)" htmlFor="price">
+              <input
+                id="price"
+                name="price"
+                className={baseInput}
+                type="number"
+                min="0"
+                inputMode="numeric"
+                value={form.price}
+                onChange={updateForm}
+                placeholder={isProduct ? "0" : "Opcional"}
+                required={isProduct}
+              />
+            </Row>
+          )}
+
+          <Row label="Resumen" htmlFor="shortDescription">
+            <textarea
+              id="shortDescription"
+              name="shortDescription"
+              className={baseTextarea}
+              value={form.shortDescription}
+              onChange={updateForm}
+              placeholder="Descripción breve que se mostrará en tarjetas y listados."
+            />
+          </Row>
+
+          <Row label="Descripción" htmlFor="description">
+            <textarea
+              id="description"
+              name="description"
+              className={baseTextarea}
+              value={form.description}
+              onChange={updateForm}
+              placeholder="Incluye todos los detalles: objetivos, material, dinámica, requisitos, etc."
+            />
+          </Row>
+
+          {isActivity && (
+            <Row label="Ubicación" htmlFor="location">
+              <input
+                id="location"
+                name="location"
+                className={baseInput}
+                value={form.location}
+                onChange={updateForm}
+                placeholder="Ej: Planetario, Online, Región Metropolitana"
+              />
+            </Row>
+          )}
+
+          <Row label="Estado">
+            <label className="label cursor-pointer justify-start gap-3">
+              <input
+                type="checkbox"
+                className="toggle toggle-sm toggle-primary"
+                checked={form.active}
+                onChange={updateForm}
+                name="active"
+              />
+              <span className="label-text text-sm">Visible en el catálogo</span>
+            </label>
+          </Row>
+        </Section>
+
+        {isProduct && (
+          <Section title="Detalles de producto" subtitle="Gestiona stock y formato de entrega.">
+            <Row label="Stock" htmlFor="stock">
+              <input
+                id="stock"
+                name="stock"
+                className={baseInput}
+                type="number"
+                min="0"
+                inputMode="numeric"
+                value={form.stock}
+                onChange={updateForm}
+                placeholder="0"
+              />
+            </Row>
+            <Row label="Entrega / Formato" htmlFor="delivery">
+              <input
+                id="delivery"
+                name="delivery"
+                className={baseInput}
+                value={form.delivery}
+                onChange={updateForm}
+                placeholder="Ej: Retiro en tienda, Envío nacional, Digital"
+              />
+            </Row>
+          </Section>
+        )}
+
+        {isService && (
+          <Section title="Detalles de servicio" subtitle="Incluye duración, aforo y ubicaciones">
+            <Row label="Duración (min)" htmlFor="durationMinutes">
+              <input
+                id="durationMinutes"
+                name="durationMinutes"
+                className={baseInput}
+                type="number"
+                min="0"
+                inputMode="numeric"
+                value={form.durationMinutes}
+                onChange={updateForm}
+              />
+            </Row>
+            <Row label="Capacidad" htmlFor="capacity">
+              <input
+                id="capacity"
+                name="capacity"
+                className={baseInput}
+                type="number"
+                min="0"
+                inputMode="numeric"
+                value={form.capacity}
+                onChange={updateForm}
+              />
+            </Row>
+            <Row label="Ubicaciones" htmlFor="locations">
+              <input
+                id="locations"
+                name="locations"
+                className={baseInput}
+                value={form.locations}
+                onChange={updateForm}
+                placeholder="Ej: Santiago, Valparaíso"
+              />
+              <p className="text-xs opacity-60 mt-1">Separa múltiples ubicaciones con coma.</p>
+            </Row>
+          </Section>
+        )}
+
+        <Section title="Etiquetas y enlaces" subtitle="Facilitan la búsqueda y añaden material adicional.">
+          <Row label="Etiquetas" htmlFor="tags">
+            <input
+              id="tags"
+              name="tags"
+              className={baseInput}
+              value={form.tags}
+              onChange={updateForm}
+              placeholder="astro, divulgación, familiar"
+            />
+          </Row>
+
+          {isActivity && (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-base-content/80">Enlaces útiles</p>
+              {links.map((link, index) => (
+                <div key={index} className="grid gap-3 sm:grid-cols-[1fr_minmax(0,1fr)_auto]">
+                  <input
+                    className={baseInput}
+                    placeholder="Etiqueta (opcional)"
+                    value={link.label}
+                    onChange={(e) => updateLink(index, "label", e.target.value)}
+                  />
+                  <input
+                    className={baseInput}
+                    placeholder="https://"
+                    value={link.url}
+                    onChange={(e) => updateLink(index, "url", e.target.value)}
+                    required={activeLinks.length === 0}
+                  />
+                  <div className="flex items-center justify-end gap-2">
+                    {links.length > 1 && (
+                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => removeLink(index)}>
+                        Quitar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <button type="button" className="btn btn-outline btn-sm" onClick={addLink}>
+                + Añadir enlace
+              </button>
+            </div>
+          )}
+        </Section>
+
+        <Section title="Material visual" subtitle="Imágenes opcionales para tarjetas y detalle.">
+          <Row label="Subir">
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                id="filepicker"
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={onPickFiles}
+              />
+              <label htmlFor="filepicker" className="btn btn-accent btn-sm md:btn-md">
+                Seleccionar imágenes
+              </label>
+              <span className="text-xs opacity-70">Formatos JPG o PNG hasta 5MB.</span>
+            </div>
+          </Row>
+
+          {preview.length > 0 ? (
+            <Row label="Vista previa">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {preview.map((item, index) => (
+                  <div key={item.url} className="card bg-base-200/70 border border-base-300 shadow-sm">
+                    <figure className="aspect-square overflow-hidden">
+                      <img src={item.url} alt={item.name} className="object-cover w-full h-full" />
+                    </figure>
+                    <div className="card-body p-3 gap-2">
+                      <input
+                        className="input input-bordered input-sm"
+                        placeholder="Texto alternativo"
+                        value={alts[index] || ""}
+                        onChange={(e) => onChangeAlt(index, e.target.value)}
+                      />
+                      <button type="button" className="btn btn-ghost btn-xs" onClick={() => removeImage(index)}>
+                        Quitar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Row>
+          ) : (
+            <Row label="Vista previa">
+              <div className="rounded-xl border-2 border-dashed border-base-300 p-6 text-center text-base-content/70">
+                Aún no has seleccionado imágenes.
+              </div>
+            </Row>
+          )}
+        </Section>
+
+        <div className="btm-nav md:static md:btm-nav-none md:flex md:justify-end md:gap-3">
+          <button type="submit" className={`btn btn-primary btn-sm md:btn-md ${loading ? "loading" : ""}`} disabled={loading}>
+            {loading ? "Creando..." : submitLabel}
           </button>
         </div>
       </form>

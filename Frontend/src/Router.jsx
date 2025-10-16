@@ -52,17 +52,11 @@ export default function AppRouter() {
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Home />} />
                   <Route path="/nosotros" element={<AboutUs />} />
-                  <Route
-                    path="/servicios-productos-list"
-                    element={<ServiceProductList />}
-                  />
-                  <Route
-                    path="/servicios-productos/:id"
-                    element={<ServiceProductSingle />}
-                  />
+                  <Route path="/servicios-productos-list" element={<ServiceProductList />} />
+                  <Route path="/servicios-productos/:id" element={<ServiceProductSingle />} />
                   {/* Software  */}
                   <Route path="/recursos/stellarium" element={<Stellarium />} />
-                  <Route path="/recursos/software" element={<Software />} />
+                  <Route path="/recursos/sofware-y-apps" element={<Software />} />
                   {/* Subpaginas de recursos */}
                   {/* Literatura */}
                   <Route path="/recursos/literatura" element={<Literatura />} />
