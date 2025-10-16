@@ -14,7 +14,7 @@ const RESOURCE_LINKS = [
 ];
 
 const COMMUNITY_LINKS = [
-  { label: "Ver comunidad", to: "/comunidad" },
+  
   { label: "Astromania responde", to: "/comunidad/astromania-responde" },
   { label: "Galeria", to: "/comunidad/galeria" },
 ];

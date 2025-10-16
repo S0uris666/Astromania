@@ -6,6 +6,7 @@ import {
   Sparkles,
   BookOpenText,
   ExternalLink,
+  ChevronDown,
 } from "lucide-react";
 
 import { literatura_aprendizaje } from "../../../data/Literatura_aprendizaje.jsx";
@@ -84,7 +85,7 @@ export function Literatura() {
         </header>
 
         {/* Search + Filters (idéntico a Música) */}
-        <div className="mt-6 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+        <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center">
           <label className="input input-bordered flex items-center gap-2 w-full md:max-w-md bg-base-100">
             <Search className="w-4 h-4 opacity-70" />
             <input
@@ -97,11 +98,11 @@ export function Literatura() {
             />
           </label>
 
-          <div className="join">
+          <div className="join join-vertical sm:join-horizontal w-full sm:w-auto">
             {TYPE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
-                className={`btn btn-sm join-item ${
+                className={`btn btn-sm join-item w-full sm:w-auto ${
                   type === opt.value ? "btn-primary" : "btn-outline"
                 }`}
                 onClick={() => setType(opt.value)}
@@ -115,9 +116,11 @@ export function Literatura() {
         </div>
 
         {/* Meta opcional */}
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-          <p className="text-base-content/70">{CATEGORY_DESCRIPTION[type]}</p>
-          <span className="ml-auto text-xs uppercase tracking-wide text-base-content/60">
+        <div className="mt-4 flex flex-col gap-2 text-sm sm:flex-row sm:flex-wrap sm:items-center">
+          <p className="text-base-content/70 sm:flex-1">
+            {CATEGORY_DESCRIPTION[type]}
+          </p>
+          <span className="text-xs uppercase tracking-wide text-base-content/60 sm:ml-auto">
             Mostrando {filtered.length} de {catalogue.length} títulos
           </span>
         </div>
@@ -133,7 +136,7 @@ export function Literatura() {
         ) : (
           <ul className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {filtered.map((book) => (
-              <li key={`${book.category}-${book.id}`}>
+              <li key={`${book.category}-${book.id}`} className="h-full">
                 <BookCard book={book} badge={TYPE_LABEL[book.category]} />
               </li>
             ))}
@@ -148,15 +151,19 @@ export function Literatura() {
 function BookCard({ book, badge }) {
   const { title, autor, description = "", imagen, link } = book || {};
   const [expanded, setExpanded] = useState(false);
+  const desc = (description ?? "").trim();
   const isValidUrl = typeof link === "string" && /^https?:\/\//i.test(link);
 
   const THRESHOLD = 140;
-  const normalized = description.trim();
-  const needsToggle = normalized.length > THRESHOLD;
-  const shortText = normalized.slice(0, THRESHOLD).trimEnd();
+  const needsToggle = useMemo(() => desc.length > THRESHOLD, [desc]);
+  const shortText = useMemo(() => desc.slice(0, THRESHOLD), [desc]);
+  const truncated = useMemo(
+    () => (needsToggle ? `${shortText}...` : desc),
+    [needsToggle, shortText, desc]
+  );
 
   return (
-    <article className="card bg-base-100 border border-base-300/70 hover:border-base-300 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden h-full">
+    <article className="card h-full flex flex-col bg-base-100 border border-base-300/70 hover:border-base-300 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
       <figure className="relative aspect-square bg-base-300/70 grid place-items-center p-4 sm:p-5">
         {imagen ? (
           <img
@@ -176,29 +183,28 @@ function BookCard({ book, badge }) {
       </figure>
 
       <div className="card-body flex flex-col">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <h3 className="card-title text-lg sm:text-xl leading-tight">
-            {title || "Título no disponible"}
+            {title || "Titulo no disponible"}
           </h3>
+
           {!!badge && (
-            <span className="badge badge-ghost whitespace-nowrap">{badge}</span>
+            <span className="badge badge-ghost capitalize self-start sm:self-auto">
+
+              {badge}
+            </span>
           )}
         </div>
 
-        {autor && (
-          <p className="mt-0.5 text-sm font-medium text-base-content/70">
+        {!!desc && (
+          <div className="mt-2 text-sm text-base-content/80">
+                                            {autor && (
+          <p className="mt-1 mb-4 text-sm font-medium text-base-content/70">
             {autor}
           </p>
         )}
-
-        {!!normalized && (
-          <div className="mt-3 text-sm text-base-content/80">
             <p className={!expanded ? "line-clamp-3" : ""}>
-              {expanded
-                ? normalized
-                : needsToggle
-                ? `${shortText}…`
-                : normalized}
+              {expanded ? desc : truncated}
             </p>
 
             {needsToggle && (
@@ -213,7 +219,9 @@ function BookCard({ book, badge }) {
               >
                 <span>{expanded ? "Ver menos" : "Ver más"}</span>
                 <span
-                  className={`flex h-5 w-5 items-center justify-center rounded-full border border-secondary transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
+                  className={`flex h-5 w-5 items-center justify-center rounded-full border border-secondary transition-transform duration-300 ${
+                    expanded ? "rotate-180" : ""
+                  }`}
                   aria-hidden="true"
                 >
                   <ChevronDown className="w-3 h-3" />
@@ -223,7 +231,9 @@ function BookCard({ book, badge }) {
           </div>
         )}
 
-        <div className="card-actions mt-auto pt-4 border-t border-base-200 gap-2">
+
+        <div className="card-actions mt-4 flex-wrap gap-2 pt-4 border-t border-base-200">
+
           {isValidUrl ? (
             <>
               <a

@@ -1,15 +1,6 @@
 // src/pages/Audiovisual.jsx
 import { useMemo, useState } from "react";
-import {
-  Sparkles,
-  Telescope,
-  Youtube,
-  Images,
-  Clapperboard,
-  Tv,
-  Search,
-  ExternalLink,
-} from "lucide-react";
+import {  Sparkles,  Telescope,  Youtube,  Images,  Clapperboard,  Tv,  Search,  ExternalLink,  ChevronDown,} from "lucide-react";
 
 import { AUDIOVISUAL_ITEMS } from "../../../data/Audiovisual_data.jsx";
 import { filterByCategoryAndQuery } from "../../../utils/filters.js";
@@ -109,100 +100,7 @@ export function Audiovisual() {
 }
 
 /* ================== Card (alineada a la de Música) ================== */
-function MediaCard({ item, badge }) {
-  const { title, provider, description = "", cover, link, linkLabel } = item || {};
-  const [expanded, setExpanded] = useState(false);
-
-  const THRESHOLD = 140; // igual que Música
-  const normalized = description.trim();
-  const needsToggle = normalized.length > THRESHOLD;
-  const shortText = normalized.slice(0, THRESHOLD);
-
-  return (
-    <article className="card bg-base-100 border border-base-300/70 hover:border-base-300 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden h-full">
-      {/* Cabecera cuadrada para empatar el look */}
-      <figure className="relative aspect-square bg-base-300/70 grid place-items-center p-4 sm:p-5">
-        {cover ? (
-          <img
-            src={cover}
-            alt=""
-            className="max-w-full max-h-full object-contain drop-shadow-sm"
-            loading="lazy"
-            decoding="async"
-            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          />
-        ) : (
-          <div className="text-sm opacity-70">Sin portada</div>
-        )}
-        <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
-      </figure>
-
-      <div className="card-body">
-        <div className="flex items-center justify-between gap-3">
-          <h3 className="card-title text-lg sm:text-xl leading-tight">
-            {title || "Título no disponible"}
-          </h3>
-          {!!badge && <span className="badge badge-ghost capitalize">{badge}</span>}
-        </div>
-
-        {provider && (
-          <p className="mt-0.5 text-sm font-medium text-base-content/70">{provider}</p>
-        )}
-
-        {!!normalized && (
-          <div className="mt-1 text-sm text-base-content/80">
-            <p className={!expanded ? "line-clamp-3" : ""}>
-              {expanded ? normalized : needsToggle ? `${shortText}…` : normalized}
-            </p>
-
-            {needsToggle && (
-              <button
-                type="button"
-                onClick={() => setExpanded((v) => !v)}
-                className="mt-2 btn btn-link btn-xs p-0 h-auto min-h-0 no-underline text-secondary"
-                aria-expanded={expanded}
-                aria-label={expanded ? "Ver menos descripción" : "Ver más descripción"}
-              >
-                {expanded ? "Ver menos" : "Ver más"}
-              </button>
-            )}
-          </div>
-        )}
-
-        <div className="card-actions mt-4">
-          {typeof link === "string" && link.length ? (
-            <>
-              <a
-                href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary btn-sm normal-case"
-                title={linkLabel || "Abrir recurso"}
-              >
-                {linkLabel || "Abrir recurso"}
-              </a>
-              <a
-                href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-ghost btn-sm normal-case"
-                aria-label={`Abrir ${title} en nueva pestaña`}
-                title="Abrir en nueva pestaña"
-              >
-                <ExternalLink className="w-4 h-4" />
-                <span className="sr-only">Abrir en nueva pestaña</span>
-              </a>
-            </>
-          ) : (
-            <button type="button" className="btn btn-disabled btn-sm normal-case" title="Enlace no disponible">
-              Enlace no disponible
-            </button>
-          )}
-        </div>
-      </div>
-    </article>
-  );
-}
+function MediaCard({ item, badge }) {  const { title, provider, description = "", cover, link, linkLabel } = item || {};  const [expanded, setExpanded] = useState(false);  const desc = (description ?? "").trim();  const isValidUrl = typeof link === "string" && link.length > 0;  const THRESHOLD = 140;  const needsToggle = useMemo(() => desc.length > THRESHOLD, [desc]);  const shortText = useMemo(() => desc.slice(0, THRESHOLD), [desc]);  const truncated = useMemo(    () => (needsToggle ? `${shortText}...` : desc),    [needsToggle, shortText, desc]  );  return (    <article className="card h-full flex flex-col bg-base-100 border border-base-300/70 hover:border-base-300 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">      {/* Cabecera cuadrada para empatar el look */}      <figure className="relative aspect-square bg-base-300/70 grid place-items-center p-4 sm:p-5">        {cover ? (          <img            src={cover}            alt=""            className="max-w-full max-h-full object-contain drop-shadow-sm"            loading="lazy"            decoding="async"            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"          />        ) : (          <div className="text-sm opacity-70">Sin portada</div>        )}        <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/10 via-transparent to-transparent" />      </figure>      <div className="card-body flex flex-col">        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">          <h3 className="card-title text-lg sm:text-xl leading-tight">            {title || "Título no disponible"}          </h3>          {!!badge && (            <span className="badge badge-ghost capitalize self-start sm:self-auto">              {badge}            </span>          )}        </div>        {provider && (          <p className="mt-1 text-sm font-medium text-base-content/70">{provider}</p>        )}        {!!desc && (          <div className="mt-2 text-sm text-base-content/80">            <p className={!expanded ? "line-clamp-3" : ""}>              {expanded ? desc : truncated}            </p>            {needsToggle && (              <button                type="button"                onClick={() => setExpanded((v) => !v)}                className="group mt-3 inline-flex items-center gap-2 text-secondary text-xs font-semibold tracking-wide uppercase"                aria-expanded={expanded}                aria-label={expanded ? "Ver menos descripción" : "Ver más descripción"}              >                <span>{expanded ? "Ver menos" : "Ver más"}</span>                <span                  className={`flex h-5 w-5 items-center justify-center rounded-full border border-secondary transition-transform duration-300 ${                    expanded ? "rotate-180" : ""                  }`}                  aria-hidden="true"                >                  <ChevronDown className="w-3 h-3" />                </span>              </button>            )}          </div>        )}        <div className="card-actions mt-4 flex-wrap gap-2 pt-4 border-t border-base-200">          {isValidUrl ? (            <>              <a                href={link}                target="_blank"                rel="noopener noreferrer"                className="btn btn-primary btn-sm normal-case"                title={linkLabel || "Abrir recurso"}              >                {linkLabel || "Abrir recurso"}              </a>              <a                href={link}                target="_blank"                rel="noopener noreferrer"                className="btn btn-ghost btn-sm normal-case"                aria-label={`Abrir ${title} en nueva pestaña`}                title="Abrir en nueva pestaña"              >                <ExternalLink className="w-4 h-4" />                <span className="sr-only">Abrir en nueva pestaña</span>              </a>            </>          ) : (            <button type="button" className="btn btn-disabled btn-sm normal-case" title="Enlace no disponible">              Enlace no disponible            </button>          )}        </div>      </div>    </article>  );}
 
 /* ================== Empty (mismo tono visual) ================== */
 function EmptyState({ onClear }) {
