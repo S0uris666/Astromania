@@ -1,27 +1,20 @@
 // src/pages/MusicaAstronomica.jsx
 import { useMemo, useState } from "react";
-import {
-  Search,
-  Music2,
-  Sparkles,
-  Radio,
-} from "lucide-react";
+import { Search, Music2, Sparkles, Radio } from "lucide-react";
 import { MUSIC_ITEMS } from "../../../data/music_items.jsx";
 import { filterByCategoryAndQuery } from "../../../utils/filters.js";
 
 const TYPE_OPTIONS = [
-  { value: "all", label: "Todo", icon: <Music2 className="w-4 h-4" /> }
-,
+  { value: "all", label: "Todo", icon: <Music2 className="w-4 h-4" /> },
   { value: "album", label: "Álbumes", icon: <Sparkles className="w-4 h-4" /> },
 
-  
-  { value: "episode", label: "Podcast", icon: <Radio className="w-4 h-4" /> }
+  { value: "episode", label: "Podcast", icon: <Radio className="w-4 h-4" /> },
 ];
 
 export default function MusicaAstronomica() {
   const [query, setQuery] = useState("");
   const [type, setType] = useState("all");
-  const [active, setActive] = useState(null); 
+  const [active, setActive] = useState(null);
 
   const filtered = useMemo(
     () =>
@@ -69,9 +62,8 @@ export default function MusicaAstronomica() {
             {TYPE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
-                className={`btn btn-sm join-item ${
-                  type === opt.value ? "btn-primary" : "btn-outline"
-                }`}
+                className={`btn btn-sm join-item ${type === opt.value ? "btn-primary" : "btn-outline"
+                  }`}
                 onClick={() => setType(opt.value)}
                 aria-pressed={type === opt.value}
               >
@@ -204,7 +196,12 @@ function SpotifyModal({ active, onClose }) {
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-lg">{active.title}</h3>
           <form method="dialog">
-            <button className="btn btn-sm btn-circle btn-ghost" onClick={onClose}>✕</button>
+            <button
+              className="btn btn-sm btn-circle btn-ghost"
+              onClick={onClose}
+            >
+              ✕
+            </button>
           </form>
         </div>
 
@@ -233,7 +230,12 @@ function SpotifyModal({ active, onClose }) {
             Abrir en Spotify
           </a>
           <form method="dialog">
-            <button className="btn btn-ghost btn-sm normal-case" onClick={onClose}>Cerrar</button>
+            <button
+              className="btn btn-ghost btn-sm normal-case"
+              onClick={onClose}
+            >
+              Cerrar
+            </button>
           </form>
         </div>
       </div>
@@ -244,13 +246,22 @@ function SpotifyModal({ active, onClose }) {
   );
 }
 
-
 /* ---------- Helpers ---------- */
+const {
+  VITE_SPOTIFY_EMBED_BASE,
+  VITE_SPOTIFY_PUBLIC_BASE,
+  VITE_SPOTIFY_EMBED_THEME = "0",
+} = import.meta.env;
+
+const buildEmbedUrl = (type, id) =>
+  `${VITE_SPOTIFY_EMBED_BASE}/${type}/${id}?utm_source=generator&theme=${VITE_SPOTIFY_EMBED_THEME}`;
+
+const buildPublicUrl = (type, id) => `${VITE_SPOTIFY_PUBLIC_BASE}/${type}/${id}`;
+
 function toEmbedSrc({ id, type }) {
-  // Tipos válidos: album, playlist, track, artist, show, episode
-  return `https://open.spotify.com/embed/${type}/${id}?utm_source=generator&theme=0`;
+  return buildEmbedUrl(type, id);
 }
 
 function toPublicSpotifyUrl({ id, type }) {
-  return `https://open.spotify.com/${type}/${id}`;
+  return buildPublicUrl(type, id);
 }

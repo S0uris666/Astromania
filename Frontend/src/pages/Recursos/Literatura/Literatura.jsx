@@ -5,6 +5,7 @@ import {
   GraduationCap,
   Sparkles,
   BookOpenText,
+  ExternalLink,
 } from "lucide-react";
 
 import { literatura_aprendizaje } from "../../../data/Literatura_aprendizaje.jsx";
@@ -12,31 +13,28 @@ import { literatura_cuento } from "../../../data/Literatura_cuento.jsx";
 import { literatura_novela } from "../../../data/Literatura_novela.jsx";
 import { filterByCategoryAndQuery } from "../../../utils/filters.js";
 
-const CATEGORY_OPTIONS = [
+/* ---------- Filtros (mismo patrón que Música) ---------- */
+const TYPE_OPTIONS = [
+  { value: "all", label: "Todos", icon: <Library className="w-4 h-4" /> },
   {
-    id: "all",
-    label: "Todos",
-    icon: <Library className="w-4 h-4" />,
-  },
-  {
-    id: "aprendizaje",
+    value: "aprendizaje",
     label: "Aprendizaje",
     icon: <GraduationCap className="w-4 h-4" />,
   },
   {
-    id: "cuentos",
+    value: "cuentos",
     label: "Juvenil y cuentos",
     icon: <Sparkles className="w-4 h-4" />,
   },
   {
-    id: "novelas",
+    value: "novelas",
     label: "Novelas y textos",
     icon: <BookOpenText className="w-4 h-4" />,
   },
 ];
 
-const CATEGORY_LABEL = CATEGORY_OPTIONS.reduce(
-  (acc, option) => ({ ...acc, [option.id]: option.label }),
+const TYPE_LABEL = TYPE_OPTIONS.reduce(
+  (acc, o) => ((acc[o.value] = o.label), acc),
   {}
 );
 
@@ -50,9 +48,10 @@ const CATEGORY_DESCRIPTION = {
     "Clásicos y obras contemporáneas de ciencia ficción y aventuras espaciales.",
 };
 
+/* ================== Página ================== */
 export function Literatura() {
   const [query, setQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [type, setType] = useState("all");
 
   const catalogue = useMemo(
     () => [
@@ -63,57 +62,79 @@ export function Literatura() {
     []
   );
 
-  const filteredBooks = useMemo(
+  const filtered = useMemo(
     () =>
-      filterByCategoryAndQuery(catalogue, activeCategory, query, {
+      filterByCategoryAndQuery(catalogue, type, query, {
+        categorySelector: (book) => book?.category, // igual que item.type en Música
         fieldSelector: (book) => [book?.title, book?.autor, book?.description],
       }),
-    [activeCategory, catalogue, query]
+    [query, type, catalogue]
   );
 
   return (
     <main className="min-h-[calc(100vh-6rem)] bg-base-200">
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14 ">
-        <header className="max-w-3xl space-y-3 mt-15">
-          <h1 className="text-3xl lg:text-5xl">Literatura</h1>
-          <p className="text-base lg:text-lg text-base-content/80">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+        {/* Header */}
+        <header className="max-w-3xl mt-15">
+          <h1 className="text-3xl lg:text-4xl">Literatura</h1>
+          <p className="mt-2 text-base text-base-content/80">
             Selección de novelas, cuentos, cómics y libros de aprendizaje para
             viajar por el universo desde tu lugar favorito.
           </p>
         </header>
 
-        <div className="mt-8 flex flex-col gap-6">
-          <FilterBar
-            activeCategory={activeCategory}
-            onChange={setActiveCategory}
-            query={query}
-            onQueryChange={setQuery}
-          />
+        {/* Search + Filters (idéntico a Música) */}
+        <div className="mt-6 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+          <label className="input input-bordered flex items-center gap-2 w-full md:max-w-md bg-base-100">
+            <Search className="w-4 h-4 opacity-70" />
+            <input
+              type="text"
+              className="grow"
+              placeholder="Buscar por título, autor o descripción…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Buscar en catálogo de literatura"
+            />
+          </label>
 
-          <p className="text-sm sm:text-base text-base-content/70">
-            {CATEGORY_DESCRIPTION[activeCategory]}
-          </p>
-
-          <p className="text-xs uppercase tracking-wide text-base-content/60">
-            Mostrando {filteredBooks.length} de {catalogue.length} títulos
-          </p>
+          <div className="join">
+            {TYPE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                className={`btn btn-sm join-item ${
+                  type === opt.value ? "btn-primary" : "btn-outline"
+                }`}
+                onClick={() => setType(opt.value)}
+                aria-pressed={type === opt.value}
+              >
+                <span className="mr-2 hidden sm:inline-flex">{opt.icon}</span>
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {filteredBooks.length === 0 ? (
-          <div className="mt-12 rounded-box border border-dashed border-base-300 bg-base-100/40 p-10 text-center">
-            <h2 className="text-lg font-semibold">Sin resultados</h2>
-            <p className="mt-2 text-sm text-base-content/70">
-              No encontramos libros para la categoría seleccionada.
-            </p>
-          </div>
+        {/* Meta opcional */}
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+          <p className="text-base-content/70">{CATEGORY_DESCRIPTION[type]}</p>
+          <span className="ml-auto text-xs uppercase tracking-wide text-base-content/60">
+            Mostrando {filtered.length} de {catalogue.length} títulos
+          </span>
+        </div>
+
+        {/* Grid / Empty */}
+        {filtered.length === 0 ? (
+          <EmptyState
+            onClear={() => {
+              setQuery("");
+              setType("all");
+            }}
+          />
         ) : (
-          <ul className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
-            {filteredBooks.map((book) => (
+          <ul className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {filtered.map((book) => (
               <li key={`${book.category}-${book.id}`}>
-                <BookCard
-                  book={book}
-                  categoryLabel={CATEGORY_LABEL[book.category]}
-                />
+                <BookCard book={book} badge={TYPE_LABEL[book.category]} />
               </li>
             ))}
           </ul>
@@ -123,144 +144,103 @@ export function Literatura() {
   );
 }
 
-function FilterBar({ activeCategory, onChange, query, onQueryChange }) {
-  return (
-    <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
-      <label className="input input-bordered flex items-center gap-2 w-full md:max-w-md bg-base-100">
-        <Search className="w-4 h-4 opacity-70" />
-        <input
-          type="text"
-          className="grow"
-          placeholder="Buscar por título, autor o descripción..."
-          value={query}
-          onChange={(event) => onQueryChange(event.target.value)}
-          aria-label="Buscar en catálogo de literatura"
-        />
-      </label>
-
-      <div className="join">
-        {CATEGORY_OPTIONS.map((option) => {
-          const isActive = option.id === activeCategory;
-          return (
-            <button
-              key={option.id}
-              type="button"
-              className={`btn btn-sm join-item ${
-                isActive ? "btn-primary" : "btn-outline"
-              }`}
-              onClick={() => onChange(option.id)}
-              aria-pressed={isActive}
-            >
-              <span className="mr-2 hidden sm:inline-flex">{option.icon}</span>
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-
-
-function BookCard({ book, categoryLabel }) {
-  const { title, autor, description, imagen, link } = book || {};
-  const isValidUrl = typeof link === "string" && /^https?:\/\//i.test(link);
+/* ================== Card ================== */
+function BookCard({ book, badge }) {
+  const { title, autor, description = "", imagen, link } = book || {};
   const [expanded, setExpanded] = useState(false);
+  const isValidUrl = typeof link === "string" && /^https?:\/\//i.test(link);
 
-  const normalizedDescription = (description ?? "").trim();
   const THRESHOLD = 140;
-  const COLLAPSED_LINES = 3;
-  const LINE_HEIGHT_REM = 1.5;
-  const collapsedDescriptionHeight = `${(
-    COLLAPSED_LINES * LINE_HEIGHT_REM
-  ).toFixed(2)}rem`;
-  const needsToggle = useMemo(() => {
-    return normalizedDescription.length > THRESHOLD;
-  }, [normalizedDescription]);
-  const shortText = useMemo(() => {
-    return normalizedDescription.slice(0, THRESHOLD).trimEnd();
-  }, [normalizedDescription]);
-  const cardClassName = [
-    "card bg-base-100 border border-base-300/70 hover:border-base-300 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden",
-    expanded ? "" : "min-h-[22rem]",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const normalized = description.trim();
+  const needsToggle = normalized.length > THRESHOLD;
+  const shortText = normalized.slice(0, THRESHOLD).trimEnd();
 
   return (
-    <article className={cardClassName}>
-      <figure className="relative h-44 sm:h-56 bg-base-300 grid place-items-center p-2 sm:p-3">
+    <article className="card bg-base-100 border border-base-300/70 hover:border-base-300 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden h-full">
+      <figure className="relative aspect-square bg-base-300/70 grid place-items-center p-4 sm:p-5">
         {imagen ? (
           <img
             src={imagen}
-            alt={title ? `Portada: ${title}` : "Portada del libro"}
-            className="max-h-full max-w-full object-contain"
+            alt=""
+            className="max-w-full max-h-full object-contain drop-shadow-sm"
             loading="lazy"
             decoding="async"
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           />
         ) : (
           <span className="text-sm text-base-content/60">
             Imagen no disponible
           </span>
         )}
+        <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
       </figure>
 
-      <div className="card-body">
-        <div className="flex items-start justify-between gap-3">
+      <div className="card-body flex flex-col">
+        <div className="flex items-center justify-between gap-3">
           <h3 className="card-title text-lg sm:text-xl leading-tight">
             {title || "Título no disponible"}
           </h3>
-
-          {categoryLabel && (
-            <span className="badge badge-primary badge-outline whitespace-nowrap">
-              {categoryLabel}
-            </span>
+          {!!badge && (
+            <span className="badge badge-ghost whitespace-nowrap">{badge}</span>
           )}
         </div>
 
         {autor && (
-          <p className="mt-1 text-sm font-medium text-base-content/70">
+          <p className="mt-0.5 text-sm font-medium text-base-content/70">
             {autor}
           </p>
         )}
 
-        {normalizedDescription && (
-          <div className="mt-1 text-sm sm:text-[0.95rem] text-base-content/80">
-            <p
-              className={!expanded ? "line-clamp-3" : ""}
-              style={{ minHeight: collapsedDescriptionHeight }}
-            >
+        {!!normalized && (
+          <div className="mt-3 text-sm text-base-content/80">
+            <p className={!expanded ? "line-clamp-3" : ""}>
               {expanded
-                ? normalizedDescription
+                ? normalized
                 : needsToggle
-                ? `${shortText}...`
-                : normalizedDescription}
+                ? `${shortText}…`
+                : normalized}
             </p>
 
             {needsToggle && (
               <button
                 type="button"
-                onClick={() => setExpanded((value) => !value)}
+                onClick={() => setExpanded((v) => !v)}
                 className="mt-2 btn btn-link btn-xs p-0 h-auto min-h-0 no-underline text-secondary"
                 aria-expanded={expanded}
+                aria-label={
+                  expanded ? "Ver menos descripción" : "Ver más descripción"
+                }
               >
-                {expanded ? "Ver menos" : "Ver mas"}
+                {expanded ? "Ver menos" : "Ver más"}
               </button>
             )}
           </div>
         )}
 
-        <div className="card-actions mt-4">
+        <div className="card-actions mt-auto pt-4 border-t border-base-200 gap-2">
           {isValidUrl ? (
-            <a
-              href={link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-primary btn-sm normal-case"
-            >
-              Ver libro
-            </a>
+            <>
+              <a
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary btn-sm normal-case"
+                title="Abrir recurso"
+              >
+                Ver libro
+              </a>
+              <a
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-ghost btn-sm normal-case"
+                aria-label={`Abrir ${title} en nueva pestaña`}
+                title="Abrir en nueva pestaña"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span className="sr-only">Abrir en nueva pestaña</span>
+              </a>
+            </>
           ) : (
             <button
               type="button"
@@ -273,5 +253,26 @@ function BookCard({ book, categoryLabel }) {
         </div>
       </div>
     </article>
+  );
+}
+
+/* ================== Empty ================== */
+function EmptyState({ onClear }) {
+  return (
+    <div className="mt-10 rounded-2xl border border-dashed border-base-300 bg-base-100/60 p-10 text-center">
+      <h2 className="text-lg font-semibold">Sin resultados</h2>
+      <p className="mt-2 text-sm text-base-content/70">
+        Prueba con otra palabra clave o selecciona otra categoría.
+      </p>
+      <div className="mt-4">
+        <button
+          type="button"
+          className="btn btn-outline btn-sm"
+          onClick={onClear}
+        >
+          Limpiar filtros
+        </button>
+      </div>
+    </div>
   );
 }
