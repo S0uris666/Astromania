@@ -205,13 +205,19 @@ function BookCard({ book, badge }) {
               <button
                 type="button"
                 onClick={() => setExpanded((v) => !v)}
-                className="mt-2 btn btn-link btn-xs p-0 h-auto min-h-0 no-underline text-secondary"
+                className="group mt-3 inline-flex items-center gap-2 text-secondary text-xs font-semibold tracking-wide uppercase"
                 aria-expanded={expanded}
                 aria-label={
                   expanded ? "Ver menos descripción" : "Ver más descripción"
                 }
               >
-                {expanded ? "Ver menos" : "Ver más"}
+                <span>{expanded ? "Ver menos" : "Ver más"}</span>
+                <span
+                  className={`flex h-5 w-5 items-center justify-center rounded-full border border-secondary transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
+                  aria-hidden="true"
+                >
+                  <ChevronDown className="w-3 h-3" />
+                </span>
               </button>
             )}
           </div>
