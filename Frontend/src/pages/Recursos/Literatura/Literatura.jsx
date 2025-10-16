@@ -10,6 +10,7 @@ import {
 import { literatura_aprendizaje } from "../../../data/Literatura_aprendizaje.jsx";
 import { literatura_cuento } from "../../../data/Literatura_cuento.jsx";
 import { literatura_novela } from "../../../data/Literatura_novela.jsx";
+import { filterByCategoryAndQuery } from "../../../utils/filters.js";
 
 const CATEGORY_OPTIONS = [
   {
@@ -62,27 +63,13 @@ export function Literatura() {
     []
   );
 
-  const filteredBooks = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-
-    return catalogue.filter((book) => {
-      const matchesCategory =
-        activeCategory === "all" || book.category === activeCategory;
-
-      if (!matchesCategory) return false;
-      if (!normalizedQuery) return true;
-
-      const fieldsToCheck = [
-        book?.title ?? "",
-        book?.autor ?? "",
-        book?.description ?? "",
-      ];
-
-      return fieldsToCheck.some((field) =>
-        field.toLowerCase().includes(normalizedQuery)
-      );
-    });
-  }, [activeCategory, catalogue, query]);
+  const filteredBooks = useMemo(
+    () =>
+      filterByCategoryAndQuery(catalogue, activeCategory, query, {
+        fieldSelector: (book) => [book?.title, book?.autor, book?.description],
+      }),
+    [activeCategory, catalogue, query]
+  );
 
   return (
     <main className="min-h-[calc(100vh-6rem)] bg-base-200">

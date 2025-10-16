@@ -4,6 +4,21 @@ import { Menu, X, ChevronDown, ShoppingCart, Trash2, Search } from "lucide-react
 import { UserContext } from "../../context/user/UserContext";
 import logoImg from "../../assets/Images/logo.png";
 
+const RESOURCE_LINKS = [
+  
+  { label: "Literatura astronomica", to: "/recursos/literatura" },
+  { label: "Musica y podcast", to: "/recursos/musica" },
+  { label: "Peliculas y series", to: "/recursos/peliculas-series" },
+  { label: "Software y apps", to: "/recursos/sofware-y-apps" },
+  { label: "Planetario interactivo", to: "/recursos/stellarium" },
+];
+
+const COMMUNITY_LINKS = [
+  { label: "Ver comunidad", to: "/comunidad" },
+  { label: "Astromania responde", to: "/comunidad/astromania-responde" },
+  { label: "Galeria", to: "/comunidad/galeria" },
+];
+
 /* ---------- Logo (evita estiramiento) ---------- */
 function Logo({ className = "", onClick }) {
   return (
@@ -30,6 +45,8 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(""); // <-- NUEVO
+  const [resourcesOpen, setResourcesOpen] = useState(false);
+  const [communityOpen, setCommunityOpen] = useState(false);
   const cartRefMobile = useRef(null);
   const cartRefDesktop = useRef(null);
   const navigate = useNavigate();
@@ -77,6 +94,13 @@ export default function Header() {
   useEffect(() => {
     document.body.classList.toggle("overflow-hidden", menuOpen);
     return () => document.body.classList.remove("overflow-hidden");
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (!menuOpen) {
+      setResourcesOpen(false);
+      setCommunityOpen(false);
+    }
   }, [menuOpen]);
 
   useEffect(() => {
@@ -186,6 +210,7 @@ export default function Header() {
               <li><Link to="/recursos/musica">Música y Podcast</Link></li>
               <li><Link to="/recursos/peliculas-series">Películas y series</Link></li>
               <li><Link to="/recursos/sofware-y-apps">Software y apps</Link></li>
+              <li><Link to="/recursos/stellarium">Planetario interactivo</Link></li>
             </Drop>
 
             <Drop label="Comunidad">
@@ -309,9 +334,82 @@ export default function Header() {
 
           <Link to="/" className="block text-xl" onClick={() => setMenuOpen(false)}>Inicio</Link>
           <Link to="/nosotros" className="block text-xl" onClick={() => setMenuOpen(false)}>Nosotros</Link>
-          <Link to="/servicios-productos-list" className="block text-xl" onClick={() => setMenuOpen(false)}>Servicios y Productos</Link>
-          <Link to="/recursos" className="block text-xl" onClick={() => setMenuOpen(false)}>Recursos</Link>
-          <Link to="/comunidad" className="block text-xl" onClick={() => setMenuOpen(false)}>Comunidad</Link>
+          <Link
+            to="/servicios-productos-list"
+            className="block text-xl"
+            onClick={() => setMenuOpen(false)}
+          >
+            Servicios y Productos
+          </Link>
+
+          <div>
+            <button
+              type="button"
+              className="flex w-full items-center justify-between text-xl"
+              onClick={() => setResourcesOpen((value) => !value)}
+              aria-expanded={resourcesOpen}
+              aria-controls="mobile-recursos"
+            >
+              <span>Recursos</span>
+              <ChevronDown
+                className={`w-5 h-5 transition-transform duration-200 ${
+                  resourcesOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+            <div
+              id="mobile-recursos"
+              className={`mt-2 space-y-2 pl-4 text-base text-white/80 ${
+                resourcesOpen ? "block" : "hidden"
+              }`}
+            >
+              {RESOURCE_LINKS.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="block"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="button"
+              className="flex w-full items-center justify-between text-xl"
+              onClick={() => setCommunityOpen((value) => !value)}
+              aria-expanded={communityOpen}
+              aria-controls="mobile-comunidad"
+            >
+              <span>Comunidad</span>
+              <ChevronDown
+                className={`w-5 h-5 transition-transform duration-200 ${
+                  communityOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+            <div
+              id="mobile-comunidad"
+              className={`mt-2 space-y-2 pl-4 text-base text-white/80 ${
+                communityOpen ? "block" : "hidden"
+              }`}
+            >
+              {COMMUNITY_LINKS.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="block"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
           <Link to="/contacto" className="block text-xl" onClick={() => setMenuOpen(false)}>Contacto</Link>
           <Link to="/eventos" className="block text-xl" onClick={() => setMenuOpen(false)}>Eventos</Link>
 

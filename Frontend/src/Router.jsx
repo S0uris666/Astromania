@@ -7,7 +7,6 @@ import { Home } from "./pages/Home/Home.jsx";
 import { AboutUs } from "./pages/AboutUs/AboutUs.jsx";
 import { ServiceProductList } from "./pages/ServiceProduct/List/ServiceProductList.jsx";
 import { ServiceProductSingle } from "./pages/ServiceProduct/Single/ServiceProductSingle.jsx";
-import { Recursos } from "./pages/Recursos/Recursos.jsx";
 import { Comunidad } from "./pages/Comunidad/Comunidad.jsx";
 import { Contacto } from "./pages/Contacto/Contacto.jsx";
 import { ScrollToTop } from "./components/ScrollToTop.jsx";
@@ -36,7 +35,8 @@ import SearchResults from "./pages/SearchResults/SearchResults.jsx";
 import { Literatura } from "./pages/Recursos/Literatura/Literatura.jsx";
 import MusicaAstronomica from "./pages/Recursos/Musica/musica.jsx";
 import { Audiovisual } from "./pages/Recursos/Audiovisual/Audiovisual.jsx";
-import { Stellarium } from "./pages/Sofware/Stellarium.jsx";
+import { Stellarium } from "./pages/Software/Stellarium.jsx";
+import { Software } from "./pages/Software/Software.jsx";
 
 export default function AppRouter() {
   return (
@@ -60,7 +60,9 @@ export default function AppRouter() {
                     path="/servicios-productos/:id"
                     element={<ServiceProductSingle />}
                   />
+                  {/* Software  */}
                   <Route path="/recursos/stellarium" element={<Stellarium />} />
+                  <Route path="/recursos/software" element={<Software />} />
                   {/* Subpaginas de recursos */}
                   {/* Literatura */}
                   <Route path="/recursos/literatura" element={<Literatura />} />
@@ -69,7 +71,6 @@ export default function AppRouter() {
 
                   {/* Peliculas */}
                    <Route path="/recursos/peliculas-series" element={<Audiovisual />} />
-
 
 
                   <Route path="/comunidad" element={<Comunidad />} />

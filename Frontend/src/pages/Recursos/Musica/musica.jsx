@@ -9,6 +9,7 @@ import {
   Radio,
 } from "lucide-react";
 import { MUSIC_ITEMS } from "../../../data/music_items.jsx";
+import { filterByCategoryAndQuery } from "../../../utils/filters.js";
 
 const TYPE_OPTIONS = [
   { value: "all", label: "Todo", icon: <Music2 className="w-4 h-4" /> }
@@ -24,18 +25,18 @@ export default function MusicaAstronomica() {
   const [type, setType] = useState("all");
   const [active, setActive] = useState(null); 
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return MUSIC_ITEMS.filter((it) => {
-      const okType = type === "all" ? true : it.type === type;
-      const okQ =
-        !q ||
-        it.title.toLowerCase().includes(q) ||
-        (it.desc || "").toLowerCase().includes(q) ||
-        (it.tags || []).some((t) => t.toLowerCase().includes(q));
-      return okType && okQ;
-    });
-  }, [query, type]);
+  const filtered = useMemo(
+    () =>
+      filterByCategoryAndQuery(MUSIC_ITEMS, type, query, {
+        categorySelector: (item) => item?.type,
+        fieldSelector: (item) => [
+          item?.title,
+          item?.desc,
+          ...(item?.tags || []),
+        ],
+      }),
+    [query, type]
+  );
 
   return (
     <main className="min-h-[calc(100vh-6rem)] bg-base-200">
