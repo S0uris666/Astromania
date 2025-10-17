@@ -18,7 +18,7 @@ export const PaymentFailure = () => {
             <Link to="/" className="btn btn-primary">
               Volver al inicio
             </Link>
-            <Link to="/eventos" className="btn btn-ghost">
+            <Link to="/servicios-productos-list" className="btn btn-ghost">
               Intentar nuevamente
             </Link>
           </div>

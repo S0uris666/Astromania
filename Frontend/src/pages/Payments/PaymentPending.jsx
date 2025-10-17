@@ -25,8 +25,8 @@ export const PaymentPending = () => {
             <Link to="/" className="btn btn-primary">
               Volver al inicio
             </Link>
-            <Link to="/eventos" className="btn btn-ghost">
-              Ver eventos
+            <Link to="/servicios-productos-list" className="btn btn-ghost">
+              Ver más
             </Link>
           </div>
         </div>

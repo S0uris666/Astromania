@@ -37,6 +37,9 @@ import MusicaAstronomica from "./pages/Recursos/Musica/musica.jsx";
 import { Audiovisual } from "./pages/Recursos/Audiovisual/Audiovisual.jsx";
 import { Stellarium } from "./pages/Software/Stellarium.jsx";
 import { Software } from "./pages/Software/Software.jsx";
+import { PaymentSuccess } from "./pages/Payments/PaymentSuccess.jsx";
+import { PaymentPending } from "./pages/Payments/PaymentPending.jsx";
+import { PaymentFailure } from  "./pages/Payments/PaymentFailure.jsx";
 
 export default function AppRouter() {
   return (
@@ -108,6 +111,15 @@ export default function AppRouter() {
                     element={<AdminRoute component={PerfilAdmin} />}
                   />
                   <Route path="/buscar" element={<SearchResults />} />
+
+
+
+
+
+
+                  <Route path="/payment/success" element={<PaymentSuccess />} />
+                  <Route path="/payment/Pending" element={<PaymentPending />} />
+                  <Route path="/payment/Failure" element={<PaymentFailure />} />
 
                   
 
