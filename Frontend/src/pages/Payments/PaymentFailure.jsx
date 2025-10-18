@@ -1,8 +1,6 @@
-export const PaymentFailure = () => {
-  const redirectTo = (path) => {
-    window.location.assign(path);
-  };
+import { Link } from "react-router-dom";
 
+export const PaymentFailure = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
       <div className="card w-full max-w-md bg-base-100 shadow-xl">
@@ -14,21 +12,13 @@ export const PaymentFailure = () => {
             Hubo un problema al procesar tu pago. Puedes intentar nuevamente.
           </p>
 
-          <div className="card-actions justify-center gap-3">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => redirectTo("/")}
-            >
+          <div className="card-actions justify-center">
+            <Link to="/" className="btn btn-primary">
               Volver al inicio
-            </button>
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={() => redirectTo("/servicios-productos-list")}
-            >
+            </Link>
+            <Link to="/servicios-productos-list" className="btn btn-ghost">
               Intentar nuevamente
-            </button>
+            </Link>
           </div>
         </div>
       </div>

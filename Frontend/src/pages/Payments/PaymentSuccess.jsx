@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { usePayment } from "../../context/payment/paymentContext";
 
 export const PaymentSuccess = () => {
@@ -63,27 +63,16 @@ export const PaymentSuccess = () => {
             </div>
           )}
 
-          <div className="card-actions justify-center gap-3">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => redirectTo("/")}
-            >
+          <div className="card-actions justify-center">
+            <Link to="/" className="btn btn-primary">
               Volver al inicio
-            </button>
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={() => redirectTo("/servicios-productos-list")}
-            >
+            </Link>
+            <Link to="/servicios-productos-list" className="btn btn-ghost">
               Ver más
-            </button>
+            </Link>
           </div>
         </div>
       </div>
     </div>
   );
 };
-  const redirectTo = (path) => {
-    window.location.assign(path);
-  };
