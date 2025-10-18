@@ -164,7 +164,7 @@ Carga de imágenes:
   - `alts` (JSON array; alt por imagen)
 - En update se puede enviar `removePublicIds` (JSON array) para eliminar imágenes existentes.
 
-Pagos (Mercado Pago) (`Backend/src/routes/payment.route.js`)
+Pagos (Mercado Pago) (`Backend/src/routes/payments.route.js`)
 - `POST /payments/create_preference` Crea preferencia de pago
 - `GET /payments/status/:paymentId` Consulta estado del pago
 - `GET /payments/success|failure|pending` Rutas de retorno (informativas)

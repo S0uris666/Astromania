@@ -1,4 +1,3 @@
-// services/payment.service.js
 import { Preference, Payment } from "mercadopago";
 import client from "../config/mercadoPago.js";
 
@@ -18,7 +17,7 @@ export const createPaymentPreference = async (preferenceData) => {
       ...preferenceData,
       items,
         back_urls: {
-    success: process.env.MP_SUCCESS_URL,  // 👈 HTTPS público
+    success: process.env.MP_SUCCESS_URL,  
     failure: process.env.MP_FAILURE_URL,
     pending: process.env.MP_PENDING_URL,
   },

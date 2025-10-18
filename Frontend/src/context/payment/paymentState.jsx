@@ -1,9 +1,8 @@
-// src/context/payment/PaymentState.jsx
 import { useReducer } from "react";
 import { PaymentContext } from "./paymentContext";
 import PaymentReducer from "./paymentReducer";
-import { createPaymentPreference, getPaymentStatus } from "../../api/payment"; 
-import { initialState, ACTIONS } from "./ActionState.js";
+import { createPaymentPreference, getPaymentStatus } from "../../api/payment";
+import { initialState, ACTIONS } from "./ActionState";
 
 const PaymentProvider = ({ children }) => {
   const [state, dispatch] = useReducer(PaymentReducer, initialState);

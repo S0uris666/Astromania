@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 .env
+PerfilAdmin.jsx
+PaymentNotification.jsx

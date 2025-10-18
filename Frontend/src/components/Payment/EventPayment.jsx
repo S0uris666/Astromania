@@ -1,4 +1,4 @@
-import { PaymentButton } from "../../components/Payment/PaymentButton";
+import { PaymentButton } from "./PaymentButton";
 import { useUser } from "../../context/user/UserContext";
 
 export const EventPayment = ({ event, onPaymentSuccess, onPaymentError }) => {

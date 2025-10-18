@@ -112,26 +112,10 @@ export default function AppRouter() {
                     element={<AdminRoute component={PerfilAdmin} />}
                   />
                   <Route path="/buscar" element={<SearchResults />} />
-
-
-
-
-
-
                   <Route path="/payment/success" element={<PaymentSuccess />} />
-                  <Route path="/payments/success" element={<PaymentSuccess />} />
-
                   <Route path="/payment/pending" element={<PaymentPending />} />
-                  <Route path="/payment/Pending" element={<PaymentPending />} />
-                  <Route path="/payments/pending" element={<PaymentPending />} />
-
                   <Route path="/payment/failure" element={<PaymentFailure />} />
-                  <Route path="/payment/Failure" element={<PaymentFailure />} />
-                  <Route path="/payments/failure" element={<PaymentFailure />} />
                   <Route path="/payment/notification" element={<PaymentNotification />} />
-
-                  
-
                 </Route>
 
                 

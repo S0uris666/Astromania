@@ -1,10 +1,34 @@
-import { useContext } from "react";
+import { useContext, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/user/UserContext";
 
 export default function PerfilAdmin() {
   const { currentUser, logoutUser, authState } = useContext(UserContext);
   const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
+
+  const VISUAL_NOTIFICATION_URL = useMemo(
+    () => import.meta.env.VITE_MP_NOTIFICATION_PANEL_URL,
+    []
+  );
+  const WEBHOOK_URL = useMemo(
+    () => import.meta.env.VITE_MP_WEBHOOK_URL,
+    []
+  );
+
+  const handleCopyWebhook = async () => {
+    try {
+      if (WEBHOOK_URL) {
+        await navigator.clipboard.writeText(WEBHOOK_URL);
+      } else {
+        throw new Error("URL no disponible");
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("No se pudo copiar el webhook:", error);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -84,6 +108,80 @@ export default function PerfilAdmin() {
               <Link to="/admin/usuarios" className="btn btn-secondary">
                 Gestionar
               </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="card bg-base-200 shadow-md hover:shadow-lg transition-shadow">
+          <div className="card-body">
+            <div className="flex items-center justify-between">
+              <h2 className="card-title">Pagos & Webhooks</h2>
+              <span className="badge badge-info">Mercado Pago</span>
+            </div>
+            <p className="text-sm text-base-content/70">
+              Consulta las notificaciones recibidas, verifica el túnel activo y ten a mano la URL configurada en Mercado Pago.
+            </p>
+            <div className="bg-base-100 rounded-lg p-4 text-xs text-left space-y-3">
+              <div>
+                <p className="font-semibold text-sm">Webhook activo (backend):</p>
+                <div className="mt-1 flex items-center gap-2">
+                {WEBHOOK_URL ? (
+                  <a
+                    href={WEBHOOK_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link link-primary break-all"
+                  >
+                    {WEBHOOK_URL}
+                  </a>
+                ) : (
+                  <span className="text-error">URL no configurada</span>
+                )}
+                  <button
+                    type="button"
+                    onClick={handleCopyWebhook}
+                    className="btn btn-ghost btn-xs"
+                    aria-label="Copiar URL de webhook"
+                  >
+                    {copied ? "Copiado" : "Copiar"}
+                  </button>
+                </div>
+
+              </div>
+
+              <div>
+                <p className="font-semibold text-sm">Vista rápida en producción:</p>
+                {VISUAL_NOTIFICATION_URL ? (
+                  <a
+                    href={VISUAL_NOTIFICATION_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link link-secondary break-all"
+                  >
+                    {VISUAL_NOTIFICATION_URL}
+                  </a>
+                ) : (
+                  <span className="text-error">URL no configurada</span>
+                )}
+                <p className="mt-2 text-base-content/60">
+                  Usa esta página para confirmar visualmente que el webhook responde y compartir la URL con el equipo.
+                </p>
+              </div>
+            </div>
+            <div className="card-actions justify-end flex-wrap gap-2">
+              <Link to="/payment/notification" className="btn btn-primary">
+                Ver en panel
+              </Link>
+              {WEBHOOK_URL && (
+                <a
+                  href={WEBHOOK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline btn-primary"
+                >
+                  Abrir webhook
+                </a>
+              )}
             </div>
           </div>
         </div>

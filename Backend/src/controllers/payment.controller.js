@@ -1,4 +1,3 @@
-// /controllers/payment.controller.js
 import { createPaymentPreference, getPaymentById } from "../services/payment.service.js";
 
 // Crea preferencia

@@ -27,7 +27,7 @@ export const createPaymentPreference = async (items, backUrls = {}) => {
       }
     };
 
-    const {data} = await client.post(`/payments/create_preference`, preferenceData);
+    const { data } = await client.post(`/payments/create_preference`, preferenceData);
     return data;
   } catch (error) {
     console.error("Error creating payment preference:", error);
