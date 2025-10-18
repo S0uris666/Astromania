@@ -39,7 +39,8 @@ import { Stellarium } from "./pages/Software/Stellarium.jsx";
 import { Software } from "./pages/Software/Software.jsx";
 import { PaymentSuccess } from "./pages/Payments/PaymentSuccess.jsx";
 import { PaymentPending } from "./pages/Payments/PaymentPending.jsx";
-import { PaymentFailure } from  "./pages/Payments/PaymentFailure.jsx";
+import { PaymentFailure } from "./pages/Payments/PaymentFailure.jsx";
+import { PaymentNotification } from "./pages/Payments/PaymentNotification.jsx";
 
 export default function AppRouter() {
   return (
@@ -118,8 +119,16 @@ export default function AppRouter() {
 
 
                   <Route path="/payment/success" element={<PaymentSuccess />} />
+                  <Route path="/payments/success" element={<PaymentSuccess />} />
+
+                  <Route path="/payment/pending" element={<PaymentPending />} />
                   <Route path="/payment/Pending" element={<PaymentPending />} />
+                  <Route path="/payments/pending" element={<PaymentPending />} />
+
+                  <Route path="/payment/failure" element={<PaymentFailure />} />
                   <Route path="/payment/Failure" element={<PaymentFailure />} />
+                  <Route path="/payments/failure" element={<PaymentFailure />} />
+                  <Route path="/payment/notification" element={<PaymentNotification />} />
 
                   
 
