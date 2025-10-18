@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { useCallback, useReducer } from "react";
 import { PaymentContext } from "./paymentContext";
 import PaymentReducer from "./paymentReducer";
 import { createPaymentPreference, getPaymentStatus } from "../../api/payment";
@@ -7,14 +7,29 @@ import { initialState, ACTIONS } from "./ActionState";
 const PaymentProvider = ({ children }) => {
   const [state, dispatch] = useReducer(PaymentReducer, initialState);
 
-  const setLoading = (v) => dispatch({ type: ACTIONS.SET_LOADING, payload: v });
-  const setError = (msg) => dispatch({ type: ACTIONS.SET_ERROR, payload: msg });
-  const setPreference = (pref) => dispatch({ type: ACTIONS.SET_PREFERENCE, payload: pref });
+  const setLoading = useCallback(
+    (v) => dispatch({ type: ACTIONS.SET_LOADING, payload: v }),
+    []
+  );
+  const setError = useCallback(
+    (msg) => dispatch({ type: ACTIONS.SET_ERROR, payload: msg }),
+    []
+  );
+  const setPreference = useCallback(
+    (pref) => dispatch({ type: ACTIONS.SET_PREFERENCE, payload: pref }),
+    []
+  );
 
-  const clearError = () => dispatch({ type: ACTIONS.CLEAR_ERROR });
-  const clearPreference = () => dispatch({ type: ACTIONS.CLEAR_PREFERENCE });
+  const clearError = useCallback(
+    () => dispatch({ type: ACTIONS.CLEAR_ERROR }),
+    []
+  );
+  const clearPreference = useCallback(
+    () => dispatch({ type: ACTIONS.CLEAR_PREFERENCE }),
+    []
+  );
 
-  const createPreference = async (items, options = {}) => {
+  const createPreference = useCallback(async (items, options = {}) => {
     setLoading(true);
     setError(null);
     try {
@@ -27,9 +42,9 @@ const PaymentProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setError, setLoading, setPreference]);
 
-  const checkPaymentStatus = async (paymentId) => {
+  const checkPaymentStatus = useCallback(async (paymentId) => {
     setLoading(true);
     setError(null);
     try {
@@ -41,7 +56,7 @@ const PaymentProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setError, setLoading]);
 
   const value = {
     loading: state.loading,
