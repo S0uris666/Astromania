@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { usePayment } from "../../context/payment/paymentContext";
 
 export const PaymentSuccess = () => {
@@ -7,6 +7,7 @@ export const PaymentSuccess = () => {
   const { checkPaymentStatus } = usePayment();
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const paymentId = searchParams.get("payment_id");
   const status = searchParams.get("status");
@@ -63,13 +64,21 @@ export const PaymentSuccess = () => {
             </div>
           )}
 
-          <div className="card-actions justify-center">
-            <Link to="/" className="btn btn-primary">
+          <div className="card-actions justify-center gap-3">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => navigate("/")}
+            >
               Volver al inicio
-            </Link>
-            <Link to="/servicios-productos-list" className="btn btn-ghost">
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => navigate("/servicios-productos-list")}
+            >
               Ver más
-            </Link>
+            </button>
           </div>
         </div>
       </div>
