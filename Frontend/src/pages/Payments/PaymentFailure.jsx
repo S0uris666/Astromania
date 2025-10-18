@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
-
 export const PaymentFailure = () => {
-  const navigate = useNavigate();
+  const redirectTo = (path) => {
+    window.location.assign(path);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
@@ -18,14 +18,14 @@ export const PaymentFailure = () => {
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => navigate("/")}
+              onClick={() => redirectTo("/")}
             >
               Volver al inicio
             </button>
             <button
               type="button"
               className="btn btn-ghost"
-              onClick={() => navigate("/servicios-productos-list")}
+              onClick={() => redirectTo("/servicios-productos-list")}
             >
               Intentar nuevamente
             </button>

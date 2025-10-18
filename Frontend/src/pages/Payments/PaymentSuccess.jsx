@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { usePayment } from "../../context/payment/paymentContext";
 
 export const PaymentSuccess = () => {
@@ -7,7 +7,6 @@ export const PaymentSuccess = () => {
   const { checkPaymentStatus } = usePayment();
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   const paymentId = searchParams.get("payment_id");
   const status = searchParams.get("status");
@@ -68,14 +67,14 @@ export const PaymentSuccess = () => {
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => navigate("/")}
+              onClick={() => redirectTo("/")}
             >
               Volver al inicio
             </button>
             <button
               type="button"
               className="btn btn-ghost"
-              onClick={() => navigate("/servicios-productos-list")}
+              onClick={() => redirectTo("/servicios-productos-list")}
             >
               Ver más
             </button>
@@ -85,3 +84,6 @@ export const PaymentSuccess = () => {
     </div>
   );
 };
+  const redirectTo = (path) => {
+    window.location.assign(path);
+  };
