@@ -192,6 +192,12 @@ function SoftwareCard({ item, badge }) {
 
 
 
+        {provider && (
+          <p className="mt-1 text-sm font-medium text-base-content/70">
+            {provider}
+          </p>
+        )}
+
         {!!desc && (
           <div className="mt-2 text-sm text-base-content/80">
             <p className={!expanded ? "line-clamp-3" : ""}>
@@ -222,10 +228,7 @@ function SoftwareCard({ item, badge }) {
           </div>
         )}
 
-         <div className="card-actions mt-4 flex-wrap gap-2 pt-4 border-t border-base-200">
-          <p className="mt-1 text-sm font-medium text-base-content/70">
-            {provider}
-          </p>
+        <div className="card-actions mt-4 flex flex-col sm:flex-row sm:flex-wrap gap-2 pt-4 border-t border-base-200">
           {isValidUrl ? (
             <>
               <a
