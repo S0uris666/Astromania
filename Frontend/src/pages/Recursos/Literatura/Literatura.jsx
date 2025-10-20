@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import { literatura_aprendizaje } from "../../../data/Literatura_aprendizaje.jsx";
-import { literatura_cuento } from "../../../data/Literatura_cuento.jsx";
+import { literatura_juvenil } from "../../../data/Literatura_cuento.jsx";
 import { literatura_novela } from "../../../data/Literatura_novela.jsx";
 import { filterByCategoryAndQuery } from "../../../utils/filters.js";
 
@@ -23,8 +23,8 @@ const TYPE_OPTIONS = [
     icon: <GraduationCap className="w-4 h-4" />,
   },
   {
-    value: "cuentos",
-    label: "Juvenil y cuentos",
+    value: "juvenil",
+    label: "Juvenil ",
     icon: <Sparkles className="w-4 h-4" />,
   },
   {
@@ -43,7 +43,7 @@ const CATEGORY_DESCRIPTION = {
   all: "Explora libros de divulgación, cuentos y novelas que conectan con el universo desde distintos formatos.",
   aprendizaje:
     "Guías, manuales y material de divulgación para aprender astronomía paso a paso.",
-  cuentos:
+  juvenil:
     "Relatos ilustrados y novelas gráficas que inspiran a niñas, niños y jóvenes.",
   novelas:
     "Clásicos y obras contemporáneas de ciencia ficción y aventuras espaciales.",
@@ -57,7 +57,7 @@ export function Literatura() {
   const catalogue = useMemo(
     () => [
       ...literatura_aprendizaje,
-      ...literatura_cuento,
+      ...literatura_juvenil,
       ...literatura_novela,
     ],
     []
