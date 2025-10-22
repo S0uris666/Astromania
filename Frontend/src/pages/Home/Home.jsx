@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Activities } from "../../data/Activities";
 import { AboutData } from "../../data/AboutData";
 import { Link } from "react-router-dom";
@@ -8,6 +9,12 @@ import HeroImage from "../../assets/Images/Hero.webp";
 
 const { team, faqs } = AboutData;
 export function Home() {
+  const partnerMarquee = useMemo(
+    () => Partners.concat(Partners),
+    []
+  );
+  const marqueeDuration = `${Math.max(Partners.length * 5, 20)}s`;
+
   return (
     <main>
       {/* HERO / PRIMER PANTALLAZO */}
@@ -170,21 +177,42 @@ export function Home() {
       {/* SECCIÓN COLABORADORES */}
       <section className="bg-base py-12">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold  text-white mb-12">Nuestros Colaboradores</h2>
+          <h2 className="text-3xl font-bold text-white mb-12">
+            Nuestros Colaboradores
+          </h2>
+          <style>
+            {`
+              @keyframes partners-marquee {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
+              }
+              .partners-marquee {
+                animation-name: partners-marquee;
+                animation-timing-function: linear;
+                animation-iteration-count: infinite;
+              }
+            `}
+          </style>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center">
-            {Partners.map((partner) => (
-              <div
-                key={partner.id}
-                className="flex justify-center items-center"
-              >
-                <img
-                  src={partner.logo}
-                  alt={partner.name}
-                  className="max-h-12 object-contain opacity-70 hover:opacity-100 transition-opacity"
-                />
-              </div>
-            ))}
+          <div className="overflow-hidden">
+            <div
+              className="partners-marquee inline-flex items-center gap-10 sm:gap-12 md:gap-16 lg:gap-20 whitespace-nowrap"
+              style={{ animationDuration: marqueeDuration }}
+            >
+              {partnerMarquee.map((partner, idx) => (
+                <div
+                  key={`${partner.id}-${idx}`}
+                  className="flex-shrink-0 flex justify-center items-center w-36 sm:w-44 md:w-52"
+                  aria-hidden={idx >= Partners.length}
+                >
+                  <img
+                    src={partner.logo}
+                    alt={idx < Partners.length ? partner.name : ""}
+                    className="max-h-20 object-contain opacity-70 hover:opacity-100 transition-opacity duration-300"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
