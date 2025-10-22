@@ -1,5 +1,5 @@
 import primera_mujer from "../assets/Images/literatura/cuentos/mujer.png";
-import creacion from "../assets/Images/literatura/cuentos/creacion.webp";
+import libroastro from "../assets/Images/literatura/cuentos/libroastro.webp";
 import bruno from "../assets/Images/literatura/cuentos/bruno.webp";
 
 import ALMAheroes from "../assets/Images/literatura/cuentos/ALMAheroes.webp"
@@ -22,12 +22,12 @@ export const literatura_juvenil = [
   {
     id: 2,
     category: "juvenil",
-    title: "La creación del todo (2020).",
-    autor: "Cristóbal Morales Reveco. Arte de Florencia Muñoz Reveco.",
+    title: "El libro de la Astronomía. (2018)",
+    autor: "David Hughes, Tom Jackson, Penny Johnson, Robert Dinwiddie",
     description:
-      "La astronomía es la ciencia que se preocupa de estudiar todos estos y otros objetos que existan en nuestro Universo. Un libro recomendado para estudiantes desde Educación Parvularia a 6° básico que invita a los más pequeños a introducirse en el mundo de la astronomía.",
-    link: "https://www.curriculumnacional.cl/portal/Asignatura/Ciencias-Naturales/246889:La-creacion-del-todo",
-    imagen: creacion,
+      "Con un lenguaje claro, proporciona breves y sencillas explicaciones que aclaran la jerga científica, esquemas que desbrozan complejas teorías, ilustraciones que juegan con nuestro conocimiento de los astros e ingeniosas citas que condensan los descubrimientos astronómicos.",
+    link: "https://archive.org/details/iii-el-libro-de-la-astronomia-978-0-2416-5739-3-2021/mode/2up",
+    imagen: libroastro,
   },
   {
     id: 3,

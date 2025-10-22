@@ -1,4 +1,3 @@
-// src/pages/Events/Events.jsx
 import { useContext, useEffect, useMemo, useState } from "react";
 import EventContext from "../../context/events/eventsContext";
 
@@ -8,6 +7,11 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import esLocale from "@fullcalendar/core/locales/es";
+import { ExternalLink } from "lucide-react";
+import {
+  CalendarDays, Clock, MapPin, UserRound, Ticket, Link as LinkIcon, Tag
+} from "lucide-react";
+
 
 import { DateTime } from "luxon";
 
@@ -21,8 +25,12 @@ const formatRange = (startISO, endISO) => {
   const s = DateTime.fromISO(startISO, { zone: TZ });
   const e = DateTime.fromISO(endISO, { zone: TZ });
   return s.hasSame(e, "day")
-    ? `${s.toFormat("dd LLL yyyy, HH:mm")} – ${e.toFormat("HH:mm")} (${s.offsetNameShort})`
-    : `${s.toFormat("dd LLL yyyy, HH:mm")} → ${e.toFormat("dd LLL yyyy, HH:mm")} (${s.offsetNameShort})`;
+    ? `${s.toFormat("dd LLL yyyy, HH:mm")} – ${e.toFormat("HH:mm")} (${
+        s.offsetNameShort
+      })`
+    : `${s.toFormat("dd LLL yyyy, HH:mm")} → ${e.toFormat(
+        "dd LLL yyyy, HH:mm"
+      )} (${s.offsetNameShort})`;
 };
 
 const statusBadge = (status) =>
@@ -40,7 +48,8 @@ function renderEventContent(arg) {
   // Colores por tipo
   let colorClasses = "";
   if (ev?.isOnline) colorClasses = "bg-gradient-to-r from-cyan-500 to-cyan-600";
-  else if (ev?.requiresRegistration) colorClasses = "bg-gradient-to-r from-amber-500 to-amber-600";
+  else if (ev?.requiresRegistration)
+    colorClasses = "bg-gradient-to-r from-amber-500 to-amber-600";
   else colorClasses = "bg-gradient-to-r from-purple-500 to-purple-600";
 
   if (isMultiDay) {
@@ -151,7 +160,9 @@ export function EventsCalendarPage() {
       .filter((ev) => isISO(ev.startDateTime))
       .map((ev) => {
         const s = DateTime.fromISO(ev.startDateTime, { zone: TZ });
-        const e = ev.endDateTime ? DateTime.fromISO(ev.endDateTime, { zone: TZ }) : null;
+        const e = ev.endDateTime
+          ? DateTime.fromISO(ev.endDateTime, { zone: TZ })
+          : null;
 
         const isMultiDay = !!(e && !s.hasSame(e, "day"));
 
@@ -187,7 +198,9 @@ export function EventsCalendarPage() {
     if (!selectedDateISO) return [];
     const d = DateTime.fromISO(selectedDateISO, { zone: TZ });
     return (eventsToUse || [])
-      .filter((ev) => DateTime.fromISO(ev.startDateTime, { zone: TZ }).hasSame(d, "day"))
+      .filter((ev) =>
+        DateTime.fromISO(ev.startDateTime, { zone: TZ }).hasSame(d, "day")
+      )
       .sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
   }, [eventsToUse, selectedDateISO]);
 
@@ -230,7 +243,9 @@ export function EventsCalendarPage() {
 
         /* Ajustes responsivos en la toolbar */
         .fc .fc-toolbar-title { font-size: ${isMobile ? "1rem" : "1.25rem"}; }
-        .fc .fc-button { padding: ${isMobile ? "0.25rem 0.5rem" : "0.5rem 0.75rem"}; }
+        .fc .fc-button { padding: ${
+          isMobile ? "0.25rem 0.5rem" : "0.5rem 0.75rem"
+        }; }
         .fc .fc-button { text-transform: none; } /* Evita MAYÚSCULAS forzadas */
         .fc .fc-daygrid-day-number { font-size: 0.9rem; }
         .fc .fc-timegrid-slot-label { font-size: 0.8rem; }
@@ -245,7 +260,9 @@ export function EventsCalendarPage() {
           <div className="card bg-base-200 shadow-xl">
             <div className="card-body">
               <div className="flex items-center justify-between mb-2">
-                <h1 className="card-title text-2xl">Calendario de eventos Astronómicos</h1>
+                <h1 className="card-title text-2xl">
+                  Calendario de eventos Astronómicos
+                </h1>
                 <label className="label cursor-pointer gap-2">
                   <span className="label-text">Mostrar fin de semana</span>
                   <input
@@ -266,10 +283,21 @@ export function EventsCalendarPage() {
                 "
               >
                 <FullCalendar
-                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                  plugins={[
+                    dayGridPlugin,
+                    timeGridPlugin,
+                    interactionPlugin,
+                    listPlugin,
+                  ]}
                   locales={[esLocale]}
                   locale="es"
-                  buttonText={{ today: "Hoy", month: "Mes", week: "Semana", day: "Día", list: "Lista" }}
+                  buttonText={{
+                    today: "Hoy",
+                    month: "Mes",
+                    week: "Semana",
+                    day: "Día",
+                    list: "Lista",
+                  }}
                   headerToolbar={headerToolbar}
                   initialView={initialView}
                   height="auto"
@@ -282,7 +310,11 @@ export function EventsCalendarPage() {
                   selectMirror={true}
                   firstDay={1}
                   timeZone={TZ}
-                  eventTimeFormat={{ hour: "2-digit", minute: "2-digit", hour12: false }}
+                  eventTimeFormat={{
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  }}
                   displayEventTime={true}
                   forceEventDuration={true}
                   eventDisplay="block"
@@ -298,124 +330,180 @@ export function EventsCalendarPage() {
         </section>
 
         {/* Panel derecho */}
-        <aside className="lg:col-span-1">
-          <div className="card bg-base-200 shadow-xl sticky top-4">
-            <div className="card-body">
-              <div className="flex items-center justify-between">
-                <h2 className="card-title">Detalle del día</h2>
-                {selectedDateISO ? (
-                  <div className="badge badge-ghost">
-                    {DateTime.fromISO(selectedDateISO, { zone: TZ }).toFormat("dd LLL yyyy")}
-                  </div>
-                ) : (
-                  <div className="badge badge-ghost">Selecciona un día</div>
-                )}
-              </div>
-
-              {!selectedDateISO ? (
-                <p className="text-base-content/70">Haz clic en una fecha para ver sus eventos.</p>
-              ) : dayEvents.length === 0 ? (
-                <div className="alert">
-                  <span>No hay eventos para este día.</span>
-                </div>
-              ) : (
-                <ul className="menu bg-base-100 rounded-box">
-                  {dayEvents.map((ev) => {
-                    const active = selectedEvent?._id === ev._id;
-                    return (
-                      <li key={ev._id}>
-                        <button
-                          className={active ? "active" : ""}
-                          onClick={() => setSelectedEvent(ev)}
-                          title={ev.title}
-                        >
-                          <span className="font-medium">{ev.title}</span>
-                          <span className="ml-auto text-xs opacity-70">
-                            {DateTime.fromISO(ev.startDateTime, { zone: TZ }).toFormat("HH:mm")}
-                          </span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-
-              {selectedEvent && (
-                <div className="mt-4 p-4 rounded-xl bg-base-100 border border-base-300">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`badge ${statusBadge(selectedEvent.status)}`}>{selectedEvent.status}</span>
-                    {selectedEvent.isOnline ? (
-                      <span className="badge badge-info">Online</span>
-                    ) : (
-                      <span className="badge badge-ghost">Presencial</span>
-                    )}
-                    {selectedEvent.requiresRegistration && (
-                      <span className="badge badge-warning">Inscripción</span>
-                    )}
-                  </div>
-
-                  <h3 className="text-xl font-bold">{selectedEvent.title}</h3>
-                  <p className="text-sm text-base-content/80 mt-1">{selectedEvent.description}</p>
-
-                  <div className="mt-3 space-y-1 text-sm">
-                    <div>
-                      <span className="font-semibold">Organiza:</span> {selectedEvent.organizer}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Lugar:</span>{" "}
-                      {selectedEvent.isOnline ? "Online" : selectedEvent.location}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Horario:</span>{" "}
-                      {formatRange(selectedEvent.startDateTime, selectedEvent.endDateTime)}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Precio:</span>{" "}
-                      {selectedEvent.price ? CLP.format(selectedEvent.price) : "Gratuito"}
-                    </div>
-                    <div>
-                      <span className="font-semibold">URL:</span>{" "}
-                      {selectedEvent?.url ? (
-                        <a
-                          href={selectedEvent.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="link link-primary break-all"
-                          title={selectedEvent.url}
-                        >
-                          Más información
-                        </a>
-                      ) : (
-                        "No disponible"
-                      )}
-                    </div>
-                    {selectedEvent.capacity != null && (
-                      <div>
-                        <span className="font-semibold">Cupos:</span> {selectedEvent.capacity}
-                      </div>
-                    )}
-                    {!!selectedEvent.tags?.length && (
-                      <div className="flex flex-wrap gap-2 pt-1">
-                        {selectedEvent.tags.map((t) => (
-                          <span key={t} className="badge badge-ghost">
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {selectedEvent.isOnline && selectedEvent.url && (
-                      <div className="pt-2">
-                        <a href={selectedEvent.url} target="_blank" rel="noreferrer" className="link link-primary">
-                          Ir al enlace del evento
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+    <aside className="lg:col-span-1">
+  <div className="card bg-base-200/70 shadow-xl sticky top-4 backdrop-blur supports-[backdrop-filter]:bg-base-200/60">
+    <div className="card-body p-4 sm:p-5">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="card-title text-base sm:text-lg">Detalle del día</h2>
+        {selectedDateISO ? (
+          <div className="badge badge-outline gap-1">
+            <CalendarDays className="size-3" />
+            {DateTime.fromISO(selectedDateISO, { zone: TZ }).toFormat("dd LLL yyyy")}
           </div>
-        </aside>
+        ) : (
+          <div className="badge badge-ghost">Selecciona un día</div>
+        )}
+      </div>
+
+      {/* Empty states */}
+      {!selectedDateISO ? (
+        <p className="text-base-content/70 mt-3">
+          Haz clic en una fecha para ver sus eventos.
+        </p>
+      ) : dayEvents.length === 0 ? (
+        <div className="alert alert-info mt-3">
+          <span>No hay eventos para este día.</span>
+        </div>
+      ) : (
+        <>
+          {/* Lista de eventos del día */}
+          <div className="mt-3 flex items-center justify-between text-xs opacity-70">
+            <span>{dayEvents.length} evento{dayEvents.length !== 1 ? "s" : ""}</span>
+            <span>Selecciona para ver detalles</span>
+          </div>
+          <ul className="menu menu-sm bg-base-100 rounded-box mt-2 border border-base-300">
+            {dayEvents.map((ev) => {
+              const active = selectedEvent?._id === ev._id;
+              return (
+                <li key={ev._id}>
+                  <button
+                    className={`justify-between ${active ? "active font-semibold" : ""}`}
+                    onClick={() => setSelectedEvent(ev)}
+                    title={ev.title}
+                  >
+                    <span className="truncate">{ev.title}</span>
+                    <span className="badge badge-ghost whitespace-nowrap">
+                      {DateTime.fromISO(ev.startDateTime, { zone: TZ }).toFormat("HH:mm")}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+
+      {/* Detalle del evento seleccionado */}
+      {selectedEvent && (
+        <div className="mt-4 p-4 rounded-xl bg-base-100 border border-base-300">
+          {/* Badges de estado */}
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className={`badge ${statusBadge(selectedEvent.status)}`}>
+              {selectedEvent.status}
+            </span>
+            {selectedEvent.isOnline ? (
+              <span className="badge badge-info">Online</span>
+            ) : (
+              <span className="badge badge-ghost">Presencial</span>
+            )}
+            {selectedEvent.requiresRegistration && (
+              <span className="badge badge-warning">Inscripción</span>
+            )}
+          </div>
+
+          {/* Título y descripción */}
+          <h3 className="text-base sm:text-lg font-bold leading-snug">{selectedEvent.title}</h3>
+          {selectedEvent.description && (
+            <p className="text-sm text-base-content/80 mt-1 line-clamp-4">
+              {selectedEvent.description}
+            </p>
+          )}
+
+          {/* Datos con iconos */}
+          <div className="mt-3 space-y-2 text-sm">
+            <div className="flex items-start gap-2">
+              <UserRound className="size-4 mt-0.5 opacity-70" />
+              <div><span className="font-semibold">Organiza:</span> {selectedEvent.organizer}</div>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <MapPin className="size-4 mt-0.5 opacity-70" />
+              <div>
+                <span className="font-semibold">Lugar:</span>{" "}
+                {selectedEvent.isOnline ? "Online" : selectedEvent.location}
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <Clock className="size-4 mt-0.5 opacity-70" />
+              <div>
+                <span className="font-semibold">Horario:</span>{" "}
+                {formatRange(selectedEvent.startDateTime, selectedEvent.endDateTime)}
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <Ticket className="size-4 mt-0.5 opacity-70" />
+              <div>
+                <span className="font-semibold">Precio:</span>{" "}
+                {selectedEvent.price ? CLP.format(selectedEvent.price) : "Gratuito"}
+              </div>
+            </div>
+
+            {selectedEvent.capacity != null && (
+              <div className="flex items-start gap-2">
+                <Tag className="size-4 mt-0.5 opacity-70 rotate-90" />
+                <div>
+                  <span className="font-semibold">Cupos:</span> {selectedEvent.capacity}
+                </div>
+              </div>
+            )}
+
+            {!!selectedEvent.tags?.length && (
+              <div className="pt-1 flex flex-wrap gap-2">
+                {selectedEvent.tags.map((t) => (
+                  <span key={t} className="badge badge-ghost">{t}</span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Acciones: dos URLs si existen */}
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {/* URL online prioritaria si el evento es online y tiene enlace */}
+            {selectedEvent.isOnline && selectedEvent.urlOnline && (
+              <a
+                href={selectedEvent.urlOnline}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary btn-xs sm:btn-sm w-full gap-2"
+                title={selectedEvent.urlOnline}
+                aria-label="Abrir enlace del evento online en una nueva pestaña"
+              >
+                Entrar al evento
+                <ExternalLink className="size-4" aria-hidden="true" />
+              </a>
+            )}
+
+            {/* URL general (más información) */}
+            {selectedEvent.url ? (
+              <a
+                href={selectedEvent.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`btn ${selectedEvent.isOnline && selectedEvent.urlOnline ? "btn-ghost" : "btn-secondary"} btn-xs sm:btn-sm w-full gap-2`}
+                title={selectedEvent.url}
+                aria-label="Abrir más información en una nueva pestaña"
+              >
+                Más información
+                <LinkIcon className="size-4" aria-hidden="true" />
+              </a>
+            ) : null}
+
+            {/* Fallback cuando no hay nada que mostrar */}
+            {!selectedEvent.url && !(selectedEvent.isOnline && selectedEvent.urlOnline) && (
+              <span className="text-xs sm:text-sm text-base-content/70">
+                No hay enlaces disponibles para este evento.
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+</aside>
+
       </div>
     </>
   );

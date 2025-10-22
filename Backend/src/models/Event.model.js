@@ -38,15 +38,14 @@ const eventSchema = new mongoose.Schema(
 
     isOnline: { type: Boolean, default: false },
     url: { type: String, default: "" },
+    urlOnline: { type: String, default: "" },
 
     status: {
       type: String,
       enum: ["draft", "published", "cancelled"],
       default: "draft",
     },
-    url:{
-      type:String
-    }
+
   },
   { timestamps: true }
 );

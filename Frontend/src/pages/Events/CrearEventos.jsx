@@ -25,9 +25,7 @@ function SectionTitle({ icon = "★", title, subtitle }) {
             {title}
           </span>
         </h2>
-        {subtitle && (
-          <p className="text-xs opacity-70 mt-0.5">{subtitle}</p>
-        )}
+        {subtitle && <p className="text-xs opacity-70 mt-0.5">{subtitle}</p>}
         <div className="h-1 w-16 rounded-full bg-primary/30 mt-3" />
       </div>
     </div>
@@ -121,6 +119,7 @@ export function CrearEventos() {
     isOnline: false,
     url: "",
     status: "draft",
+    urlOnline: "",           // 🔹 NUEVO en el estado
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -168,6 +167,15 @@ export function CrearEventos() {
     if (form.capacity && Number(form.capacity) < 0) err.capacity = "No puede ser negativo.";
     if (form.url && !/^https?:\/\/.{3,}/i.test(form.url.trim())) err.url = "URL inválida. Ej: https://ejemplo.com/evento";
 
+    // Validación para urlOnline cuando es online
+    if (form.isOnline) {
+      if (!form.urlOnline?.trim()) {
+        err.urlOnline = "Ingresa la URL del evento online.";
+      } else if (!/^https?:\/\/.{3,}/i.test(form.urlOnline.trim())) {
+        err.urlOnline = "URL online inválida. Ej: https://zoom.us/j/...";
+      }
+    }
+
     setErrors(err);
     return Object.keys(err).length === 0;
   };
@@ -181,6 +189,7 @@ export function CrearEventos() {
         title: form.title.trim(),
         description: form.description.trim(),
         organizer: form.organizer.trim(),
+        // Mantengo tu lógica: si es online y queda vacío, guardas "Online"
         location: form.isOnline && !form.location.trim() ? "Online" : form.location.trim(),
         startDateTime: toISO(form.startDateTime),
         endDateTime: toISO(form.endDateTime),
@@ -191,6 +200,7 @@ export function CrearEventos() {
         isOnline: !!form.isOnline,
         url: form.url.trim(),
         status: form.status,
+        urlOnline: form.urlOnline.trim(),
       };
       await createOneEvent(payload);
       alert("Evento creado ✅");
@@ -198,6 +208,7 @@ export function CrearEventos() {
         title: "", description: "", organizer: "", location: "",
         startDateTime: "", endDateTime: "", requiresRegistration: false,
         price: "", capacity: "", tags: "", isOnline: false, url: "", status: "draft",
+        urlOnline: "", // 🔹 reset
       });
       setErrors({});
     } catch (err) {
@@ -266,42 +277,70 @@ export function CrearEventos() {
         </section>
 
         {/* Modalidad y referencia */}
-        <section className="card bg-base-100/70 border border-base-200 shadow-sm">
-          <div className="card-body p-5 space-y-5">
-            <SectionTitle
-              icon="🌐"
-              title="Modalidad y referencia"
-              subtitle="Define si es presencial u online y agrega enlaces útiles."
-            />
-            <div className="space-y-4">
-              <Field
-                id="location"
-                label="Lugar"
-                value={form.location}
-                onChange={onChange}
-                name="location"
-                placeholder={form.isOnline ? "Se guardará como 'Online' si queda vacío" : "Ej: Centro Cultural, Santiago"}
-                hint="Sé específico si es presencial."
-              />
-              <FieldToggle
-                label="Modalidad"
-                checked={form.isOnline}
-                onChange={(e) => onChange({ target: { name: "isOnline", type: "checkbox", checked: e.target.checked } })}
-                textRight="Evento online"
-              />
-              <Field
-                id="url"
-                label="URL de referencia"
-                value={form.url}
-                onChange={onChange}
-                name="url"
-                placeholder="https://tusitio.com/evento/123"
-                hint="Página del evento, formulario, etc. (opcional)"
-                error={errors.url}
-              />
-            </div>
-          </div>
-        </section>
+<section className="card bg-base-100/70 border border-base-200 shadow-sm">
+  <div className="card-body p-5 space-y-5">
+    <SectionTitle
+      icon="🌐"
+      title="Modalidad y referencia"
+      subtitle="Define si es presencial u online y agrega enlaces útiles."
+    />
+
+    <div className="space-y-4">
+      <Field
+        id="location"
+        label="Lugar"
+        value={form.location}
+        onChange={onChange}
+        name="location"
+        placeholder={form.isOnline ? "Se guardará como 'Online' si queda vacío" : "Ej: Centro Cultural, Santiago"}
+        hint="Sé específico si es presencial."
+      />
+
+      <FieldToggle
+        label="Modalidad"
+        checked={form.isOnline}
+        onChange={(e) =>
+          onChange({ target: { name: "isOnline", type: "checkbox", checked: e.target.checked } })
+        }
+        textRight="Evento online"
+      />
+
+      {/* URL general: SIEMPRE visible (opcional) */}
+      <Field
+        id="url"
+        label="URL de referencia"
+        value={form.url}
+        onChange={onChange}
+        name="url"
+        placeholder="https://tusitio.com/evento/123"
+        hint="Página del evento, formulario, etc. (opcional)"
+        error={errors.url}
+        type="url"
+        pattern="https?://.+"
+        title="Debe comenzar con http:// o https://"
+      />
+
+      
+{form.isOnline && (
+  <Field
+    id="urlOnline"
+    label="URL del evento online"
+    value={form.urlOnline}
+    onChange={onChange}
+    name="urlOnline"
+    placeholder="https://zoom.us/j/..."
+    hint="Requerida cuando el evento es online."
+    error={errors.urlOnline}
+    type="url"
+    pattern="https?://.+"
+    title="Debe comenzar con http:// o https://"
+    required
+  />
+)}
+    </div>
+  </div>
+</section>
+
 
         {/* Fechas */}
         <section className="card bg-base-100/70 border border-base-200 shadow-sm">

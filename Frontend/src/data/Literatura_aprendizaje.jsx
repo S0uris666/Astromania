@@ -12,8 +12,8 @@ export const literatura_aprendizaje = [
     autor: "Farid Char y Eduardo Unda-Sanzana.",
     description:
       "Se trata de un fotolibro impreso y digital, de libre acceso, lanzado el 10 de junio de 2022. Su propósito es ilustrar y explicar algunos de los más interesantes fenómenos y dinámicas del cielo nocturno, con astrofotografías tomadas desde el desierto de Atacama. Disponible también cápsulas audiovisuales sobre algunos fenómenos celestes",
-    link2: "https://fotolibro-astrofoto.cl/?fbclid=IwAR1D8PZGxtBsGwmgpyiz_00JWsc1-3jPCUg_oA-DNFw0f3_z5DoqMHBl6ik",
-    link: "https://www.youtube.com/channel/UC9ZQChkBzo3XEXmnvbmrbaw",
+    link: "https://play.google.com/store/books/details?id=XKl0EAAAQBAJ&rdid=book-XKl0EAAAQBAJ&rdot=1&source=gbs_atb&pcampaignid=books_booksearch_atb",
+    link2: "https://www.youtube.com/channel/UC9ZQChkBzo3XEXmnvbmrbaw",
     imagen: astrofoto,
   },
   {
