@@ -1,6 +1,18 @@
 import ServiceProductItem from "../models/ServiceProduct.model.js";
 import slugify from "slugify";
-import { v2 as cloudinary } from "cloudinary";
+import {
+  cleanEmptyStrings,
+  cleanupCloudinary,
+  getUserId,
+  normText,
+  parseJSON,
+  sanitizeLinks,
+  sanitizeLocations,
+  sanitizeTags,
+  toBool,
+  toNum,
+  uploadToCloudinary,
+} from "./serviceProduct/utils.js";
 
 export const getAllServiceProducts = async (_req, res) => {
   try {
@@ -11,93 +23,6 @@ export const getAllServiceProducts = async (_req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-
-const parseJSON = (value, fallback = undefined) => {
-  try {
-    if (typeof value !== "string") return fallback;
-    return JSON.parse(value);
-  } catch {
-    return fallback;
-  }
-};
-
-const normText = (value) => {
-  if (value === null || value === undefined) return undefined;
-  return String(value).trim();
-};
-
-const toBool = (value, def = true) => {
-  if (value === undefined || value === null) return def;
-  if (typeof value === "boolean") return value;
-  return String(value).toLowerCase() === "true";
-};
-
-const toNum = (value, def = undefined) => {
-  if (value === undefined || value === null || value === "") return def;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : def;
-};
-
-const toArray = (value) => {
-  if (Array.isArray(value)) return value;
-  if (typeof value === "string") {
-    return value
-      .split(/[,;\n]/g)
-      .map((item) => item.trim())
-      .filter(Boolean);
-  }
-  return [];
-};
-
-const sanitizeTags = (value) =>
-  toArray(value)
-    .map((tag) => normText(tag)?.toLowerCase())
-    .filter(Boolean);
-
-const sanitizeLocations = (value) =>
-  toArray(value)
-    .map((location) => normText(location))
-    .filter(Boolean);
-
-const sanitizeLinks = (value) => {
-  const entries = Array.isArray(value)
-    ? value
-    : typeof value === "string"
-    ? value
-        .split(/[\n,;]/g)
-        .map((url) => ({ url: url.trim() }))
-        .filter((entry) => entry.url)
-    : [];
-
-  return entries
-    .map((entry) => {
-      if (typeof entry === "string") {
-        const url = normText(entry);
-        return url ? { label: "", url } : null;
-      }
-      if (entry && typeof entry === "object") {
-        const url = normText(entry.url || entry.href || entry.link);
-        if (!url) return null;
-        return {
-          label: normText(entry.label || entry.title) || "",
-          url,
-        };
-      }
-      return null;
-    })
-    .filter(Boolean);
-};
-
-const cleanEmptyStrings = (obj = {}) => {
-  Object.keys(obj).forEach((key) => {
-    if (typeof obj[key] === "string" && obj[key].trim() === "") {
-      obj[key] = undefined;
-    }
-  });
-  return obj;
-};
-
-const getUserId = (user) => user?.id || user?._id || user?.userId || null;
 
 const getOwnerId = (doc) =>
   doc?.createdBy?._id ||
@@ -114,31 +39,6 @@ const canEdit = (doc, user) => {
   const ownerId = getOwnerId(doc);
   const uid = getUserId(user);
   return ownerId && uid && String(ownerId) === String(uid);
-};
-
-const uploadToCloudinary = async (file, folder = "service-products") => {
-  const MAX_MB = 5;
-  if (!file?.mimetype?.startsWith?.("image/")) {
-    throw new Error(`Archivo ${file?.originalname ?? ""} no es una imagen válida`);
-  }
-  if (file.size > MAX_MB * 1024 * 1024) {
-    throw new Error(`Imagen ${file.originalname} supera ${MAX_MB}MB`);
-  }
-  const dataURI = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
-  const res = await cloudinary.uploader.upload(dataURI, {
-    folder,
-    resource_type: "image",
-  });
-  return { url: res.secure_url, public_id: res.public_id };
-};
-
-const cleanupCloudinary = async (publicIds = []) => {
-  if (!publicIds.length) return;
-  await Promise.allSettled(
-    publicIds.map((id) =>
-      cloudinary.uploader.destroy(id, { resource_type: "image" })
-    )
-  );
 };
 
 const buildPayload = ({ body, images, userId }) => {
