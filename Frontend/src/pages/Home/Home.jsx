@@ -143,38 +143,7 @@ export function Home() {
           </div>
         </div>
 
-        {/* FAQs */}
-        <div className="max-w-5xl mx-auto px-4 mb-16">
-          <h3 className=" text-2xl md:text-3xl font-bold mb-8 text-center">
-            Preguntas Frecuentes
-          </h3>
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <details
-                key={index}
-                className="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition"
-              >
-                <summary className="font-semibold">{faq.question}</summary>
-                <p className="mt-2 text-gray-300">{faq.answer}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div className="text-center">
-          <Link
-            to="/contacto"
-            className="inline-block px-6 py-3 bg-galaxy text-white rounded-lg shadow-lg
-               transition-transform duration-300 transform hover:scale-105
-               hover:bg-galaxy/80"
-          >
-            Contáctanos
-          </Link>
-        </div>
-      </section>
-
-      {/* SECCIÓN COLABORADORES */}
+              {/* SECCIÓN COLABORADORES */}
       <section className="bg-base py-12">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold text-white mb-12">
@@ -216,6 +185,39 @@ export function Home() {
           </div>
         </div>
       </section>
+
+        {/* FAQs */}
+        <div className="max-w-5xl mx-auto px-4 mb-16">
+          <h3 className=" text-2xl md:text-3xl font-bold mb-8 text-center">
+            Preguntas Frecuentes
+          </h3>
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <details
+                key={index}
+                className="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition"
+              >
+                <summary className="font-semibold">{faq.question}</summary>
+                <p className="mt-2 text-gray-300">{faq.answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="text-center">
+          <Link
+            to="/contacto"
+            className="inline-block px-6 py-3 bg-galaxy text-white rounded-lg shadow-lg
+               transition-transform duration-300 transform hover:scale-105
+               hover:bg-galaxy/80"
+          >
+            Contáctanos
+          </Link>
+        </div>
+      </section>
+
+
 
       
         

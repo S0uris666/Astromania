@@ -130,13 +130,15 @@ export const updateEvent = async (req, res) => {
 // Obtener todos los eventos (público, sin auth)
 export const getAllPublicEvents = async (req, res) => {
   try {
-   
-    const events = await Event.find({ status: "published" }).sort({ startDateTime: 1 });
-    
+    const allowedStatuses = ["published", "cancelled"];
+    const requestedStatus = String(req.query?.status || "").toLowerCase();
+    const filter = requestedStatus && allowedStatuses.includes(requestedStatus)
+      ? { status: requestedStatus }
+      : { status: { $in: allowedStatuses } };
+    const events = await Event.find(filter).sort({ startDateTime: 1 });
     res.status(200).json(events);
-    console.log(events)
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener los eventos públicos" });
+    res.status(500).json({ error: "Error al obtener los eventos publicos" });
   }
 };
 
@@ -144,11 +146,11 @@ export const getAllPublicEvents = async (req, res) => {
 export const getPublicEventById = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
-
-    if (!event || event.status !== "published") {
-      return res.status(404).json({ message: "Evento no encontrado o no publicado" });
+    const allowedStatuses = ["published", "cancelled"];
+    const currentStatus = String(event?.status || "").toLowerCase();
+    if (!event || !allowedStatuses.includes(currentStatus)) {
+      return res.status(404).json({ message: "Evento no encontrado o no disponible" });
     }
-
     res.status(200).json(event);
   } catch (error) {
     res.status(500).json({ error: error.message });
