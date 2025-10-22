@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useServiceProducts } from "../../context/serviceProducts/ServiceProductContext";
+import { BackButton } from "../../components/Common/BackButton.jsx";
 
 const baseInput =
   "w-full input input-bordered input-sm rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40";
@@ -262,17 +263,20 @@ export function CrearProductos() {
   };
 
   return (
-    <main className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-      <header className="mt-15 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Nuevo elemento del catálogo</h1>
-          <p className="text-sm text-base-content/70">
-            Selecciona el tipo de elemento y completa la información necesaria. Puedes adjuntar imágenes y enlaces de apoyo.
-          </p>
-        </div>
+    <main className="mt-15 max-w-4xl mx-auto px-4 pb-28 pt-6">
+      <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        
+        <h1 className="text-3xl font-bold tracking-tight">
+          <span className="bg-white bg-clip-text text-transparent">
+            Crear elemento en el catálogo
+          </span>
+        </h1>
+        <BackButton fallback="/admin/eventos/editar" />
+        
       </header>
 
       <div className="flex flex-wrap gap-2">
+        
         {TYPE_OPTIONS.map((option) => (
           <button
             key={option.value}
@@ -283,6 +287,7 @@ export function CrearProductos() {
             {option.label}
           </button>
         ))}
+        
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

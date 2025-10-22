@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { BackButton } from "../../components/Common/BackButton.jsx";
 import { useServiceProducts } from "../../context/serviceProducts/ServiceProductContext";
 
 const baseInput =
@@ -349,9 +350,7 @@ export function EditarProductos() {
           </p>
         </div>
         <div className="sm:ml-auto flex gap-2">
-          <Link to="/admin/productos/seleccionar" className="btn btn-ghost btn-sm">
-            Volver
-          </Link>
+          <BackButton fallback="/admin/productos/seleccionar" />
           <button
             type="button"
             className={`btn btn-error btn-sm ${deleting ? "loading" : ""}`}
@@ -647,3 +646,4 @@ export function EditarProductos() {
     </main>
   );
 }
+

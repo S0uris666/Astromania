@@ -414,16 +414,16 @@ export default function Header() {
           <Link to="/eventos" className="block text-xl" onClick={() => setMenuOpen(false)}>Eventos</Link>
 
           <Link
-            to="/login"
+            to={accountPath}
             onClick={() => setMenuOpen(false)}
             className="btn btn-secondary w-full sm:w-auto inline-flex items-center justify-center mt-6 px-6 py-3
                        text-base font-semibold normal-case tracking-wide leading-tight text-white
                        shadow-md hover:shadow-lg focus:outline-none focus-visible:ring-2
                        focus-visible:ring-secondary focus-visible:ring-offset-2"
-            aria-label="Inicia sesión"
-            title="Inicia sesión"
+            aria-label={authState ? "Mi cuenta" : "Inicia sesión"}
+            title={authState ? "Mi cuenta" : "Inicia sesión"}
           >
-            Inicia sesión
+            {authState ? "Mi cuenta" : "Inicia sesión"}
           </Link>
         </nav>
       </div>

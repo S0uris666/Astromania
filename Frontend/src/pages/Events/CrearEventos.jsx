@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { BackButton } from "../../components/Common/BackButton.jsx";
 import { useEvents } from "../../context/events/eventsContext";
 
 // util
@@ -220,13 +221,15 @@ export function CrearEventos() {
 
   return (
     <main className="mt-15 max-w-4xl mx-auto px-4 pb-28 pt-6">
-      <header className="mb-6">
+      <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        
         <h1 className="text-3xl font-bold tracking-tight">
           <span className="bg-white bg-clip-text text-transparent">
             Crear evento
           </span>
         </h1>
-        <p className="text-sm opacity-70 mt-1">Completa lo necesario; siempre podrás editar luego.</p>
+        <BackButton fallback="/admin/eventos/editar" />
+        
       </header>
 
       {error && <div className="alert alert-error mb-4"><span>{error}</span></div>}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { BackButton } from "../../components/Common/BackButton.jsx";
 import { useEvents } from "../../context/events/eventsContext";
 
 // Helpers de fecha
@@ -256,7 +257,7 @@ export function Editar() {
         <h1 className="text-3xl font-bold tracking-tight">
           <span className="bg-white bg-clip-text text-transparent">Editar evento</span>
         </h1>
-        <Link to="/admin/eventos/editar" className="btn btn-ghost btn-sm">Volver</Link>
+        <BackButton fallback="/admin/eventos/editar" />
       </header>
 
       <form onSubmit={onSubmit} className="space-y-6">

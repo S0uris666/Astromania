@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { BackButton } from "../../components/Common/BackButton.jsx";
 import { useEvents } from "../../context/events/eventsContext";
 import { useUser } from "../../context/user/UserContext";
 
@@ -108,6 +109,7 @@ export function EditarEventos() {
   return (
     <main className="max-w-6xl mx-auto p-6">
       <header className="mt-15 mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <BackButton className="sm:self-start" fallback="/admin" />
         <h1 className="text-2xl font-bold">
           {isAdmin ? "Todos los eventos" : "Mis eventos"}
         </h1>
