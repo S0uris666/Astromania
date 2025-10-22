@@ -110,4 +110,11 @@ export const cleanupCloudinary = async (publicIds = []) => {
   );
 };
 
-export const getUserId = (user) => user?.id || user?._id || user?.userId || null;
+
+  export const canEdit = (doc, user) => {
+    const role = String(user?.role || "").toLowerCase();
+    if (role === "admin") return true;
+    const ownerId = getOwnerId(doc);
+    const uid = getUserId(user);
+    return ownerId && uid && String(ownerId) === String(uid);
+  };

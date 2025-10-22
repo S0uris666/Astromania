@@ -3,7 +3,6 @@ import slugify from "slugify";
 import {
   cleanEmptyStrings,
   cleanupCloudinary,
-  getUserId,
   normText,
   parseJSON,
   sanitizeLinks,
@@ -12,7 +11,8 @@ import {
   toBool,
   toNum,
   uploadToCloudinary,
-} from "./serviceProduct/utils.js";
+  canEdit
+} from "../utils/utils.js";
 
 export const getAllServiceProducts = async (_req, res) => {
   try {
@@ -24,22 +24,8 @@ export const getAllServiceProducts = async (_req, res) => {
   }
 };
 
-const getOwnerId = (doc) =>
-  doc?.createdBy?._id ||
-  doc?.createdBy ||
-  doc?.owner?._id ||
-  doc?.owner ||
-  doc?.user?._id ||
-  doc?.user ||
-  null;
 
-const canEdit = (doc, user) => {
-  const role = String(user?.role || "").toLowerCase();
-  if (role === "admin") return true;
-  const ownerId = getOwnerId(doc);
-  const uid = getUserId(user);
-  return ownerId && uid && String(ownerId) === String(uid);
-};
+
 
 const buildPayload = ({ body, images, userId }) => {
   const title = normText(body.title);
