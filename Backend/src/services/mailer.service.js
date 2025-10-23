@@ -37,7 +37,15 @@ export async function sendContactMail({
   html,
   replyTo,
 }) {
-  const { SMTP_USER, SMTP_JP } = process.env;
+  const {
+    SMTP_USER,
+    SMTP_JP,
+  } = process.env;
+
+  if (!SMTP_USER || !SMTP_JP) {
+    throw new Error("Mail addresses not configured");
+  }
+
   const transporter = createTransporter();
   await transporter.sendMail({
     from: `${fromLabel} <${SMTP_USER}>`,

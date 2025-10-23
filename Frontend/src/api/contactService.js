@@ -34,8 +34,23 @@ export const sendMessage = async ({
 
     const contentType = res.headers.get("content-type") || "";
     if (!res.ok) {
-      const detail = await res.text().catch(() => "");
-      return { error: "No se pudo enviar el mensaje", status: res.status, detail };
+      let detail;
+      let serverMessage = "";
+      if (contentType.includes("application/json")) {
+        detail = await res.json().catch(() => null);
+        serverMessage =
+          detail?.error ||
+          detail?.message ||
+          detail?.detail?.error ||
+          "";
+      } else {
+        detail = await res.text().catch(() => "");
+      }
+      return {
+        error: serverMessage || "No se pudo enviar el mensaje",
+        status: res.status,
+        detail,
+      };
     }
     if (contentType.includes("application/json")) {
       return await res.json();
