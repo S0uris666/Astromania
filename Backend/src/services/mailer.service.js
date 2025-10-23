@@ -37,11 +37,11 @@ export async function sendContactMail({
   html,
   replyTo,
 }) {
-  const { EMAIL_USER, EMAIL_JP } = process.env;
+  const { SMTP_USER, SMTP_JP } = process.env;
   const transporter = createTransporter();
   await transporter.sendMail({
-    from: `${fromLabel} <${EMAIL_USER}>`,
-    to: EMAIL_JP,
+    from: `${fromLabel} <${SMTP_USER}>`,
+    to: SMTP_JP,
     replyTo,
     subject,
     html,
