@@ -3,6 +3,20 @@ import User from "../models/User.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import slugify from "slugify";
+import {
+  cleanEmptyStrings,
+  cleanupCloudinary,
+  normText,
+  parseJSON,
+  sanitizeLinks,
+  sanitizeLocations,
+  sanitizeTags,
+  toBool,
+  toNum,
+  uploadToCloudinary,
+  canEdit
+} from "../utils/utils.js";
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 //
@@ -33,7 +47,7 @@ export const createUser = async (req, res) => {
     const newUser = await User.create({
       username: username.trim(),
       email: email.toLowerCase().trim(),
-      role: "user", // <- no aceptamos rol del cliente por seguridad
+      role: "user", 
       password: hashedPassword,
     });
 
@@ -54,6 +68,19 @@ export const createUser = async (req, res) => {
     return res.status(500).json({ error: "Error del servidor" });
   }
 };
+
+export const getAllUsers = async (_req, res) => {
+  try {
+    const data = await ServiceProductItem.find({});
+    return res.status(200).json(data);
+  } catch (err) {
+    console.error("getAllServiceProducts error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
 
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -237,3 +264,6 @@ export const adminPromoteUserToSuperuser = async (req, res) => {
     return res.status(500).json({ error: "Error al actualizar el rol" });
   }
 };
+
+
+

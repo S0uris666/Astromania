@@ -1,5 +1,22 @@
 import mongoose from "mongoose";
 
+const PerfilImageSchema = new mongoose.Schema(
+  {
+    url: { type: String, required: true, trim: true },
+    public_id: { type: String, required: true, trim: true },
+    alt: { type: String, trim: true, default: "" },
+  },
+  { _id: false }
+);
+
+const SocialLinkSchema = new mongoose.Schema(
+  {
+    label: { type: String, trim: true, default: "" },
+    url: { type: String, trim: true, required: true },
+  },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -9,6 +26,9 @@ const userSchema = new mongoose.Schema(
       unique: true,
       maxlength: [50, "El nombre no puede exceder 50 caracteres"],
     },
+    profesion: {type: String},
+    especializacion:{},
+    
     email: {
       type: String,
       required: [true, "El email es requerido"],
@@ -32,12 +52,24 @@ const userSchema = new mongoose.Schema(
     address: { type: String, trim: true, default: "" },
     city: { type: String, trim: true, default: "" }, //
     country: { type: String, trim: true, default: "" },
-    zipcode: { type: String, trim: true, default: "" },
     phone: { type: String, trim: true, default: "" },
-
     isActive: {
       type: Boolean,
       default: true,
+    },
+    images: [PerfilImageSchema],
+    links:[SocialLinkSchema],
+      description: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 10,
+      maxlength: 1000,
+    },
+     status: {
+      type: String,
+      enum: ["draft", "published"],
+      default: "draft",
     },
   },
   {

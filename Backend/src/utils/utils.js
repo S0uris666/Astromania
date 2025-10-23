@@ -11,7 +11,8 @@ export const parseJSON = (value, fallback = undefined) => {
 
 export const normText = (value) => {
   if (value === null || value === undefined) return undefined;
-  return String(value).trim();
+  const s = String(value).trim();
+  return s === "" ? undefined : s; 
 };
 
 export const toBool = (value, def = true) => {
@@ -118,3 +119,11 @@ export const cleanupCloudinary = async (publicIds = []) => {
     const uid = getUserId(user);
     return ownerId && uid && String(ownerId) === String(uid);
   };
+
+
+export const sanitizeUser = (u) => {
+  if (!u) return null;
+  const obj = u.toObject ? u.toObject() : u;
+  delete obj.password;
+  return obj;
+};
