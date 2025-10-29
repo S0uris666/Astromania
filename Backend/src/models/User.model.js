@@ -59,12 +59,19 @@ const userSchema = new mongoose.Schema(
     },
     images: [PerfilImageSchema],
     links:[SocialLinkSchema],
-      description: {
+    description: {
       type: String,
-      required: true,
       trim: true,
-      minlength: 10,
-      maxlength: 1000,
+      default: "",
+      maxlength: [1000, "La descripcion no puede exceder 1000 caracteres"],
+      validate: {
+        validator: function (value) {
+          if (!value) return true;
+          return value.trim().length >= 10;
+        },
+        message:
+          "La descripcion debe tener al menos 10 caracteres si se proporciona",
+      },
     },
      status: {
       type: String,
